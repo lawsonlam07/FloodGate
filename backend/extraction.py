@@ -166,16 +166,19 @@ def extract_source(client, url: str, shape: str, *, step: str, screenshot: bool 
 # ---------------------------------------------------------------- fast incremental updates
 #
 # For a page we already captured: Context.dev fetches it as markdown (fast, 1 credit), we diff it against the last
-# capture, and Claude Haiku extracts claims from only the changed lines. Quotes are still grounded against the full
+# capture, and a small LLM (Gemini Flash-Lite or Claude Haiku, see backend/llm.py) extracts claims from only the
+# changed lines. Quotes are still grounded against the full
 # Context.dev markdown, and withdrawals are decided by rule (a quote that is no longer on the page). Anything that
 # looks unusual (no baseline, big change, LLM error) asks the caller for a full Context.dev JSON extraction instead.
 
-FAST_MODEL = "claude-haiku-5-5"
 _LINK_TARGET = re.compile(r"\]\([^)]*\)")         # link URLs change with the tunnel; compare link text only
 
 FAST_NOTE = """
 You receive only the lines that are NEW on this page since the last check, plus the page's headings for context.
-Extract claims only from the new lines; every evidence_quote must be copied from the new lines."""
+Extract claims only from the new lines; every evidence_quote must be copied from the new lines.
+A statement that something is fake, a scam, a hoax or untrue DENIES that thing: proposition = what it rejects, stance \
+denies ("This donation link is a scam" -> "This donation link is a genuine collection." | denies). A post that pushes \
+the thing ("Donate here!") asserts it."""
 
 
 def markdown_lines(md: str) -> list[str]:
@@ -201,11 +204,8 @@ class Update(Extraction):
     llm_model: str = ""
 
 
-def extract_update(ctx, claude, url: str, shape: str, old_markdown: str, *, step: str) -> Update:
-    """Blocking. Markdown scrape via Context.dev + Haiku extraction of the changed lines."""
-    import json
-    import time
-
+def extract_update(ctx, llm, url: str, shape: str, old_markdown: str, *, step: str) -> Update:
+    """Blocking. Markdown scrape via Context.dev + LLM extraction of the changed lines (llm: backend.llm.make())."""
     result = Update(ok=False)
     data, entry = ctx.scrape(step + " (markdown)", url, markdown=True, max_age_ms=0)
     result.calls.append(entry)
@@ -225,25 +225,12 @@ def extract_update(ctx, claude, url: str, shape: str, old_markdown: str, *, step
     schema, instructions = SCHEMAS[shape]
     headings = [line for line in markdown_lines(new_md) if line.startswith("#")][:12]
     prompt = f"Page: {url}\nHeadings:\n" + "\n".join(headings) + "\n\nNew lines:\n" + "\n".join(added)
-    start = time.monotonic()
-    try:
-        response = claude.messages.create(
-            model=FAST_MODEL, max_tokens=8000,
-            output_config={"effort": "low", "format": {"type": "json_schema", "schema": schema}},
-            system=instructions + FAST_NOTE,
-            messages=[{"role": "user", "content": prompt}],
-        )
-    except Exception as exc:
-        result.llm_latency_ms = round((time.monotonic() - start) * 1000)
-        result.error, result.needs_full = f"{type(exc).__name__}: {exc}"[:200], True
+    r = llm.json(system=instructions + FAST_NOTE, prompt=prompt, schema=schema, effort="low", max_tokens=8000)
+    result.llm_latency_ms, result.llm_model = r.latency_ms, r.model
+    if r.data is None:
+        result.error, result.needs_full = (r.error or "no output")[:200], True
         return result
-    result.llm_latency_ms, result.llm_model = round((time.monotonic() - start) * 1000), response.model
-    text = next((b.text for b in response.content if b.type == "text"), "")
-    try:
-        extracted = json.loads(text)
-    except ValueError:
-        result.error, result.needs_full = f"unparseable output (stop_reason {response.stop_reason})", True
-        return result
+    extracted = r.data
     result.schema_errors = schema_errors(extracted, schema)
     if result.schema_errors:
         result.error, result.needs_full = f"{len(result.schema_errors)} schema errors", True

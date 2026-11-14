@@ -9,23 +9,22 @@ Division of labour:
   - Every assignment stores a one-line reason, so the UI can show why claims were merged.
 
 Usage:
-  uv run poc/grouping.py out/<run>                 # group the claims saved by extract.py
+  uv run poc/grouping.py out/<run>                          # group the claims saved by extract.py
+  uv run poc/grouping.py out/<run> gemini [model]           # or: anthropic [model]; default = LLM_PROVIDER setting
 """
 
 from __future__ import annotations
 
 import json
-import os
 import sys
 from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import anthropic
-
+from backend import llm as llms
 from backend.context_client import load_dotenv
-from backend.grouping import EFFORT, MODEL, Grouper
+from backend.grouping import EFFORT, Grouper
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -123,12 +122,21 @@ def load_run(run_dir: Path) -> list[tuple[str, list[dict]]]:
     return batches
 
 
-def group_run(run_dir: Path, effort: str = EFFORT) -> Grouper:
+def make_llm(provider: str | None, model: str | None):
+    if provider == "gemini":
+        return llms.GeminiLLM(model or llms.GEMINI_MODEL)
+    if provider == "anthropic":
+        return llms.ClaudeLLM(model or llms.CLAUDE_MODEL)
+    return llms.make()
+
+
+def group_run(run_dir: Path, effort: str = EFFORT, provider: str | None = None, model: str | None = None) -> Grouper:
     load_dotenv(ROOT / ".env")
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        raise SystemExit("ANTHROPIC_API_KEY is not set (put it in .env).")
-    grouper = Grouper(anthropic.Anthropic(), effort)
-    print(f"   model {MODEL} · effort {effort}")
+    llm = make_llm(provider, model)
+    if llm is None:
+        raise SystemExit("No LLM key set (GEMINI_API_KEY or ANTHROPIC_API_KEY in .env).")
+    grouper = Grouper(llm, effort)
+    print(f"   {llm.provider} {llm.model} · effort {effort}")
     for name, claims in load_run(run_dir):
         print(f"   grouping batch '{name}' ({len(claims)} claims)...", flush=True)
         grouper.add_batch(name, claims)
@@ -146,7 +154,7 @@ def group_run(run_dir: Path, effort: str = EFFORT) -> Grouper:
         for v in violations:
             print(f"      rule override: {v}")
 
-    (run_dir / f"groups-{MODEL}-{effort}.json").write_text(json.dumps(
+    (run_dir / f"groups-{llm.model}-{effort}.json").write_text(json.dumps(
         [{"id": g.id, "condition": g.condition, "subject": g.subject, "label": g.label,
           "members": [{"claim_id": m["claim_id"], "source": m["source_id"], "stance": m["stance"],
                        "attributed_to": m.get("attributed_to"), "proposition": m["proposition"],
@@ -156,6 +164,7 @@ def group_run(run_dir: Path, effort: str = EFFORT) -> Grouper:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if not 2 <= len(sys.argv) <= 4:
         raise SystemExit(__doc__)
-    group_run(Path(sys.argv[1]))
+    group_run(Path(sys.argv[1]), provider=sys.argv[2] if len(sys.argv) > 2 else None,
+              model=sys.argv[3] if len(sys.argv) > 3 else None)

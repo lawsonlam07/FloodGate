@@ -1,6 +1,6 @@
 """change detected -> Context.dev evidence -> claims diff -> LLM grouping -> rule-based verdicts -> feed + alerts.
 
-Runs on the asyncio loop; blocking calls (Context.dev, Anthropic) go to worker threads and their results are
+Runs on the asyncio loop; blocking calls (Context.dev, LLM) go to worker threads and their results are
 applied back on the loop, so the store is only ever mutated from one thread.
 """
 
@@ -20,7 +20,6 @@ from .monitors import Monitor
 from .grouping import Group
 from .store import Incident, Item, Store, now, source_meta
 
-ANTHROPIC_MODEL = grouping.MODEL
 BATCH_MAX_WAIT_S = 4.0      # when several pages of one incident change together, group their claims in one LLM call
 
 
@@ -56,7 +55,7 @@ class Capture:
     generation: int
     claims: list = field(default_factory=list)
     markdown: str = ""
-    mode: str = "full"          # full = Context.dev JSON extraction; fast = Context.dev markdown + Haiku on the diff
+    mode: str = "full"          # full = Context.dev JSON extraction; fast = Context.dev markdown + LLM on the diff
     calm: bool = False
 
 
@@ -68,11 +67,11 @@ def seen_text(c: dict, first: bool) -> str:
 
 
 class Pipeline:
-    def __init__(self, store: Store, context_client, anthropic_client, context_monitors=None):
-        self.store, self.ctx, self.anthropic = store, context_client, anthropic_client
+    def __init__(self, store: Store, context_client, llm, context_monitors=None):
+        self.store, self.ctx, self.llm = store, context_client, llm      # llm: backend.llm.make() or None
         self.context_monitors = context_monitors   # parallel Context.dev "run now" checks (see context_monitors.py)
         self.last_update: dict[str, tuple[float, int]] = {}   # source_id -> (detection time, new claims): in memory only
-        self.paused = False                                     # admin "pause processing": no Context.dev / Claude calls
+        self.paused = False                                     # admin "pause processing": no Context.dev / LLM calls
         self.source_locks: dict[str, asyncio.Lock] = defaultdict(asyncio.Lock)
         self.incident_locks: dict[str, asyncio.Lock] = defaultdict(asyncio.Lock)
         self.pending: dict[str, tuple[str, float]] = {}
@@ -86,6 +85,10 @@ class Pipeline:
         self.timers: dict[str, asyncio.TimerHandle] = {}
         self.flushing: set[str] = set()
         self.generation: dict[str, int] = defaultdict(int)     # bumped by a scenario reset; stale captures are dropped
+
+    @property
+    def llm_label(self) -> str:
+        return self.llm.model if self.llm else "no LLM"
 
     # ---- monitor callbacks ------------------------------------------------------------------------------------
     def in_incident(self, monitor: Monitor) -> bool:
@@ -274,14 +277,14 @@ class Pipeline:
                 return None
 
         snap = store.snapshots.get(src.id) or {}
-        if FAST_UPDATES and self.anthropic is not None and not self.replay and snap.get("markdown"):
-            self._stage(src.id, "extracting", t0, "Context.dev scrape (markdown) + Haiku on the changed lines")
-            upd = await asyncio.to_thread(extract_update, self.ctx, self.anthropic, src.public_url, src.shape,
+        if FAST_UPDATES and self.llm is not None and not self.replay and snap.get("markdown"):
+            self._stage(src.id, "extracting", t0, f"Context.dev scrape (markdown) + {self.llm.model} on the changed lines")
+            upd = await asyncio.to_thread(extract_update, self.ctx, self.llm, src.public_url, src.shape,
                                           snap["markdown"], step=f"update:{src.id}")
             for call in upd.calls:
                 self._log_call(call, "scrape (markdown)", f"{len(upd.added_lines)} changed lines")
             if upd.llm_latency_ms:
-                store.add_activity({"service": "anthropic", "action": "extract update", "target": src.id,
+                store.add_activity({"service": self.llm.provider, "action": "extract update", "target": src.id,
                                     "latency_ms": upd.llm_latency_ms, "credits": None, "cache": None,
                                     "ok": upd.ok, "detail": upd.error or f"{upd.llm_model} · {len(upd.claims)} new claims"})
             if upd.ok:
@@ -411,14 +414,14 @@ class Pipeline:
         if ok:
             batch_note = f" (one call for {names})" if len(caps) > 1 else ""
             for cap in caps:
-                self._stage(cap.src.id, "grouping", cap.t0, f"{len(ok)} new claims → {ANTHROPIC_MODEL}{batch_note}")
+                self._stage(cap.src.id, "grouping", cap.t0, f"{len(ok)} new claims → {self.llm_label}{batch_note}")
             groups = {it.group.id: it.group for it in store.incident_items(incident.id)}
-            if self.anthropic is None:
-                proposal = grouping.Proposal(None, error="ANTHROPIC_API_KEY not set")
+            if self.llm is None:
+                proposal = grouping.Proposal(None, error="no LLM key set (GEMINI_API_KEY or ANTHROPIC_API_KEY)")
             else:
-                proposal = await asyncio.to_thread(grouping.propose, self.anthropic, groups, ok,
+                proposal = await asyncio.to_thread(grouping.propose, self.llm, groups, ok,
                                                    "+".join(c.src.id for c in caps))
-            store.add_activity({"service": "anthropic", "action": "group claims", "target": incident.id,
+            store.add_activity({"service": self.llm.provider if self.llm else "llm", "action": "group claims", "target": incident.id,
                                 "latency_ms": proposal.latency_ms, "credits": None, "cache": None,
                                 "ok": proposal.error is None,
                                 "detail": proposal.error or f"{proposal.model} · {len(ok)} claims from {len(caps)} source(s)"})
