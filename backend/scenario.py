@@ -78,7 +78,7 @@ class ScenarioEngine:
         self.tasks: dict[str, asyncio.Task] = {}
         self.locks: dict[str, asyncio.Lock] = {sid: asyncio.Lock() for sid in self.defs}
         self.bulk_task: asyncio.Task | None = None
-        self.control = {"paused": False, "since": None, "reason": None,
+        self.control = {"paused": False, "since": None, "reason": None, "fictional": True,
                         "showcase": {"running": SHOWCASE, "max_concurrent": 3, "interval_s": 45, "hold_s": 120,
                                      "only_when_watched": True}}
         if CONTROL_FILE.exists():
@@ -142,6 +142,7 @@ class ScenarioEngine:
     def restore(self) -> None:
         """On server start: watch the sources of every scenario that was started before the restart."""
         self.scheduler.paused = self.pipeline.paused = bool(self.control["paused"])
+        self.store.hide_fictional = not self.control.get("fictional", True)
         for sid, st in self.state.items():
             if st["current_step"] >= 0:
                 # Re-render the current pages (a fresh container has none); unchanged text is not re-processed.
@@ -186,6 +187,31 @@ class ScenarioEngine:
                                  "latency_ms": None, "credits": None, "cache": None, "ok": True,
                                  "detail": (f"{reason}: " if reason else "") + "page monitors stopped, no Context.dev / LLM calls" if paused else
                                  "re-checking every page against what was last processed"})
+        self.store.publish("control", self.control_view())
+        return self.control_view()
+
+    # ---- fictional sources on / off (the board then shows only real official warnings) -----------------------------
+    async def set_fictional(self, enabled: bool) -> dict:
+        """Hide or show every fictional scenario. Hidden ones are frozen (no steps, so no page changes and no credits)
+        and kept exactly as they are; showing them again carries on from there."""
+        from .store import now
+        if enabled == self.control.get("fictional", True):
+            return self.control_view()
+        fictional = [inc for inc in self.store.incidents.values() if inc.kind != "official_warning" and inc.is_live()]
+        if not enabled:                             # tell open pages to drop them (not recorded in history)
+            for inc in fictional:
+                self.store.publish("incident", {**self.store.incident_view(inc), "status": "ended"}, record=False)
+        self.control["fictional"] = enabled
+        self.store.hide_fictional = not enabled
+        if enabled:
+            for inc in fictional:
+                self.store.publish("incident", self.store.incident_view(inc), record=False)
+        self._last_turn = time.monotonic()          # the next showcase step comes after a normal gap
+        self._save_control()
+        self.store.add_activity({"service": "control", "action": "fictional on" if enabled else "fictional off",
+                                 "target": "all", "latency_ms": None, "credits": None, "cache": None, "ok": True,
+                                 "detail": "fictional scenarios shown again, carrying on where they were" if enabled else
+                                 f"{len(fictional)} fictional incidents hidden and frozen; real official warnings only"})
         self.store.publish("control", self.control_view())
         return self.control_view()
 
@@ -237,7 +263,10 @@ class ScenarioEngine:
         return self.store.credits_spent - self.control["budget_start"] >= CREDIT_BUDGET_DAILY
 
     def _unwatched(self) -> bool:
+        """Showcase holds still: nobody is watching, or the fictional sources are switched off."""
         sc = self.control["showcase"]
+        if not self.control.get("fictional", True):
+            return True
         return sc["running"] and sc.get("only_when_watched", True) and self.store.viewers() == 0
 
     async def _showcase_turn(self) -> None:
@@ -245,6 +274,9 @@ class ScenarioEngine:
         e.g. 45 s / 3 = a change every 15 s), and only while someone has a page open. Manual autoplay is not paced."""
         while True:
             sc = self.control["showcase"]
+            if not self.control.get("fictional", True):   # switched off: every scenario holds its step
+                await asyncio.sleep(2)
+                continue
             if not sc["running"]:
                 return
             if self._unwatched():

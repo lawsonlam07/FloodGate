@@ -22,6 +22,34 @@ cp .env.example .env            # add CONTEXT_DEV_API_KEY and GEMINI_API_KEY (ot
 - Starting a scenario costs roughly 15 Context.dev credits, a full storyline about 40. Real official warnings are free.
 - To start from scratch, stop the server and delete `data/`.
 
+## Real official sources
+
+Alongside the fictional scenarios, the board shows live warnings read directly from official structured feeds (no
+Context.dev credits; see `backend/feeds.py`). Each active warning becomes an official warning on the map and list, with
+its level mapped onto our L1 to L4 scale, and ends when it leaves the feed.
+
+| Feed | Covers | Official level → ours |
+|---|---|---|
+| [FMI](https://en.ilmatieteenlaitos.fi/warnings) (CAP) | Weather and sea warnings, Finland | yellow L1, orange L3, red L4 |
+| [GDACS](https://www.gdacs.org) (UN and European Commission) | Floods, tropical cyclones, volcanoes, droughts, large wildfires, worldwide | green L1, orange L3, red L4 |
+| [USGS](https://earthquake.usgs.gov/earthquakes/feed/) | Earthquakes M4.5+ in the past day, worldwide | PAGER alert if given, else M5.5+ L2, M6.5+ L3 |
+| [Environment Agency](https://environment.data.gov.uk/flood-monitoring/doc/reference) | Flood alerts and warnings, England | alert L2, warning L3, severe L4 |
+| [MeteoAlarm](https://meteoalarm.org) (EUMETNET) | Orange and red weather warnings from 37 European national weather services (Finland via FMI) | orange L3, red L4 |
+
+`OFFICIAL_FEEDS=fmi-warnings,gdacs` limits which are watched; `FMI_MONITOR=0` turns them all off. GDACS and
+MeteoAlarm content is CC BY 4.0 and credited on every warning page. MeteoAlarm names regions by code only; their
+outlines come from `backend/meteoalarm_regions.json` (built by `deploy/build_meteoalarm_regions.py`).
+
+**Context.dev reads the official page behind every serious real warning** (L2 and above, `backend/enrich.py`): the feed
+is the tripwire, Context.dev captures the human-facing page it links to (a GDACS event report, an Environment Agency
+flood page, Météo-France's vigilance page, ...) and extracts key facts and the official instructions, each with a
+word-for-word quote checked against the page. They show as "What to do" on the board and the warning page. One
+capture per warning (about 5 credits), at most `ENRICH_DAILY` (60) a day, never while paused; `ENRICH_WARNINGS=0`
+turns it off.
+
+**Fictional: on / off** (admin page header) hides every fictional scenario from the board, leaving only real
+warnings. Hidden scenarios are frozen, not reset: switching back on carries on exactly where they were.
+
 ## Partner technology
 
 | | What it does here | Key (in `.env`) |

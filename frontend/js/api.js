@@ -187,6 +187,15 @@ export async function setControl(paused) {
   }
   return post("/api/admin/control", { paused });
 }
+export async function setFictional(enabled) {
+  if (MOCK) {
+    mockAuth();
+    mockControl.fictional = enabled;
+    mockScenarios.emit("control", structuredClone(mockControl));
+    return structuredClone(mockControl);
+  }
+  return post("/api/admin/fictional", { enabled });
+}
 export async function setShowcase(body) {
   if (MOCK) {
     mockAuth();

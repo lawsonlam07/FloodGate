@@ -171,7 +171,7 @@ def incident(incident_id: str):
 async def incident_history(incident_id: str):
     """Over-time view from Tiger Data: status counts per minute, time to confirm / debunk, update latency."""
     inc = store.incidents.get(incident_id)
-    if inc is None:
+    if inc is None or store.hidden(incident_id):
         raise HTTPException(404, "unknown incident")
     if store.history is None:
         return {"available": False, "reason": "TIGER_DATABASE_URL not set"}
@@ -254,7 +254,7 @@ async def history_usage(hours: int = 24):
 
 @app.get("/api/alerts")
 def alerts():
-    return {"alerts": store.alerts}
+    return {"alerts": [a for a in store.alerts if not store.hidden_alert(a)]}
 
 
 @app.get("/api/monitors")
@@ -366,6 +366,10 @@ class ControlBody(BaseModel):
     paused: bool
 
 
+class FictionalBody(BaseModel):
+    enabled: bool
+
+
 @app.post("/api/admin/auth")
 def admin_auth():
     """Token check for the admin page's unlock form (the guard above rejects a wrong token before this runs)."""
@@ -380,6 +384,13 @@ def control():
 @app.post("/api/admin/control")
 async def set_control(body: ControlBody):
     return await _engine().set_paused(body.paused)
+
+
+@app.post("/api/admin/fictional")
+async def set_fictional(body: FictionalBody):
+    """Show or hide every fictional scenario on the board. Hiding freezes them as they are (nothing resets), so
+    switching back on carries on where they were."""
+    return await _engine().set_fictional(body.enabled)
 
 
 class ShowcaseBody(BaseModel):
@@ -520,7 +531,7 @@ def board_page(request: Request):
 def incident_page(request: Request, id: str = ""):
     base = _base_url(request)
     inc = store.incidents.get(id)
-    if inc is None:
+    if inc is None or store.hidden(id):
         return _page_with_meta("incident.html", "Incident · FloodGate", SITE_DESCRIPTION, f"{base}/incident.html")
     v = store.incident_view(inc)
     absolute = lambda u: f"{base}{u}" if (u or "").startswith("/") else (u or "")

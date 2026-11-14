@@ -156,6 +156,7 @@ class Store:
         self.credits_spent = 0.0
         self.seq = 0
         self.history = None                         # backend.history.History when TIGER_DATABASE_URL is set
+        self.hide_fictional = False                 # admin switch: the board shows only real official warnings
         self._subscribers: set[asyncio.Queue] = set()
 
     # ---- pub/sub ----------------------------------------------------------------------------------------
@@ -171,9 +172,22 @@ class Store:
         """Open live-update connections (board, incident, demo and admin pages)."""
         return len(self._subscribers)
 
-    def publish(self, event: str, data: dict) -> None:
-        if self.history is not None:
+    def hidden(self, incident_id: str | None) -> bool:
+        """True for a fictional scenario incident while the admin has fictional sources switched off."""
+        inc = self.incidents.get(incident_id or "")
+        return self.hide_fictional and inc is not None and inc.kind != "official_warning"
+
+    def hidden_alert(self, alert: dict) -> bool:
+        """Real feed alerts always name their incident; one without (a fictional page change) hides with the rest."""
+        return self.hide_fictional and (not alert.get("incident_id") or self.hidden(alert["incident_id"]))
+
+    def publish(self, event: str, data: dict, record: bool = True) -> None:
+        if record and self.history is not None:
             self.history.record(event, data, self)
+        if self.hide_fictional and (self.hidden_alert(data) if event == "alert" else
+                                    event in ("incident", "item", "pipeline", "context_check")
+                                    and self.hidden(data.get("id") if event == "incident" else data.get("incident_id"))):
+            return                                  # kept and recorded, just not shown while switched off
         for q in list(self._subscribers):
             try:
                 q.put_nowait((event, data))
@@ -279,14 +293,14 @@ class Store:
         }
 
     def incident_list(self) -> list[dict]:
-        views = [self.incident_view(i) for i in self.incidents.values() if i.is_live()]
+        views = [self.incident_view(i) for i in self.incidents.values() if i.is_live() and not self.hidden(i.id)]
         views.sort(key=lambda v: v["updated_at"], reverse=True)
         views.sort(key=lambda v: v["severity"], reverse=True)
         return views
 
     def incident_detail(self, incident_id: str) -> dict | None:
         inc = self.incidents.get(incident_id)
-        if inc is None:
+        if inc is None or self.hidden(incident_id):
             return None
         items = sorted(self.visible_items(incident_id), key=lambda it: it.updated_at, reverse=True)
         old = self.superseded(items)

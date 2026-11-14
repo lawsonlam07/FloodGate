@@ -75,7 +75,7 @@ async function recheckSavedToken() {
 window.addEventListener("fg-auth-rejected", () => { applyAuth("Token rejected."); renderAll(); });
 
 function applyControl(c) {
-  Object.assign(control, { paused: !!c.paused, since: c.since || null, reason: c.reason || null,
+  Object.assign(control, { paused: !!c.paused, since: c.since || null, reason: c.reason || null, fictional: c.fictional !== false,
     showcase: c.showcase || null, auth_required: !!c.auth_required, viewers: c.viewers ?? null,
     credit_budget_daily: c.credit_budget_daily ?? null, credits_today: c.credits_today ?? null });
   const t = control.since ? new Date(control.since).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : null;
@@ -92,6 +92,11 @@ function applyControl(c) {
     : `${icon("pause_circle", "text-[17px]")}<span class="hidden sm:inline">Pause processing</span>`;
   btn.title = control.paused ? "Resume processing" : "Pause processing: stop spending Context.dev and LLM credits";
   document.querySelectorAll(".paused-hint").forEach((el) => el.classList.toggle("hidden", !control.paused));
+  const fb = $("fictional-btn");
+  fb.textContent = control.fictional ? "Fictional: on" : "Fictional: off";
+  fb.setAttribute("aria-pressed", String(control.fictional));
+  fb.classList.toggle("btn-on", !control.fictional);
+  $("fictional-banner").classList.toggle("hidden", control.fictional);
 }
 function showcaseText() {
   const sc = control.showcase;
@@ -151,6 +156,12 @@ async function togglePause(paused) {
   catch (err) { if (err.status !== 401) toast("Failed: " + err.message); }
 }
 $("pause-btn").onclick = () => togglePause(!control.paused);
+async function toggleFictional(enabled) {
+  try { applyControl(await api.setFictional(enabled)); toast(enabled ? "Fictional scenarios back on the board" : "Fictional scenarios hidden and frozen"); }
+  catch (err) { if (err.status !== 401) toast("Failed: " + err.message); }
+}
+$("fictional-btn").onclick = () => toggleFictional(!control.fictional);
+$("fictional-on-btn").onclick = () => toggleFictional(true);
 $("resume-btn").onclick = () => togglePause(false);
 const pageUrl = (u) => (api.MOCK ? u.replace(/^\/sites\//, "../fake_site/") : u);   // mock dev server has no /sites/
 

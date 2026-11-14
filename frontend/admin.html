@@ -50,6 +50,7 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
           </div>
         </div>
       </div>
+      <button type="button" id="fictional-btn" class="btn !min-h-[36px] admin-action" aria-pressed="true" title="Show or hide every fictional scenario on the board">Fictional: on</button>
       <button type="button" id="pause-btn" class="btn !min-h-[36px] admin-action" aria-pressed="false"><span class="material-symbols-outlined text-[17px]">pause_circle</span><span class="hidden sm:inline">Pause processing</span></button>
       <span class="chip chip-corroborated hidden sm:inline-flex" title="Context.dev credits spent by this backend"><span class="material-symbols-outlined text-[13px]">toll</span><span id="credits-top" class="tnum">–</span> credits</span>
       <span class="flex items-center gap-2"><span id="live-dot" class="live-dot" aria-hidden="true"></span><span id="live-text" class="label hidden sm:inline">Connecting</span></span>
@@ -93,6 +94,13 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
     <span class="material-symbols-outlined icon-fill text-triage" style="font-size:22px">pause_circle</span>
     <span id="paused-text" class="text-sm text-ink flex-1 min-w-[16rem]"></span>
     <button type="button" id="resume-btn" class="btn btn-on !min-h-[32px] admin-action"><span class="material-symbols-outlined text-[17px]">play_circle</span>Resume</button>
+  </div>
+</div>
+
+<div id="fictional-banner" class="hidden border-b border-line bg-card" role="status">
+  <div class="max-w-[1500px] mx-auto px-4 lg:px-6 py-2.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+    <span class="text-sm text-ink flex-1 min-w-[16rem]"><b>Fictional sources are off.</b> The board shows only real official warnings. Every scenario is frozen where it was; switch back on to carry on.</span>
+    <button type="button" id="fictional-on-btn" class="btn btn-on !min-h-[32px] admin-action">Switch back on</button>
   </div>
 </div>
 

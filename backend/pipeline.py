@@ -250,7 +250,7 @@ class Pipeline:
         self.enrich_count += 1
         inc.official_page = {"status": "pending", "url": w["web"], "attempts": page.get("attempts", 0) + 1,
                              "since": now()}
-        self.store.publish("incident", self.store.incident_view(inc))
+        self.store.publish("incident", self.store.incident_view(inc), record=False)
         publisher = (inc.source or {}).get("name") or "the official source"
         asyncio.ensure_future(self._enrich(inc.id, w["web"], w["headline"], list(w.get("areas") or []), publisher))
 
