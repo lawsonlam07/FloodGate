@@ -7,15 +7,17 @@ from __future__ import annotations
 
 import asyncio
 import hmac
+import time
+from collections import defaultdict, deque
 import json
 import logging
+import mimetypes
 import os
 from contextlib import asynccontextmanager
 from typing import Literal
 
-import anthropic
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -24,7 +26,10 @@ from .config import (ADMIN_TOKEN, CONTEXT_REPLAY_DIR, CREDIT_BUDGET, FEED_MONITO
 from .context_client import ContextClient, ReplayContextClient
 from .context_monitors import ContextMonitors
 from .monitors import CapFeedMonitor, Scheduler
-from .pipeline import ANTHROPIC_MODEL, Pipeline
+from . import bulletin
+from . import history as tiger
+from . import llm as llms
+from .pipeline import Pipeline
 from .scenario import ScenarioEngine
 from .store import Store
 
@@ -52,11 +57,18 @@ def make_context_client():
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     store.load()
+    store.history = tiger.make()
+    if store.history:                              # starting point for the timelines: the state as of this start
+        for inc in store.incidents.values():
+            if inc.is_live():
+                store.history.record("incident", store.incident_view(inc), store)
+                for it in store.visible_items(inc.id):
+                    store.history.record("item", it.to_api(), store)
     ctx = make_context_client()
-    claude = anthropic.Anthropic() if os.environ.get("ANTHROPIC_API_KEY") else None
+    llm = llms.make()
     key = os.environ.get("CONTEXT_DEV_API_KEY")
     monitors_api = ContextMonitors(key, store) if key and not CONTEXT_REPLAY_DIR else None
-    pipeline = Pipeline(store, ctx, claude, monitors_api)
+    pipeline = Pipeline(store, ctx, llm, monitors_api)
     # Page monitors exist only for started scenarios (the engine adds/removes them); feed monitors always run.
     monitors = [CapFeedMonitor(f.id, f.name, f.kind, f.url, f.interval_s, f.interval_s) for f in FEED_MONITORS]
     scheduler = Scheduler(store, monitors, pipeline.on_change, pipeline.in_incident)
@@ -68,7 +80,9 @@ async def lifespan(_app: FastAPI):
     await scenario.stop_all()
     await scheduler.stop()
     store.save()
-    # Blocking Context.dev / Claude calls run in worker threads, and Python would wait for them (up to ~90 s) before
+    if store.history:
+        store.history.flush(3)
+    # Blocking Context.dev / LLM calls run in worker threads, and Python would wait for them (up to ~90 s) before
     # exiting. The state is saved, so exit now instead of making Ctrl-C hang.
     print("FloodGate: state saved, exiting.", flush=True)
     os._exit(0)
@@ -80,17 +94,31 @@ app = FastAPI(title="FloodGate", lifespan=lifespan)
 class AdminGuard:
     """With ADMIN_TOKEN set (hosted demo), every admin action needs the token; GETs stay public (read-only view).
 
-    Plain ASGI middleware on purpose: it must not buffer or wrap the long-lived /api/stream responses."""
+    Plain ASGI middleware on purpose: it must not buffer or wrap the long-lived /api/stream responses.
+    Guessing is throttled: after MAX_FAILURES wrong tokens from one address within WINDOW_S, it gets 429 for a while
+    (the client address comes from the proxy's X-Forwarded-For; uvicorn runs with --proxy-headers)."""
+
+    MAX_FAILURES, WINDOW_S = 10, 600
 
     def __init__(self, app):
         self.app = app
+        self.failures: dict[str, deque] = defaultdict(deque)
 
     async def __call__(self, scope, receive, send):
         if (scope["type"] == "http" and ADMIN_TOKEN and scope["method"] == "POST"
                 and scope["path"].startswith("/api/admin/")):
+            ip = (scope.get("client") or ("?", 0))[0]
+            recent = self.failures[ip]
+            while recent and time.monotonic() - recent[0] > self.WINDOW_S:
+                recent.popleft()
+            if len(recent) >= self.MAX_FAILURES:
+                await JSONResponse({"detail": "too many wrong tokens; try again in a few minutes"},
+                                   status_code=429)(scope, receive, send)
+                return
             headers = {k.decode("latin-1").lower(): v.decode("latin-1") for k, v in scope["headers"]}
             given = headers.get("x-admin-token") or headers.get("authorization", "").removeprefix("Bearer ").strip()
             if not hmac.compare_digest(given.encode(), ADMIN_TOKEN.encode()):
+                recent.append(time.monotonic())
                 await JSONResponse({"detail": "admin token required"}, status_code=401)(scope, receive, send)
                 return
         await self.app(scope, receive, send)
@@ -113,6 +141,91 @@ def incident(incident_id: str):
     return detail
 
 
+@app.get("/api/incidents/{incident_id}/history")
+async def incident_history(incident_id: str):
+    """Over-time view from Tiger Data: status counts per minute, time to confirm / debunk, update latency."""
+    inc = store.incidents.get(incident_id)
+    if inc is None:
+        raise HTTPException(404, "unknown incident")
+    if store.history is None:
+        return {"available": False, "reason": "TIGER_DATABASE_URL not set"}
+    try:
+        return await asyncio.to_thread(store.history.incident_history, incident_id, inc.created_at)
+    except Exception as exc:
+        return {"available": False, "reason": f"{type(exc).__name__}: {exc}"[:200]}
+
+
+# ---- spoken bulletins (ElevenLabs) ---------------------------------------------------------------------------
+_voicing: dict[str, asyncio.Lock] = {}
+
+
+def _bulletin(incident_id: str, lang: str) -> tuple[dict, dict]:
+    detail = store.incident_detail(incident_id)
+    if detail is None:
+        raise HTTPException(404, "unknown incident")
+    langs = bulletin.languages(detail["incident"])
+    if lang not in langs:
+        raise HTTPException(400, f"bulletin languages for this incident: {langs}")
+    return detail, bulletin.script(detail, lang)
+
+
+@app.get("/api/incidents/{incident_id}/bulletin")
+def get_bulletin(incident_id: str, lang: str = "en"):
+    """The bulletin script (rule-built, no LLM) and its audio URL if it has been voiced already."""
+    detail, b = _bulletin(incident_id, lang)
+    cached = bulletin.audio_path(b["id"]).exists()
+    return {**b, "languages": bulletin.languages(detail["incident"]),
+            "audio": f"/api/audio/{b['id']}.mp3" if cached else None,
+            "can_voice": bool(os.environ.get("ELEVENLABS_API_KEY"))}
+
+
+@app.post("/api/incidents/{incident_id}/bulletin/audio")
+async def voice_bulletin(incident_id: str, lang: str = "en"):
+    """Voice the current bulletin with ElevenLabs (cached per script, so each board state is voiced once)."""
+    _, b = _bulletin(incident_id, lang)
+    path = bulletin.audio_path(b["id"])
+    if not path.exists() and state.get("scenario") and state["scenario"].control["paused"]:
+        raise HTTPException(409, "processing is paused: no new audio")
+    lock = _voicing.setdefault(b["id"], asyncio.Lock())
+    async with lock:                                   # two listeners pressing play = one ElevenLabs call
+        cached = path.exists()
+        t0 = asyncio.get_running_loop().time()
+        try:
+            _, cost = await asyncio.to_thread(bulletin.synthesize, b)
+        except bulletin.TTSError as exc:
+            store.add_activity({"service": "elevenlabs", "action": "voice bulletin", "target": incident_id,
+                                "latency_ms": None, "credits": None, "cache": None, "ok": False, "detail": str(exc)})
+            raise HTTPException(503, str(exc))
+        if not cached:
+            store.add_activity({"service": "elevenlabs", "action": "voice bulletin", "target": incident_id,
+                                "latency_ms": round((asyncio.get_running_loop().time() - t0) * 1000), "credits": None,
+                                "cache": None, "ok": True, "detail": f"{lang} · {cost} characters · {bulletin.MODEL}"})
+    _voicing.pop(b["id"], None)
+    return {"audio": f"/api/audio/{b['id']}.mp3", "cached": cached, "id": b["id"],
+            "chars_today": bulletin.chars_used_today(), "char_budget_daily": bulletin.CHAR_BUDGET_DAILY}
+
+
+@app.get("/api/audio/{digest}.mp3")
+def audio(digest: str):
+    if not (len(digest) == 20 and all(c in "0123456789abcdef" for c in digest)):
+        raise HTTPException(404, "no such audio")
+    path = bulletin.audio_path(digest)
+    if not path.exists():
+        raise HTTPException(404, "no such audio")
+    return FileResponse(path, media_type="audio/mpeg", headers={"Cache-Control": "public, max-age=86400"})
+
+
+@app.get("/api/history/usage")
+async def history_usage(hours: int = 24):
+    """Calls, credits, latency and failures per service per hour (TimescaleDB continuous aggregate)."""
+    if store.history is None:
+        return {"available": False, "reason": "TIGER_DATABASE_URL not set"}
+    try:
+        return await asyncio.to_thread(store.history.usage, max(1, min(hours, 24 * 30)))
+    except Exception as exc:
+        return {"available": False, "reason": f"{type(exc).__name__}: {exc}"[:200]}
+
+
 @app.get("/api/alerts")
 def alerts():
     return {"alerts": store.alerts}
@@ -131,10 +244,12 @@ def activity(limit: int = 50):
 @app.get("/api/health")
 def health():
     return {"ok": True, "mode": "replay" if CONTEXT_REPLAY_DIR else "live",
-            "context_dev": state.get("context_ready", False), "grouping_model": ANTHROPIC_MODEL,
+            "context_dev": state.get("context_ready", False), "grouping_model": state["pipeline"].llm_label if state.get("pipeline") else None,
+            "llm_provider": state["pipeline"].llm.provider if state.get("pipeline") and state["pipeline"].llm else None,
             "site_public_url": site_public_url() or None, "site_local_url": SITE_LOCAL_URL,
             "paused": bool(state["scenario"].control["paused"]) if state.get("scenario") else False,
-            "credit_budget": CREDIT_BUDGET}
+            "credit_budget": CREDIT_BUDGET,
+            "history": store.history.status() if store.history else {"enabled": False}}
 
 
 # ---- community signals (shown, never used for verdicts) ------------------------------------------------------
@@ -225,6 +340,12 @@ class ControlBody(BaseModel):
     paused: bool
 
 
+@app.post("/api/admin/auth")
+def admin_auth():
+    """Token check for the admin page's unlock form (the guard above rejects a wrong token before this runs)."""
+    return {"ok": True, "auth_required": bool(ADMIN_TOKEN)}
+
+
 @app.get("/api/admin/control")
 def control():
     return _engine().control_view()
@@ -240,11 +361,13 @@ class ShowcaseBody(BaseModel):
     max_concurrent: int | None = Field(default=None, ge=1, le=8)
     interval_s: int | None = Field(default=None, ge=30, le=600)
     hold_s: int | None = Field(default=None, ge=30, le=3600)
+    only_when_watched: bool | None = None
 
 
 @app.post("/api/admin/showcase")
 async def showcase(body: ShowcaseBody):
-    return await _engine().set_showcase(body.running, body.max_concurrent, body.interval_s, body.hold_s)
+    return await _engine().set_showcase(body.running, body.max_concurrent, body.interval_s, body.hold_s,
+                                        body.only_when_watched)
 
 
 @app.get("/api/admin/scenarios")
@@ -321,6 +444,8 @@ async def stream(request: Request):
 
 # ---- the fictional sites, served for humans at /sites (links never depend on the tunnel) ------------------------------
 (ROOT / "fake_site").mkdir(exist_ok=True)            # generated at runtime by the scenario engine
+# Slim containers have no /etc/mime.types: make sure self-hosted fonts get their proper type.
+mimetypes.add_type("font/woff2", ".woff2")
 app.mount("/sites", StaticFiles(directory=ROOT / "fake_site", html=True), name="sites")
 
 # ---- frontend (mounted last so /api wins) --------------------------------------------------------------------------

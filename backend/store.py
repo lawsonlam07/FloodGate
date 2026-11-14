@@ -1,7 +1,8 @@
 """In-memory state, persisted to data/state.json, plus a tiny pub/sub bus for Server-Sent Events.
 
 All mutation happens on the asyncio event loop (blocking API calls run in threads and hand results back),
-so no locks are needed here. Swap for SQLite later without changing the API layer.
+so no locks are needed here. Every published event is also recorded in Tiger Data when it is configured
+(backend/history.py), which keeps the full history over time.
 """
 
 from __future__ import annotations
@@ -107,7 +108,7 @@ class Item:
                 "captured_from": m.get("source_url") if registered else None,
                 "stance": m["stance"], "attributed_to": m.get("attributed_to"),
                 "author": post.get("author_handle"), "author_signals": signals if post else None,
-                "evidence_quote": m.get("evidence_quote"), "seen_at": m.get("seen_at"),
+                "evidence_quote": m.get("evidence_quote"), "time_stated": m.get("time_stated"), "seen_at": m.get("seen_at"),
             })
         return {
             "id": self.id, "incident_id": self.incident_id, "title": self.title(), "summary": self.summary,
@@ -153,6 +154,7 @@ class Store:
         self.monitors: dict[str, dict] = {}         # runtime monitor status (not persisted)
         self.credits_spent = 0.0
         self.seq = 0
+        self.history = None                         # backend.history.History when TIGER_DATABASE_URL is set
         self._subscribers: set[asyncio.Queue] = set()
 
     # ---- pub/sub ----------------------------------------------------------------------------------------
@@ -164,7 +166,13 @@ class Store:
     def unsubscribe(self, q: asyncio.Queue) -> None:
         self._subscribers.discard(q)
 
+    def viewers(self) -> int:
+        """Open live-update connections (board, incident, demo and admin pages)."""
+        return len(self._subscribers)
+
     def publish(self, event: str, data: dict) -> None:
+        if self.history is not None:
+            self.history.record(event, data, self)
         for q in list(self._subscribers):
             try:
                 q.put_nowait((event, data))
@@ -213,6 +221,14 @@ class Store:
         return alert
 
     # ---- API views --------------------------------------------------------------------------------------
+    @staticmethod
+    def superseded(items: list[Item]) -> set[str]:
+        """Ids of verified official warnings replaced by a newer one (see rules.superseded_warnings)."""
+        return rules.superseded_warnings([(it.id, it._most_common("hazard", "none"), it.first_seen, it.group.members)
+                                          for it in items if it.status == "verified"
+                                          and it._most_common("category") == "warning"
+                                          and rules.is_warning_level(it.group.members)])
+
     def visible_items(self, incident_id: str) -> list[Item]:
         """Items some source still states. A group whose every statement was withdrawn stays in history only."""
         return [it for it in self.incident_items(incident_id) if it.group.members]
@@ -223,8 +239,10 @@ class Store:
         for it in items:
             counts[it.status] += 1
             counts["held"] += it.held
-        severity = max((it.severity for it in items), default=1)
-        verified = sorted((it for it in items if it.status == "verified"), key=lambda it: (-it.severity, it.first_seen))
+        old = self.superseded(items)                  # a lowered warning must not keep the incident at red
+        severity = max((it.severity for it in items if it.id not in old), default=1)
+        verified = sorted((it for it in items if it.status == "verified" and it.id not in old),
+                          key=lambda it: (-it.severity, it.first_seen))
         contradicted = [it for it in items if it.status == "contradicted"
                         and any(m["stance"] != "denies" for m in it.group.members)]   # rumours, not bare denials
         summary = " ".join(f"{it.title().rstrip('.')}." for it in verified[:3])
@@ -263,7 +281,8 @@ class Store:
         if inc is None:
             return None
         items = sorted(self.visible_items(incident_id), key=lambda it: it.updated_at, reverse=True)
-        views = [it.to_api() for it in items]
+        old = self.superseded(items)
+        views = [{**it.to_api(), "superseded": it.id in old} for it in items]
         tags = {
             "status": sorted({v["status"] for v in views}, key=lambda s: STATUS_ORDER[s]),
             "category": sorted({v["category"] for v in views}),
@@ -291,7 +310,8 @@ class Store:
                     return quoted
             return None
 
-        verified = [it for it in items if it.status == "verified"]
+        old = Store.superseded(items)
+        verified = [it for it in items if it.status == "verified" and it.id not in old]
         confirmed = sorted((it for it in verified if cat[it.id] != "instruction"),
                            key=lambda it: (-it.severity, it.first_seen))[:6]
         what_to_do = sorted((it for it in verified if cat[it.id] == "instruction" and official_member(it)),

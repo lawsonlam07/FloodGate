@@ -79,7 +79,8 @@ class ScenarioEngine:
         self.locks: dict[str, asyncio.Lock] = {sid: asyncio.Lock() for sid in self.defs}
         self.bulk_task: asyncio.Task | None = None
         self.control = {"paused": False, "since": None, "reason": None,
-                        "showcase": {"running": SHOWCASE, "max_concurrent": 3, "interval_s": 75, "hold_s": 180}}
+                        "showcase": {"running": SHOWCASE, "max_concurrent": 3, "interval_s": 45, "hold_s": 120,
+                                     "only_when_watched": True}}
         if CONTROL_FILE.exists():
             try:
                 saved = json.loads(CONTROL_FILE.read_text())
@@ -89,6 +90,7 @@ class ScenarioEngine:
                 pass
         self.showcase_task: asyncio.Task | None = None
         self.finished_at: dict[str, float] = {}     # sid -> wall time it reached its last step (showcase retires it)
+        self._last_turn = 0.0                       # showcase pacing: when the last showcase step happened (monotonic)
         if STATE_FILE.exists():
             saved = json.loads(STATE_FILE.read_text())
             if "scenarios" not in saved:            # old single-scenario format = Halvik
@@ -156,6 +158,7 @@ class ScenarioEngine:
         view = json.loads(json.dumps(self.control))
         view["showcase"]["running"] = bool(self.showcase_task and not self.showcase_task.done())
         view["auth_required"] = bool(ADMIN_TOKEN)
+        view["viewers"] = self.store.viewers()
         view["credit_budget_daily"] = CREDIT_BUDGET_DAILY or None
         view["credits_today"] = round(self.store.credits_spent - self.control.get("budget_start", self.store.credits_spent), 1) \
             if self.control.get("budget_day") == time.strftime("%Y-%m-%d") else 0
@@ -181,15 +184,17 @@ class ScenarioEngine:
         self.scheduler.set_paused(paused)
         self.store.add_activity({"service": "control", "action": "paused" if paused else "resumed", "target": "all",
                                  "latency_ms": None, "credits": None, "cache": None, "ok": True,
-                                 "detail": (f"{reason}: " if reason else "") + "page monitors stopped, no Context.dev / Claude calls" if paused else
+                                 "detail": (f"{reason}: " if reason else "") + "page monitors stopped, no Context.dev / LLM calls" if paused else
                                  "re-checking every page against what was last processed"})
         self.store.publish("control", self.control_view())
         return self.control_view()
 
     # ---- showcase: scenarios run by themselves for every viewer -------------------------------------------------------
     async def set_showcase(self, running: bool, max_concurrent: int | None = None, interval_s: int | None = None,
-                           hold_s: int | None = None) -> dict:
+                           hold_s: int | None = None, only_when_watched: bool | None = None) -> dict:
         sc = self.control["showcase"]
+        if only_when_watched is not None:
+            sc["only_when_watched"] = bool(only_when_watched)
         if max_concurrent:
             sc["max_concurrent"] = max(1, min(int(max_concurrent), 8))
         if interval_s:
@@ -204,7 +209,9 @@ class ScenarioEngine:
         self.store.add_activity({"service": "control", "action": "showcase on" if running else "showcase off",
                                  "target": "all", "latency_ms": None, "credits": None, "cache": None, "ok": True,
                                  "detail": f"{sc['max_concurrent']} at a time, a step every {sc['interval_s']} s, "
-                                           f"finished scenarios held {sc['hold_s']} s" if running else "scenarios left as they are"})
+                                           f"finished scenarios held {sc['hold_s']} s"
+                                           + (", only while someone is watching" if sc.get("only_when_watched", True) else "")
+                                           if running else "scenarios left as they are"})
         self.store.publish("control", self.control_view())
         return self.control_view()
 
@@ -229,8 +236,33 @@ class ScenarioEngine:
             self._save_control()
         return self.store.credits_spent - self.control["budget_start"] >= CREDIT_BUDGET_DAILY
 
+    def _unwatched(self) -> bool:
+        sc = self.control["showcase"]
+        return sc["running"] and sc.get("only_when_watched", True) and self.store.viewers() == 0
+
+    async def _showcase_turn(self) -> None:
+        """Showcase pacing: steps of all running scenarios take turns, evenly spaced (interval / max_concurrent apart,
+        e.g. 45 s / 3 = a change every 15 s), and only while someone has a page open. Manual autoplay is not paced."""
+        while True:
+            sc = self.control["showcase"]
+            if not sc["running"]:
+                return
+            if self._unwatched():
+                await asyncio.sleep(2)
+                continue
+            gap = sc["interval_s"] / max(1, sc["max_concurrent"])
+            wait = self._last_turn + gap - time.monotonic()
+            if wait <= 0:
+                self._last_turn = time.monotonic()
+                return
+            await asyncio.sleep(min(wait, 2))
+
     async def _showcase_loop(self) -> None:
         next_i = 0
+        sc0, now0 = self.control["showcase"], time.time()
+        for sid, st in self.state.items():          # finished before showcase (re)started: their hold is over
+            if st["current_step"] >= len(self.defs[sid].steps) - 1:
+                self.finished_at.setdefault(sid, now0 - sc0["hold_s"])
         try:
             while True:
                 await asyncio.sleep(5)
@@ -241,26 +273,36 @@ class ScenarioEngine:
                     continue
                 sc = self.control["showcase"]
                 last = {sid: len(d.steps) - 1 for sid, d in self.defs.items()}
-                active = [sid for sid, st in self.state.items() if st["current_step"] >= 0]
-                for sid in active:                  # retire finished scenarios after showing the end for a while
-                    if self.state[sid]["current_step"] >= last[sid]:
-                        if time.time() - self.finished_at.setdefault(sid, time.time()) >= sc["hold_s"]:
-                            await self.reset(sid)
-                            self.finished_at.pop(sid, None)
-                active = [sid for sid, st in self.state.items() if st["current_step"] >= 0]
-                for sid in active:                  # keep running ones moving (e.g. after a pause stopped autoplay)
+                started = [sid for sid, st in self.state.items() if st["current_step"] >= 0]
+                finished = [sid for sid in started if self.state[sid]["current_step"] >= last[sid]]
+                moving = [sid for sid in started if sid not in finished]
+                now_t = time.time()
+                for sid in finished:
+                    if self._unwatched():           # nobody watching: keep the results up, restart the hold clock
+                        self.finished_at[sid] = now_t
+                    else:
+                        self.finished_at.setdefault(sid, now_t)
+                expired = sorted((sid for sid in finished if now_t - self.finished_at[sid] >= sc["hold_s"]),
+                                 key=lambda sid: self.finished_at[sid])          # oldest results first
+                # Keep the latest few results on the board; retire older ones one at a time (the board never empties).
+                if len(finished) > sc["max_concurrent"] and expired and not self._unwatched():
+                    await self.reset(expired.pop(0))
+                for sid in moving:                  # keep running ones moving (e.g. after a pause stopped autoplay)
                     task = self.tasks.get(sid)
-                    if self.state[sid]["current_step"] < last[sid] and not (task and not task.done()):
+                    if not (task and not task.done()):
                         await self.set_autoplay(sid, True, sc["interval_s"], delay_s=sc["interval_s"])
-                if len(active) < sc["max_concurrent"]:
-                    order = self._rotation()        # start at most one scenario per tick, so starts are staggered
-                    for _ in range(len(order)):
-                        sid = order[next_i % len(order)]
-                        next_i += 1
-                        if self.state[sid]["current_step"] < 0:
-                            await self.go_to(sid, 0)
-                            await self.set_autoplay(sid, True, sc["interval_s"], delay_s=sc["interval_s"])
-                            break
+                if len(moving) < sc["max_concurrent"] and not self._unwatched():   # finished ones don't hold a slot
+                    order = self._rotation()        # start at most one scenario per tick, alternating sizes
+                    fresh = [order[(next_i + k) % len(order)] for k in range(len(order))]
+                    sid = next((x for x in fresh if self.state[x]["current_step"] < 0), None)
+                    if sid is None and expired:     # everything has run: replay the oldest finished one
+                        sid = expired.pop(0)
+                        await self.reset(sid)
+                    if sid is not None:
+                        next_i = order.index(sid) + 1
+                        await self._showcase_turn()
+                        await self.go_to(sid, 0)
+                        await self.set_autoplay(sid, True, sc["interval_s"], delay_s=sc["interval_s"])
         except asyncio.CancelledError:
             raise
         except Exception as exc:                    # never die silently: log, and the admin can switch it back on
@@ -339,6 +381,7 @@ hackathon demo. A scenario's pages exist only while it is started (from the Floo
         """Back to 'not started': incident, items, alerts, snapshots, monitors (ours and Context.dev's) and, for JSON
         scenarios, the pages are removed. Halvik's hand-written pages stay on disk (inert without monitors)."""
         d, st = self.defs[sid], self.state[sid]
+        self.finished_at.pop(sid, None)
         await self.set_autoplay(sid, False)
         async with self.locks[sid]:
             source_ids = [p["source_id"] for p in d.pages]
@@ -387,6 +430,7 @@ hackathon demo. A scenario's pages exist only while it is started (from the Floo
                 await asyncio.sleep(delay_s)
             last = len(self.defs[sid].steps) - 1
             while self.state[sid]["current_step"] < last:
+                await self._showcase_turn()         # showcase: take turns with the other scenarios, only when watched
                 await self.next(sid)                # advance right away, then once per interval
                 if self.state[sid]["current_step"] >= last:
                     break
