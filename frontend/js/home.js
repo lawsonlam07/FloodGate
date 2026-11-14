@@ -181,7 +181,7 @@ function initMap() {
   // touch screens one finger scrolls the page while two fingers pinch-zoom the map. Tapping an area opens it.
   const touch = L.Browser.mobile || matchMedia("(pointer: coarse)").matches;
   map = L.map("map", { zoomControl: true, attributionControl: true, worldCopyJump: true, scrollWheelZoom: false, dragging: !touch });
-  document.getElementById("map-note").textContent = touch ? "pinch to zoom · tap an area to open it" : "drag to move · tap an area to open it";
+  document.getElementById("map-note").textContent = touch ? "Pinch to zoom in for names; tap an area to open it." : "Zoom in for names; click an area to open it.";
   basemap(map);                                           // Esri gray canvas in the page's theme (dark or light)
   map.createPane("warnings");                             // official warning polygons sit under the rings
   map.getPane("warnings").style.zIndex = 390;
@@ -203,6 +203,17 @@ const openIncident = (inc) => () => { location.href = api.link(`incident.html?id
 // Rings are real-size L.circle layers, so they shrink when you zoom out. Once the outer ring would be smaller
 // than MIN_RING_PX on screen, the stack is replaced by a 5 px dot (L4 gets a faint pulsing halo).
 const MIN_RING_PX = 12;
+const LABEL_ZOOM = 6;           // names on the map from about country level; below it, hover or tap a dot or area
+// Names are cut to fit the map (about half its width), so phones get names too.
+const labelMax = () => Math.max(18, Math.min(46, Math.floor(((map ? map.getSize().x : 700) * 0.55 - 14) / 7)));
+// Warnings are named on the map by hazard and place ("Storm, Erzgebirgskreis"); the full title is on the card.
+const mapName = (inc) => {
+  if (!isWarning(inc) || !inc.name.includes(": ")) return inc.name;
+  const place = inc.name.split(": ").slice(1).join(": ").replace(/\s*\([^)]*\)$/, "");
+  const h = (inc.hazards || [])[0];
+  return h && h !== "other" ? `${cap(h.replace(/_/g, " "))}, ${place}` : place;
+};
+const labelText = (inc) => { const t = `L${inc.severity} · ${mapName(inc)}`, n = labelMax(); return t.length > n ? `${t.slice(0, n - 1)}…` : t; };
 const LABEL_DIRS = [["top", [0, -6]], ["bottom", [0, 6]], ["right", [8, 0]], ["left", [-8, 0]]];
 
 const ringsOf = (inc) => {
@@ -222,7 +233,7 @@ function drawRings(inc, labelDir) {
   const n = rings.length;
   const outerPx = (rings[n - 1].radius_km * 1000) / metersPerPixel(a.lat);
   const hot = fxAge(inc.id) < 6000;
-  const label = `L${inc.severity} · ${esc(inc.name)}`;
+  const label = esc(labelText(inc));
   let anchor;
   if (outerPx < MIN_RING_PX) {
     const color = sevColor(inc.severity);
@@ -247,7 +258,7 @@ function drawRings(inc, labelDir) {
     });
     anchor = L.circleMarker(ll, { radius: 3.5, color: "#F8FAFC", weight: 1.5, fillColor: sevColor(rings[0].severity), fillOpacity: 1 });
   }
-  // Calmer map: permanent text labels only for L3+ that don't collide (see planLabels); the rest on hover/tap.
+  // Names: from LABEL_ZOOM on, for every incident in view that has room (see planLabels); otherwise on hover/tap.
   const off = Object.fromEntries(LABEL_DIRS)[labelDir];
   anchor.bindTooltip(label, labelDir
     ? { permanent: true, interactive: true, direction: labelDir, className: "fg-tip", offset: off }
@@ -264,7 +275,8 @@ function planLabels(list) {
   const plan = new Map();
   for (const inc of [...list].sort((a, b) => b.severity - a.severity)) {
     const pt = map.latLngToContainerPoint([inc.area.lat, inc.area.lon]);
-    const w = 14 + 7 * `L${inc.severity} · ${inc.name}`.length, h = 22;
+    if (pt.x < 0 || pt.y < 0 || pt.x > size.x || pt.y > size.y) continue;          // not in view
+    const w = 14 + 7 * labelText(inc).length, h = 22;
     const tries = { top: [pt.x - w / 2, pt.y - 10 - h], bottom: [pt.x - w / 2, pt.y + 10], right: [pt.x + 12, pt.y - h / 2], left: [pt.x - 12 - w, pt.y - h / 2] };
     for (const [dir, [x, y]] of Object.entries(tries)) {
       const box = [x, y, x + w, y + h];
@@ -280,10 +292,20 @@ function planLabels(list) {
 function drawAllRings() {
   if (!map) return;
   ringLayer.clearLayers();
-  const list = visible().filter((inc) => !isWarning(inc) && inc.area && inc.area.lat != null && inc.area.lon != null);
-  const labels = planLabels(list);
-  list.sort((x, y) => x.severity - y.severity)                        // most severe drawn on top
+  const located = visible().filter((inc) => inc.area && inc.area.lat != null && inc.area.lon != null);
+  const labels = map.getZoom() >= LABEL_ZOOM ? planLabels(located) : new Map();
+  located.filter((inc) => !isWarning(inc)).sort((x, y) => x.severity - y.severity)   // most severe drawn on top
     .forEach((inc) => drawRings(inc, labels.get(inc.id) || null));
+  for (const inc of located) if (isWarning(inc) && labels.has(inc.id)) labelWarning(inc, labels.get(inc.id));
+}
+
+// An official warning's name sits at the middle of its area, like an incident's next to its dot.
+function labelWarning(inc, dir) {
+  const anchor = L.circleMarker([inc.area.lat, inc.area.lon], { radius: 1, opacity: 0, fillOpacity: 0, interactive: false });
+  anchor.bindTooltip(esc(labelText(inc)), { permanent: true, interactive: true, direction: dir, className: "fg-tip",
+                                            offset: Object.fromEntries(LABEL_DIRS)[dir] });
+  anchor.on("tooltipopen", (e) => { const el = e.tooltip.getElement(); if (el) el.onclick = openIncident(inc); });
+  ringLayer.addLayer(anchor);
 }
 
 // ---- official warnings: polygons in FMI's public colours ------------------------------
@@ -334,10 +356,10 @@ function renderMap(fit = false) {
 
 // ---------------------------------------------------------------- area focus (v0.7)
 const AREAS = {
-  europe:   { label: "All Europe",      b: [[34, -25], [71.5, 45]] },
-  nordics:  { label: "Nordics",         b: [[54.5, 4], [71.2, 32]] },
-  british:  { label: "British Isles",   b: [[49.6, -11], [61, 2.2]] },
-  western:  { label: "Western Europe",  b: [[42.2, -5.2], [54.2, 9.8]] },
+  world:    { label: "World",           b: [[-50, -165], [72, 175]] },
+  europe:   { label: "Europe",          b: [[34, -25], [71.5, 45]] },
+  northern: { label: "Northern Europe", b: [[53.5, 4], [71.2, 32]] },     // Nordics and Baltics
+  western:  { label: "Western Europe",  b: [[42.2, -11], [59, 9.8]] },    // incl. the UK and Ireland
   central:  { label: "Central Europe",  b: [[45.6, 5.8], [55.1, 24.2]] },
   southern: { label: "Southern Europe", b: [[35, -9.8], [46.6, 28.5]] },
   eastern:  { label: "Eastern Europe",  b: [[44, 21], [60, 41]] },
@@ -363,7 +385,7 @@ function restoreView() {
   const saved = lsGet(VIEW_KEY, null);
   if (saved && Array.isArray(saved.center) && saved.zoom != null) {
     programmaticMove = true; map.setView(saved.center, saved.zoom); programmaticMove = false;
-    focus.area = saved.area || "custom";
+    focus.area = AREAS[saved.area] || saved.area === "near" ? saved.area : "custom";   // e.g. a renamed area
     return;
   }
   fitTo(AREAS.europe.b, "europe");
@@ -375,7 +397,7 @@ function onMapMoved() {
   const c = map.getCenter();
   lsSet(VIEW_KEY, { center: [Number(c.lat.toFixed(4)), Number(c.lng.toFixed(4))], zoom: map.getZoom(), area: focus.area });
   clearTimeout(moveTimer);
-  moveTimer = setTimeout(() => { renderIncidents(); renderAreaPicker(); }, 120);
+  moveTimer = setTimeout(() => { renderIncidents(); renderAreaPicker(); if (map.getZoom() >= LABEL_ZOOM) drawAllRings(); }, 120);
 }
 
 const inMapView = (inc) => {
