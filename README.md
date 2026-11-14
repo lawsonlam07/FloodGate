@@ -7,9 +7,10 @@ officials are right and slow. FloodGate watches both and shows what is actually 
 
 ```bash
 uv sync                         # creates .venv from pyproject.toml + uv.lock
-cp .env.example .env            # add CONTEXT_DEV_API_KEY and ANTHROPIC_API_KEY
+cp .env.example .env            # add CONTEXT_DEV_API_KEY and GEMINI_API_KEY (others optional, see below)
 
 ./serve.sh                      # terminal 1: fictional sites + public tunnel (URL saved to data/site_public_url)
+                                #   uses cloudflared if installed (sturdier: sudo pacman -S cloudflared), else localhost.run
 ./run.sh                        # terminal 2: backend + frontend on http://127.0.0.1:8000
 ```
 
@@ -19,6 +20,18 @@ cp .env.example .env            # add CONTEXT_DEV_API_KEY and ANTHROPIC_API_KEY
 - **Fictional sites:** http://127.0.0.1:8000/sites/ (pages exist while their scenario is started).
 - Starting a scenario costs roughly 15 Context.dev credits, a full storyline about 40. Real FMI weather warnings are free.
 - To start from scratch, stop the server and delete `data/`.
+
+## Partner technology
+
+| | What it does here | Key (in `.env`) |
+|---|---|---|
+| **Context.dev** | Captures every changed page: scrape + structured claim extraction with verbatim quotes; semantic monitors as a second opinion | `CONTEXT_DEV_API_KEY` |
+| **Google Gemini** | Groups claims that say the same thing across sources and languages; extracts claims from the changed lines of a page (`gemini-3.5-flash-lite`: 12/12 grouping checks, 3-5 s per call) | `GEMINI_API_KEY` |
+| **ElevenLabs** | Spoken bulletin of each incident's key facts, in English and the pages' language. The script is built by rules (official sentences word for word), never by an LLM | `ELEVENLABS_API_KEY` |
+| **Tiger Data** | Postgres + TimescaleDB: every change kept as a time series. Powers "rumour → debunked in 3 min", update latency, and hourly cost per service | `TIGER_DATABASE_URL` |
+| Claude (optional) | Automatic fallback if a Gemini call fails | `ANTHROPIC_API_KEY` |
+
+Everything except Context.dev and one LLM key is optional: without a key, that feature is simply off.
 
 ## Host it
 
@@ -39,6 +52,10 @@ docker run -p 8000:8000 -v floodgate-data:/app/data --env-file .env \
 | `SHOWCASE=1` | the server runs scenarios by itself for every viewer (also switchable from the admin page) |
 | `CREDIT_BUDGET_DAILY` | auto-pause once this many Context.dev credits were spent today |
 | `CREDIT_BUDGET` | cap per server run (default 1500) |
+| `LLM_PROVIDER` / `GEMINI_MODEL` | `gemini` (default when `GEMINI_API_KEY` is set) or `anthropic`; Gemini model id |
+| `CONTEXT_MAX_CONCURRENT` | Context.dev captures in flight at once (default 4); bursts queue instead of timing out |
+| `CONTEXT_MONITOR_LIMIT` | monitors your Context.dev plan allows (default 10); the least recently used FloodGate monitor is replaced when full |
+| `ELEVENLABS_CHAR_BUDGET_DAILY` | cap on characters voiced per day (default 20000); audio is cached per bulletin |
 
 Put a TLS-terminating proxy (e.g. Caddy) in front for HTTPS.
 
@@ -51,18 +68,24 @@ our monitors (cheap, every 5–60 s)          backend/monitors.py   page hash / 
 Context.dev scrape + JSON extraction         backend/extraction.py evidence: claims with verbatim quotes
    │ (small updates: Context.dev markdown + LLM on the changed lines only)
    ▼
-LLM grouping + rule guardrails               backend/grouping.py   "same claim?" across sources and languages
+LLM grouping + rule guardrails               backend/grouping.py   "same claim?" across sources and languages (Gemini)
    │ claim groups (one call per update, however many pages changed)
    ▼
 status ladder (plain rules, no LLM)          backend/rules.py      verified / corroborated / unverified /
    │                                                                disputed / contradicted, held-back reassurances
    ▼
 store + alerts + Server-Sent Events          backend/store.py, backend/app.py → frontend/
+   │ every event also goes to                  backend/history.py    Tiger Data hypertables (history, analytics)
+   ▼ key facts → rule-built script             backend/bulletin.py   ElevenLabs voice, cached per script
 ```
 
+- Frontend: plain HTML + JS modules, one set of pages for phone and desktop (responsive). Styles, fonts, icons and
+  Leaflet are served by us, no CDNs at page load: `uv run frontend/build.py` builds `css/tailwind.css` (standalone
+  Tailwind, theme in `frontend/tailwind.config.js`) and `frontend/vendor/` (icons are picked up from the code
+  automatically). `run.sh` and `deploy.sh` run it for you.
 - API contract: `docs/API.md`. Scenario format: `docs/SCENARIOS.md`.
 - Which sources are official is configured by us (`backend/config.py`, scenario files), never decided by the LLM.
-- `poc/` holds the proof-of-concept scripts (`uv run poc/extract.py`, `uv run poc/grouping.py`,
-  `uv run poc/monitor_experiment.py`).
+- `poc/` holds the proof-of-concept scripts and evals (`uv run poc/extract.py`, `uv run poc/grouping.py out/<run> gemini`,
+  `uv run poc/debunk_eval.py`, `uv run poc/monitor_experiment.py`).
 - Without uv: `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt` (exported from uv.lock).
 - Everything in `scenario/` is fictional: invented towns, organisations, newspapers and accounts.

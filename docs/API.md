@@ -351,7 +351,7 @@ A scenario that hasn't started has no pages, no monitors and no incident. Starti
 ### v0.8: pause processing, sites index
 - `GET /api/admin/control` → `{"paused": false, "since": "…"}`; `POST /api/admin/control` `{"paused": true}`.
   Paused: page monitors stop checking (mode `"paused"` in /api/monitors), autoplay and bulk runs stop, no Context.dev or
-  Claude calls; FMI feed sync continues (free). Resume re-checks every page against what was last processed, so edits made
+  LLM calls; FMI feed sync continues (free). Resume re-checks every page against what was last processed, so edits made
   while paused are picked up. Persisted across restarts. SSE `control` event on change; `/api/health` has `"paused"`.
 - `/sites/` (and the tunnel root) is now an index of every scenario's fictional pages; links are live for started scenarios.
 
@@ -373,3 +373,55 @@ A scenario that hasn't started has no pages, no monitors and no incident. Starti
   sizes), a step every `interval_s`, holds finished ones `hold_s` then resets them and starts the next. Pausing stops it
   from advancing; the daily budget auto-pauses with a `reason`.
 - Hosted mode: fictional sites are served by the backend at `/sites/…` (no tunnel); `/api/health.site_public_url` shows it.
+
+## v0.10: Gemini, spoken bulletins (ElevenLabs), history (Tiger Data)
+
+- **LLM provider.** Grouping and fast-path extraction run on Google Gemini (`gemini-3.5-flash-lite` by default) with
+  Claude as an automatic fallback when a call fails (`backend/llm.py`). Activity rows now use `"service": "gemini"` (or
+  `"anthropic"` after a fallback; the `detail` then says so). `GET /api/health` adds `"llm_provider"`, and
+  `"grouping_model"` is the configured model.
+- **Spoken bulletin.** `GET /api/incidents/{id}/bulletin?lang=en` returns the script, built by rules from the key facts
+  (no LLM): in the pages' own language it reads the officials' sentences word for word (`"verbatim": true`); in English it
+  reads the board's lines. Scenario bulletins always start with "Fictional exercise".
+```json
+{"lang": "pl", "id": "e26b5d72ce8b10eb397f", "chars": 518, "verbatim": true, "languages": ["en", "pl"],
+ "lines": [{"kind": "intro|heading|fact|outro", "text": "…"}], "text": "…",
+ "audio": "/api/audio/e26b5d72ce8b10eb397f.mp3",        // null until someone has pressed Listen for this script
+ "can_voice": true}
+```
+  `POST /api/incidents/{id}/bulletin/audio?lang=pl` voices it with ElevenLabs (about 1-4 s) or returns the cached file:
+  `{"audio": "/api/audio/<id>.mp3", "cached": false, "chars_today": 114, "char_budget_daily": 20000}`. Errors: `409` while
+  processing is paused (cached audio still plays), `503` with `detail` when the daily character budget is reached or
+  ElevenLabs fails. Audio is cached per script, so each state of the board is voiced at most once per language.
+  `GET /api/audio/{id}.mp3` serves it. Activity rows: `"service": "elevenlabs", "action": "voice bulletin"`.
+- **History (Tiger Data).** Every SSE event is also written to Postgres + TimescaleDB hypertables when
+  `TIGER_DATABASE_URL` is set. `GET /api/incidents/{id}/history`:
+```json
+{"available": true, "bucket": "1 minute",
+ "timeline": [{"t": "…", "verified": 6, "corroborated": 0, "unverified": 11, "disputed": 2, "contradicted": 1, "held": 4, "severity": 3}],
+ "debunked":  [{"item_id": "…", "title": "…", "first_kind": "social", "after_s": 178, "status": "contradicted"}],
+ "confirmed": [{"item_id": "…", "title": "…", "first_kind": "social", "after_s": 312, "status": "verified"}],
+ "stats": {"items": 32, "confirmed": 1, "median_confirm_s": 312, "debunked": 2, "median_debunk_s": 641,
+           "updates": 7, "p50_update_ms": 8901, "p90_update_ms": 15111}}
+```
+  Times count from the item's first report on the board; "debunked"/"confirmed" only include items that stood unconfirmed
+  first. The timeline is gap-filled per bucket (15 s for runs under 15 min, then 1 min, then 5 min). Without the database:
+  `{"available": false, "reason": "…"}`. `GET /api/history/usage?hours=24` returns calls, credits, average latency and
+  failures per service per hour (a TimescaleDB continuous aggregate). `GET /api/health` adds
+  `"history": {"enabled", "ok", "written", "dropped", "queued", "error"}`.
+- **Context.dev monitor slots.** Plans allow a fixed number of monitors (`CONTEXT_MONITOR_LIMIT`, default 10), fewer than
+  the official pages. When a new one is needed and the plan is full, the least recently used FloodGate monitor is deleted
+  first. If no slot can be freed, the `context_check` has `"status": "skipped"` (not `failed`) with the reason in
+  `summary`, and that source rests for 10 minutes.
+- **Superseded warnings.** Official warnings replace each other (orange → red → lowered) but each stays `verified`. Per
+  hazard, only the newest warning-level item counts for the incident's `severity`, its summary and `key_facts.confirmed`;
+  the others carry `"superseded": true` in `GET /api/incidents/{id}` items (SSE `item` events omit the field; the next
+  detail fetch has it). Newest = first seen latest, then the later clock time stated on the official page.
+- **Showcase pacing (v0.10).** Defaults: 3 at a time, a step every 45 s, finished scenarios held 120 s. Steps of all
+  showcase scenarios take turns, evenly spaced (`interval_s / max_concurrent` apart: a change every ~15 s). Finished
+  scenarios no longer hold a slot. `only_when_watched` (default true; `POST /api/admin/showcase` accepts it): while no
+  page has the live stream open, showcase waits and spends nothing, keeps finished results on the board, and resumes
+  within seconds of a visitor arriving. `GET /api/admin/control` adds `"viewers"` (open live-update connections).
+- **Admin token check.** `POST /api/admin/auth` (with `X-Admin-Token`) returns `{"ok": true}` for the right token and
+  `401` otherwise; the admin page unlocks only after it, and re-checks a saved token on load. After 10 wrong tokens from
+  one address within 10 minutes, every admin POST from that address gets `429` until the window passes.
