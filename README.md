@@ -3,11 +3,13 @@
 Live, verified situation board for emergencies (Junction 2026, Context.dev challenge). Social media is fast and wrong;
 officials are right and slow. FloodGate watches both and shows what is actually confirmed, with a source on every line.
 
-## Run it locally
+# Hosting
+
+## Local
 
 ```bash
 uv sync                         # creates .venv from pyproject.toml + uv.lock
-cp .env.example .env            # add CONTEXT_DEV_API_KEY and ANTHROPIC_API_KEY
+cp .env.example .env            # add all the API Keys needed.
 
 ./serve.sh                      # terminal 1: fictional sites + public tunnel (URL saved to data/site_public_url)
 ./run.sh                        # terminal 2: backend + frontend on http://127.0.0.1:8000
@@ -20,7 +22,7 @@ cp .env.example .env            # add CONTEXT_DEV_API_KEY and ANTHROPIC_API_KEY
 - Starting a scenario costs roughly 15 Context.dev credits, a full storyline about 40. Real FMI weather warnings are free.
 - To start from scratch, stop the server and delete `data/`.
 
-## Host it
+## Server
 
 One central server makes every Context.dev and LLM call; visitors only watch. In hosted mode the server serves the
 fictional sites itself, so no tunnel is needed.
@@ -42,7 +44,7 @@ docker run -p 8000:8000 -v floodgate-data:/app/data --env-file .env \
 
 Put a TLS-terminating proxy (e.g. Caddy) in front for HTTPS.
 
-## How it works
+# How it Works
 
 ```
 our monitors (cheap, every 5â€“60 s)          backend/monitors.py   page hash / official feeds; triggers only
@@ -67,9 +69,16 @@ store + alerts + Server-Sent Events          backend/store.py, backend/app.py â†
 - Without uv: `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt` (exported from uv.lock).
 - Everything in `scenario/` is fictional: invented towns, organisations, newspapers and accounts.
 
-Sources
-<img width="1698" height="867" alt="image" src="https://github.com/user-attachments/assets/395c2470-7245-44c9-b46c-36b2cbaf6831" />
+## Sources
+To gather information, we use context.dev to scrape information from sites such as government, news and social media.
+
 <img width="1490" height="849" alt="image" src="https://github.com/user-attachments/assets/ff2c7c05-a86c-461f-9457-277f55a49c14" />
+<img width="1698" height="867" alt="image" src="https://github.com/user-attachments/assets/395c2470-7245-44c9-b46c-36b2cbaf6831" />
 <img width="1186" height="716" alt="image" src="https://github.com/user-attachments/assets/3b2044eb-e03b-4651-987a-83a069f9a559" />
+
+## Features
+<img width="1640" height="876" alt="image" src="https://github.com/user-attachments/assets/98207436-b68d-414b-919b-2fe1f19c2f71" />
+<img width="1532" height="894" alt="image" src="https://github.com/user-attachments/assets/76849179-1180-4a33-b9c3-2ec60269a669" />
+
 
 
