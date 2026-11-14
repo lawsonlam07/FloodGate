@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FloodGate live demo</title>
+<meta name="description" content="Live demo: the verified situation board next to what the system is doing behind the scenes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="js/tw-config.js"></script>
+<link rel="stylesheet" href="css/app.css">
+<style>
+  html, body { height: 100%; }
+  body { display: flex; flex-direction: column; overflow: hidden; }
+  .demo-frame { border: 0; width: 100%; height: 100%; display: block; background: var(--canvas); }
+  .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--authority); }
+</style>
+</head>
+<body>
+<header class="shrink-0 border-b border-line bg-canvas">
+  <div class="px-3 sm:px-4 h-12 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined icon-fill text-critical" style="font-size:22px">flood</span>
+      <span class="font-extrabold tracking-tight">FLOODGATE</span>
+      <span class="label text-muted truncate hidden sm:inline">· Live demo · fictional scenarios + real FMI warnings</span>
+    </div>
+    <div class="flex items-center gap-3 shrink-0">
+      <button type="button" id="how-btn" class="label text-authority hover:underline flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">help</span>How it works</button>
+      <span class="flex items-center gap-2"><span id="live-dot" class="live-dot" aria-hidden="true"></span><span id="live-text" class="label">CONNECTING</span></span>
+    </div>
+  </div>
+  <!-- mobile: tab switcher -->
+  <div class="lg:hidden flex border-t border-line" role="tablist" aria-label="Demo views">
+    <button type="button" class="tab flex-1 py-2 text-sm font-semibold text-muted border-b-2 border-transparent" role="tab" aria-selected="true" data-tab="board">Board</button>
+    <button type="button" class="tab flex-1 py-2 text-sm font-semibold text-muted border-b-2 border-transparent" role="tab" aria-selected="false" data-tab="behind">Behind the scenes</button>
+  </div>
+</header>
+
+<main class="flex-1 min-h-0 flex">
+  <section id="pane-board" class="min-w-0 flex-1 lg:flex-none lg:w-[62%] lg:border-r border-line" aria-label="Board">
+    <iframe id="f-board" class="demo-frame" title="FloodGate board"></iframe>
+  </section>
+  <section id="pane-behind" class="hidden lg:block min-w-0 flex-1" aria-label="Behind the scenes">
+    <iframe id="f-behind" class="demo-frame" title="Behind the scenes"></iframe>
+  </section>
+</main>
+
+<div id="how-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="how-h">
+  <div class="card w-full max-w-lg p-5" style="box-shadow:0 12px 32px -4px rgba(0,0,0,.7)">
+    <div class="flex items-center justify-between gap-2">
+      <h2 id="how-h" class="text-lg font-bold flex items-center gap-2"><span class="material-symbols-outlined text-authority">route</span>How it works</h2>
+      <button type="button" id="how-close" class="toast-close" aria-label="Close"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+    <ol class="mt-3 flex flex-col gap-2.5 text-sm">
+      <li class="flex gap-2.5"><span class="mono text-authority font-bold">1</span><span><b>Our monitors</b> watch official pages, local news and public social feeds, and notice a change within seconds. Watching costs nothing.</span></li>
+      <li class="flex gap-2.5"><span class="mono text-authority font-bold">2</span><span>Every change is captured through <b>Context.dev</b>: a fresh scrape plus structured extraction of each claim, with a word-for-word quote as evidence.</span></li>
+      <li class="flex gap-2.5"><span class="mono text-authority font-bold">3</span><span>An <b>LLM</b> (<span id="how-model">grouping model</span>) groups claims that say the same thing across sources. It never decides what is true.</span></li>
+      <li class="flex gap-2.5"><span class="mono text-authority font-bold">4</span><span><b>Transparent rules</b> set each claim's status: verified only by an official source, corroborated by independent origins, false when an official denies it, risky reassurances held back.</span></li>
+      <li class="flex gap-2.5"><span class="mono text-authority font-bold">5</span><span>The <b>board</b> updates live. Context.dev's own semantic monitors run in parallel as a second opinion on every official page change.</span></li>
+    </ol>
+    <p class="mt-4 text-xs text-muted">The scenario towns, agencies and posts are fictional; the yellow/orange/red weather warnings are real FMI data.</p>
+  </div>
+</div>
+
+<script type="module" src="js/demo.js"></script>
+</body>
+</html>
