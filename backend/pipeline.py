@@ -9,10 +9,11 @@ from __future__ import annotations
 import asyncio
 import difflib
 import time
+from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 from dataclasses import dataclass, field
 
-from . import feeds, fmi, grouping, rules
+from . import enrich, feeds, fmi, grouping, rules
 from .config import (CONTEXT_MONITOR_KINDS, CONTEXT_MONITORS, CONTEXT_REPLAY_DIR, CREDIT_BUDGET, FAST_UPDATES,
                      SOURCES_BY_ID, Source, site_public_url)
 from . import images
@@ -67,6 +68,10 @@ def seen_text(c: dict, first: bool) -> str:
     return f"{'First seen: ' if first else ''}{who} {verb}{quoting}"
 
 
+def now_minus(seconds: float) -> str:
+    return (datetime.now(timezone.utc) - timedelta(seconds=seconds)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 class Pipeline:
     def __init__(self, store: Store, context_client, llm, context_monitors=None):
         self.store, self.ctx, self.llm = store, context_client, llm      # llm: backend.llm.make() or None
@@ -86,6 +91,8 @@ class Pipeline:
         self.timers: dict[str, asyncio.TimerHandle] = {}
         self.flushing: set[str] = set()
         self.generation: dict[str, int] = defaultdict(int)     # bumped by a scenario reset; stale captures are dropped
+        self.enrich_slots = asyncio.Semaphore(2)               # Context.dev reads of official warning pages
+        self.enrich_day, self.enrich_count = "", 0
 
     @property
     def llm_label(self) -> str:
@@ -163,8 +170,9 @@ class Pipeline:
             label = ", ".join(w["areas"])
             label = label if len(label) <= 80 else label[:77] + "…"
             area = {**fmi.area_geometry(w["polygons"]), "label": label, "polygons": w["polygons"]}
-            source = {"id": monitor.id, "name": "Finnish Meteorological Institute", "kind": "official", "url": w["web"]}
-            fields = dict(name=w["headline"].split(":")[0].strip() or w["event"], hazards=[fmi.hazard_for(w["event"])],
+            source = {"id": monitor.id, "name": w.get("publisher") or feed.publisher, "kind": "official", "url": w["web"],
+                      "has_instruction": bool(w.get("instruction"))}
+            fields = dict(name=w.get("name") or w["headline"].split(":")[0].strip() or w["event"], hazards=[hazard],
                           area=area, kind="official_warning", valid={"from": w["onset"], "to": w["expires"]},
                           source_label=feed.label, source=source,
                           summary_text=" ".join(x for x in (w["description"], w["instruction"]) if x))
@@ -202,9 +210,12 @@ class Pipeline:
                 it.updated_at = inc.updated_at = seen_at
                 store.publish("item", it.to_api())
                 store.publish("incident", store.incident_view(inc))
-                if created and w["colour"] in ("orange", "red"):
-                    store.add_alert("critical" if w["colour"] == "red" else "info",
-                                    f"FMI: {w['headline']}", fields["summary_text"], inc_id, item_id)
+                if created and level >= 3 and not change.get("first_check"):
+                    store.add_alert("critical" if level == 4 else "info",
+                                    f"{feed.short}: {w['headline']}", fields["summary_text"], inc_id, item_id)
+
+            if level >= enrich.ENRICH_MIN_LEVEL:
+                self._maybe_enrich(inc, w)
 
         for inc in store.incidents.values():           # this feed's warnings that left it (cancelled / expired) end
             if (inc.kind == "official_warning" and inc.status == "active" and inc.id not in live
@@ -212,6 +223,57 @@ class Pipeline:
                 inc.status, inc.updated_at = "ended", seen_at
                 store.publish("incident", store.incident_view(inc))
         store.save()
+
+    # ---- Context.dev reads the official page behind a serious real warning (backend/enrich.py) ---------------
+    def _maybe_enrich(self, inc: Incident, w: dict) -> None:
+        page = inc.official_page or {}
+        if (not enrich.ENRICH or self.ctx is None or self.replay or self.paused or not w.get("web")
+                or inc.status != "active" or page.get("status") in ("done", "nothing", "skipped")):
+            return
+        if page.get("status") == "pending" and (page.get("since") or "") > now_minus(600):
+            return                                      # in progress (older: the server restarted mid-capture)
+        if page.get("status") == "failed" and (page.get("attempts", 0) >= 2 or
+                                               (page.get("captured_at") or "") > now_minus(1200)):
+            return                                      # failed: one more try, 20 minutes later
+        day = time.strftime("%Y-%m-%d")
+        if day != self.enrich_day:
+            self.enrich_day, self.enrich_count = day, 0
+        if self.enrich_count >= enrich.ENRICH_DAILY:
+            return
+        host = enrich.host_of(w["web"])
+        seen = [i.official_page["status"] for i in self.store.incidents.values()
+                if i.official_page and i.official_page.get("host") == host]
+        if seen.count("nothing") >= 2 and "done" not in seen:   # e.g. a map app or a national overview page
+            inc.official_page = {"status": "skipped", "url": w["web"], "host": host,
+                                 "reason": "this site's pages had nothing about specific warnings"}
+            return
+        self.enrich_count += 1
+        inc.official_page = {"status": "pending", "url": w["web"], "attempts": page.get("attempts", 0) + 1,
+                             "since": now()}
+        self.store.publish("incident", self.store.incident_view(inc))
+        publisher = (inc.source or {}).get("name") or "the official source"
+        asyncio.ensure_future(self._enrich(inc.id, w["web"], w["headline"], list(w.get("areas") or []), publisher))
+
+    async def _enrich(self, inc_id: str, url: str, headline: str, areas: list[str], publisher: str) -> None:
+        async with self.enrich_slots:
+            try:
+                page, calls = await asyncio.to_thread(enrich.capture, self.ctx, url, headline, areas, publisher,
+                                                      step=f"official-page:{inc_id}")
+            except Exception as exc:                    # budget exceeded, network, ...
+                page, calls = {"url": url, "status": "failed", "error": f"{type(exc).__name__}: {exc}"[:200]}, []
+        inc = self.store.incidents.get(inc_id)
+        if inc is None:
+            return
+        detail = (f"official page: {len(page.get('instructions') or [])} instructions, {len(page.get('facts') or [])} facts"
+                  if page["status"] == "done" else page.get("error") or "the official page says nothing about this warning")
+        for call in calls:
+            self._log_call(call, "read official page", detail)
+        page.update(attempts=(inc.official_page or {}).get("attempts", 1), captured_at=now())
+        inc.official_page = page
+        if page["status"] == "done":
+            inc.updated_at = page["captured_at"]
+        self.store.publish("incident", self.store.incident_view(inc))
+        self.store.save()
 
     # ---- processing ---------------------------------------------------------------------------------------
     def _stage(self, source_id: str, stage: str, t0: float, detail: str = "") -> None:

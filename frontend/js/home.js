@@ -77,6 +77,8 @@ function incidentCard(inc) {
       <span class="${h.status === "contradicted" ? "struck" : ""}">${esc(h.title)}</span>
     </li>`).join("");
   const age = fxAge(inc.id);
+  const warn = isWarning(inc);
+  const page = inc.official_page?.status === "done" ? inc.official_page : null;
   const glow = age < 3200 ? `glow ${inc.counts?.contradicted ? "glow-false" : "glow-ok"}` : "";
   return `
   <a href="${href}" class="card card-hover accent-sev${esc(inc.severity)} block p-4 ${glow}" style="${glow ? animDelay(age) : ""}" data-incident="${esc(inc.id)}">
@@ -85,6 +87,20 @@ function incidentCard(inc) {
         <span class="label text-faint truncate">${esc(cap((inc.hazards || []).join(", ").replace(/_/g, " ")))}</span></div>
       <span class="label text-faint shrink-0 text-right">${age < 60000 ? `<span class="updated-chip">Updated just now</span>` : `Updated ${ago(inc.updated_at)}`}</span>
     </div>
+    <h3 class="mt-2 text-xl font-bold leading-snug">${esc(inc.name)}</h3>
+    <p class="mt-1 text-[15px] text-muted clamp-2">${esc(inc.summary)}</p>
+    ${(inc.what_to_do || []).length ? `
+    <div class="mt-3 rounded-md border border-authority/40 bg-authority/5 px-3 py-2.5">
+      <div class="label text-authority">What to do</div>
+      <ul class="mt-1.5 flex flex-col gap-1.5">${inc.what_to_do.slice(0, 2).map((t) => `<li class="text-base font-semibold leading-snug text-ink">${esc(t)}</li>`).join("")}</ul>
+    </div>` : isWarning(inc) ? "" : `
+    <div class="mt-3 text-sm text-muted">No official instructions right now.</div>`}
+    ${warn ? "" : `<div class="mt-3 flex flex-wrap gap-1.5">${countChipsFx(inc)}</div>`}
+    ${warn ? (page?.facts?.length ? `<ul class="mt-3 flex flex-col gap-1.5 border-t border-line pt-3">${page.facts.slice(0, 2).map((f) => `
+      <li class="flex items-start gap-2 text-[15px]"><span class="mt-[9px] w-1.5 h-1.5 rounded-full shrink-0 bg-ok"></span><span>${esc(f.text)}</span></li>`).join("")}</ul>` : "")
+      : highlights ? `<ul class="mt-3 flex flex-col gap-1.5 border-t border-line pt-3">${highlights}</ul>` : ""}
+    <div class="mt-3 text-sm text-muted truncate">${esc((inc.area?.label || "").replace(" (fictional)", ""))}${officialOf(inc) ? ` · official source: <span class="text-ink">${esc(officialOf(inc))}</span>` : ""}</div>
+    ${page ? `<div class="mt-1 text-xs text-faint truncate">Official page read through Context.dev: ${esc(page.host || "")}</div>` : ""}
   </a>`;
 }
 

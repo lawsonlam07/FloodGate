@@ -120,6 +120,9 @@ def script(detail: dict, lang: str = "en") -> dict:
         publisher = ((inc.get("sources") or [{}])[0].get("name")) or inc.get("source_label") or "an official source"
         lines.append(("intro", f"Official warning from {publisher}."))
         lines.append(("fact", _sentence(inc.get("summary") or inc.get("name") or "")))
+        if not ((inc.get("sources") or [{}])[0].get("has_instruction")):          # the feed gave no advice itself
+            for x in ((inc.get("official_page") or {}).get("instructions") or [])[:3]:   # read via Context.dev
+                lines.append(("fact", _sentence(x["text"])))
         until = (inc.get("valid") or {}).get("to")
         if until:
             try:

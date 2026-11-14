@@ -136,6 +136,7 @@ class Incident:
     source_label: str | None = None     # official_warning: who issued it
     source: dict | None = None          # official_warning: {"id", "name", "kind", "url"}
     summary_text: str | None = None     # official_warning: the official description
+    official_page: dict | None = None   # official_warning: what Context.dev read on the official page (enrich.py)
 
     def is_live(self) -> bool:
         return self.status == "active" and not (self.valid and self.valid.get("to") and self.valid["to"] <= now())
@@ -266,10 +267,11 @@ class Store:
         instructions = sorted((it for it in items if it.status == "verified" and it._most_common("category") == "instruction"
                                and any(m.get("source_kind") == "official" and m["stance"] == "asserts" for m in it.group.members)),
                               key=lambda it: it.first_seen, reverse=True)
-        what_to_do = [it.title() for it in instructions[:2]] if inc.kind != "official_warning" else []
+        what_to_do = [it.title() for it in instructions[:2]] if inc.kind != "official_warning" else \
+            [x["text"] for x in ((inc.official_page or {}).get("instructions") or [])[:2]]
         return {
             "id": inc.id, "kind": inc.kind, "name": inc.name, "summary": summary.strip(), "severity": severity,
-            "what_to_do": what_to_do,
+            "what_to_do": what_to_do, "official_page": inc.official_page,
             "severity_label": rules.SEVERITY_LABELS[severity], "status": "active" if inc.is_live() else "ended",
             "hazards": inc.hazards, "area": area, "valid": inc.valid, "source_label": inc.source_label,
             "counts": counts, "highlights": highlights, "sources": sources,

@@ -417,14 +417,47 @@ function renderWarning() {
     </dl>
     <div class="mt-4">
       <div class="label mb-1.5">Official text</div>
-      <blockquote class="rounded border-l-[3px] border-authority bg-authority/5 px-3 py-2.5 text-base leading-relaxed">${esc(text)}</blockquote>
+      <blockquote id="official-text" class="rounded border-l-[3px] border-authority bg-authority/5 px-3 py-2.5 text-base leading-relaxed ${String(text).length > 280 ? "line-clamp-4" : ""}">${esc(text)}</blockquote>
+      ${String(text).length > 280 ? `<button type="button" class="mt-1.5 text-sm text-authority underline" onclick="const q=document.getElementById('official-text');q.classList.toggle('line-clamp-4');this.textContent=q.classList.contains('line-clamp-4')?'Show full text':'Show less'">Show full text</button>` : ""}
     </div>
     <div class="mt-4 pt-3 border-t border-line flex flex-wrap items-center justify-between gap-2">
       <span class="text-sm text-muted">${src?.name && src.name !== inc.source_label ? `<b class="text-ink font-semibold">${esc(src.name)}</b><span class="block text-xs text-faint">${esc(inc.source_label || "")}</span>` : esc(inc.source_label || src?.name || "Official source")}</span>
       ${src?.url ? `<a href="${esc(src.url)}" target="_blank" rel="noopener" class="btn">${icon("open_in_new", "text-[16px]")}Open official source</a>` : ""}
       ${capturedText(src) ? `<span class="basis-full mono text-[12px] text-faint" title="${esc(src.captured_from)}">${esc(capturedText(src))}</span>` : ""}
     </div>
-  </article>`;
+  </article>
+  ${officialPage(inc)}`;
+}
+
+// What Context.dev read on the official page behind this warning (backend/enrich.py): instructions and facts,
+// each with the page's own words one tap away.
+function officialPage(inc) {
+  const p = inc.official_page;
+  if (!p || p.status === "failed" || p.status === "skipped") return "";
+  const where = `<a href="${esc(p.url)}" target="_blank" rel="noopener" class="text-authority underline">${esc(p.host || p.url)}</a>`;
+  if (p.status === "pending") return `<div class="card p-4 mt-4 text-sm text-muted">Reading the official page (${where}) through Context.dev…</div>`;
+  if (p.status === "nothing") return `<div class="card p-4 mt-4 text-sm text-muted">Context.dev read ${where} ${ago(p.captured_at)}. It has no more detail about this warning yet.</div>`;
+  const line = (x) => `
+    <li><details class="py-1">
+      <summary class="flex items-start gap-2 cursor-pointer list-none [&::-webkit-details-marker]:hidden"><span class="mt-[9px] w-1.5 h-1.5 rounded-full bg-authority shrink-0"></span><span>${esc(x.text)}</span></summary>
+      <blockquote class="ml-3.5 mt-1 mb-1 border-l-2 border-line pl-2.5 text-sm text-muted">“${esc(x.quote)}”</blockquote>
+    </details></li>`;
+  const via = `<p class="mt-3 pt-3 border-t border-line text-xs text-faint">Read through Context.dev from ${where}, ${ago(p.captured_at)}. Every line is checked against the page's own words: tap one to see them.</p>`;
+  const who = esc(p.publisher || inc.sources?.[0]?.name || p.host);
+  return `
+  ${p.instructions?.length ? `
+  <div class="card border-authority/60 p-4 mt-4">
+    <h2 class="text-xl font-bold tracking-tight text-authority">What to do</h2>
+    <p class="mt-1 text-sm text-muted">Official instructions from ${who}.</p>
+    <ul class="mt-2 text-base font-medium leading-snug">${p.instructions.map(line).join("")}</ul>
+    ${p.facts?.length ? "" : via}
+  </div>` : ""}
+  ${p.facts?.length ? `
+  <div class="card p-4 mt-4">
+    <h2 class="text-lg font-bold tracking-tight">From the official page</h2>
+    <ul class="mt-2 text-[15px] leading-snug">${p.facts.map(line).join("")}</ul>
+    ${via}
+  </div>` : ""}`;
 }
 
 // ---------------------------------------------------------------- mode + filters

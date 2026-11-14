@@ -153,6 +153,8 @@ class Scheduler:
                 # Re-check every page against what the pipeline last processed, so edits made while paused are
                 # picked up (the pipeline skips pages whose content it already processed).
                 m.last_hash, m.forced = None, True
+            elif not paused and m.type == "feed":
+                m.last_hash = None
             m.wake.set()
 
     def start(self) -> None:
