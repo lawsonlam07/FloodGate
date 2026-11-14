@@ -1,0 +1,19 @@
+[project]
+name = "floodgate"
+version = "0.1.0"
+description = "Live, verified situation board for emergencies (Junction 2026, Context.dev challenge)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "anthropic>=2.8",
+    "fastapi>=0.160",
+    "jsonschema>=4.20",
+    "requests>=2.31",
+    "uvicorn>=0.50",
+]
+
+[dependency-groups]
+dev = ["pyflakes>=3.0"]
+
+[tool.uv]
+package = false   # an app, not a library: uv installs the dependencies, not the project itself
