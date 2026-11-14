@@ -1,0 +1,22 @@
+{
+ "alerts": [
+  {
+   "id": "al_2",
+   "level": "debunk",
+   "title": "FALSE: Harbour Bridge has collapsed",
+   "body": "Halvik Rescue Services says this is false. 3 near-identical posts spread it.",
+   "incident_id": "halvik-storm-surge",
+   "item_id": "it_57c24c",
+   "created_at": "2026-11-14T10:10:00Z"
+  },
+  {
+   "id": "al_1",
+   "level": "critical",
+   "title": "VERIFIED: Saltmarsh residents south of Ferry Street must leave by 16:00",
+   "body": "Confirmed by Halvik Rescue Services.",
+   "incident_id": "halvik-storm-surge",
+   "item_id": "it_fcb595",
+   "created_at": "2026-11-14T10:09:30Z"
+  }
+ ]
+}

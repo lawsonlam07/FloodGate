@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Incident feed · FloodGate</title>
+<meta name="description" content="Verified claim timeline for one incident.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+<script>
+// Dev aid: in ?mock=1 / ?debug=1 show script errors on the page (no console in headless screenshots).
+if (/[?&](mock|debug)=1/.test(location.search)) {
+  const show = (msg) => { const d = document.createElement("pre"); d.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:99999;margin:0;padding:8px;background:#7f1d1d;color:#fff;font:12px monospace;white-space:pre-wrap"; d.textContent = "JS error: " + msg; (document.body || document.documentElement).appendChild(d); };
+  window.addEventListener("error", (e) => show((e.message || "") + " @ " + (e.filename || "") + ":" + (e.lineno || "")));
+  window.addEventListener("unhandledrejection", (e) => show(String(e.reason && e.reason.stack || e.reason)));
+}
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="js/tw-config.js"></script>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body class="min-h-screen">
+
+<header class="sticky top-0 z-[500] bg-canvas/90 backdrop-blur border-b border-line">
+  <div class="max-w-[760px] mx-auto px-4 h-14 flex items-center justify-between gap-3">
+    <a id="back" href="index.html" class="flex items-center gap-1.5 text-sm text-muted hover:text-ink min-h-[44px]">
+      <span class="material-symbols-outlined">arrow_back</span><span class="hidden min-[400px]:inline">All disasters</span>
+    </a>
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined icon-fill text-critical" style="font-size:20px">flood</span>
+      <span class="font-extrabold tracking-tight hidden sm:inline">FLOODGATE</span>
+      <span id="live-dot" class="live-dot ml-2" aria-hidden="true"></span>
+      <span id="live-text" class="label">CONNECTING</span>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-[760px] mx-auto px-4 pb-20">
+  <!-- incident header -->
+  <section id="inc-head" class="mt-4" aria-live="polite">
+    <div class="card p-4 text-muted text-sm">Loading incident…</div>
+  </section>
+
+  <!-- key facts (verified boards) -->
+  <section id="key-facts" class="mt-4 hidden" aria-labelledby="kf-h"></section>
+
+  <!-- v0.5: Context.dev semantic-monitor verdicts (collapsed) -->
+  <section id="ctx-checks" class="mt-4 hidden"></section>
+
+  <!-- official warning view -->
+  <section id="warning-view" class="mt-4 hidden"></section>
+
+  <!-- timeline controls: Key/All toggle + secondary filters -->
+  <section id="controls" class="sticky top-14 z-[400] -mx-4 px-4 py-2 mt-5 bg-canvas/95 backdrop-blur border-y border-line hidden" aria-label="Timeline view">
+    <div class="flex items-center justify-between gap-2">
+      <div class="inline-flex rounded border border-line overflow-hidden" role="group" aria-label="Which updates">
+        <button type="button" id="mode-key" class="px-3 min-h-[36px] text-sm font-semibold">Key updates <span class="tnum text-muted" id="n-key"></span></button>
+        <button type="button" id="mode-all" class="px-3 min-h-[36px] text-sm font-semibold border-l border-line">All <span class="tnum text-muted" id="n-all"></span></button>
+      </div>
+      <button type="button" id="filter-btn" class="btn !min-h-[36px]" aria-expanded="false" aria-controls="filter-panel">
+        <span class="material-symbols-outlined text-[16px]">filter_list</span>Filter<span id="filter-n" class="chip chip-corroborated hidden"></span>
+      </button>
+    </div>
+    <div id="filter-panel" class="hidden mt-2">
+      <div id="filters" class="flex flex-wrap gap-1.5"></div>
+    </div>
+  </section>
+
+  <!-- timeline -->
+  <section id="timeline-wrap" class="mt-4 hidden" aria-labelledby="tl-h">
+    <div class="flex items-baseline justify-between mb-3">
+      <h2 id="tl-h" class="label">Timeline · newest first</h2>
+      <span id="tl-count" class="label text-faint"></span>
+    </div>
+    <ol id="timeline" class="timeline flex flex-col gap-3"></ol>
+  </section>
+</main>
+
+<!-- report modal -->
+<div id="report-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="report-h">
+  <form id="report-form" class="card w-full max-w-sm p-4" style="box-shadow:0 12px 32px -4px rgba(0,0,0,.7)">
+    <h3 id="report-h" class="font-bold flex items-center gap-2"><span class="material-symbols-outlined text-critical">flag</span>Report this item</h3>
+    <p id="report-title" class="mt-1 text-sm text-muted"></p>
+    <fieldset class="mt-3 flex flex-col gap-2 text-sm">
+      <legend class="label mb-1">Reason</legend>
+      <label class="flex items-center gap-2"><input type="radio" name="reason" value="misleading" checked> Misleading</label>
+      <label class="flex items-center gap-2"><input type="radio" name="reason" value="wrong_location"> Wrong location</label>
+      <label class="flex items-center gap-2"><input type="radio" name="reason" value="outdated"> Outdated</label>
+      <label class="flex items-center gap-2"><input type="radio" name="reason" value="other"> Other</label>
+    </fieldset>
+    <label class="block mt-3">
+      <span class="label">Note (optional)</span>
+      <textarea name="note" rows="3" maxlength="500" class="mt-1 w-full rounded border border-line bg-canvas p-2 text-sm text-ink placeholder:text-faint focus:outline-none focus:border-authority" placeholder="What is wrong?"></textarea>
+    </label>
+    <div class="mt-4 flex justify-end gap-2">
+      <button type="button" id="report-cancel" class="btn">Cancel</button>
+      <button type="submit" class="btn btn-critical">Send report</button>
+    </div>
+  </form>
+</div>
+
+<script type="module" src="js/incident.js"></script>
+</body>
+</html>
