@@ -12,7 +12,7 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 
-from . import fmi, grouping, rules
+from . import feeds, fmi, grouping, rules
 from .config import (CONTEXT_MONITOR_KINDS, CONTEXT_MONITORS, CONTEXT_REPLAY_DIR, CREDIT_BUDGET, FAST_UPDATES,
                      SOURCES_BY_ID, Source, site_public_url)
 from . import images
@@ -152,10 +152,13 @@ class Pipeline:
         store.save()
 
     def _on_feed(self, monitor: Monitor, change: dict) -> None:
-        """Sync official CAP warnings into official_warning incidents (one verified item each). No Context.dev."""
+        """Sync an official feed's warnings into official_warning incidents (one verified item each). No Context.dev."""
         store, seen_at, live = self.store, now(), set()
+        feed = feeds.FEEDS.get(monitor.id, feeds.FMI)
         for w in change["warnings"]:
-            inc_id = fmi.incident_id(w["key"])
+            inc_id = feeds.incident_id(feed, w["key"])
+            hazard = w.get("hazard") or fmi.hazard_for(w["event"])
+            level = feeds.level_of(w)
             live.add(inc_id)
             label = ", ".join(w["areas"])
             label = label if len(label) <= 80 else label[:77] + "…"
@@ -163,7 +166,7 @@ class Pipeline:
             source = {"id": monitor.id, "name": "Finnish Meteorological Institute", "kind": "official", "url": w["web"]}
             fields = dict(name=w["headline"].split(":")[0].strip() or w["event"], hazards=[fmi.hazard_for(w["event"])],
                           area=area, kind="official_warning", valid={"from": w["onset"], "to": w["expires"]},
-                          source_label="Finnish Meteorological Institute (CAP feed)", source=source,
+                          source_label=feed.label, source=source,
                           summary_text=" ".join(x for x in (w["description"], w["instruction"]) if x))
             inc = store.incidents.get(inc_id)
             created = inc is None
@@ -178,19 +181,19 @@ class Pipeline:
                       "source_url": w["web"], "stance": "asserts", "attributed_to": None,
                       "evidence_quote": fields["summary_text"] or w["headline"], "proposition": w["headline"],
                       "subject": label, "condition": "warning_issued", "category": "warning",
-                      "hazard": fmi.hazard_for(w["event"]), "location": label, "safety_effective": "protective",
-                      "seen_at": seen_at, "cap_identifier": w["identifier"]}
+                      "hazard": hazard, "location": label, "safety_effective": "protective",
+                      "seen_at": seen_at, "cap_identifier": w["identifier"], "official_level": w.get("level")}
             item_id = f"{inc_id}--W1"
             it = store.items.get(item_id)
             changed = created
             if it is None:
                 it = store.items[item_id] = Item(id=item_id, incident_id=inc_id, first_seen=seen_at,
                                                  group=Group("W1", "warning_issued", label, w["headline"], [member]))
-                it.log.append({"at": seen_at, "kind": "seen", "text": "First seen: Finnish Meteorological Institute issues it"})
+                it.log.append({"at": seen_at, "kind": "seen", "text": f"First seen: {source['name']} issues it"})
                 changed = True
             elif it.group.members[0].get("cap_identifier") != w["identifier"]:
                 it.group.members, it.group.label, it.group.subject = [member], w["headline"], label
-                it.log.append({"at": seen_at, "kind": "seen", "text": "Finnish Meteorological Institute updated the warning"})
+                it.log.append({"at": seen_at, "kind": "seen", "text": f"{source['name']} updated the warning"})
                 changed = True
             if changed:
                 transition = it.reassess()
@@ -203,8 +206,9 @@ class Pipeline:
                     store.add_alert("critical" if w["colour"] == "red" else "info",
                                     f"FMI: {w['headline']}", fields["summary_text"], inc_id, item_id)
 
-        for inc in store.incidents.values():           # warnings that left the feed (cancelled / expired) end
-            if inc.kind == "official_warning" and inc.status == "active" and inc.id not in live:
+        for inc in store.incidents.values():           # this feed's warnings that left it (cancelled / expired) end
+            if (inc.kind == "official_warning" and inc.status == "active" and inc.id not in live
+                    and (inc.source or {}).get("id", feeds.FMI.id) == monitor.id):
                 inc.status, inc.updated_at = "ended", seen_at
                 store.publish("incident", store.incident_view(inc))
         store.save()

@@ -401,7 +401,7 @@ function renderWarning() {
     <div class="flex items-center justify-between gap-2 flex-wrap">
       <div class="flex items-center gap-2 flex-wrap">${sevChip(inc.severity, inc.severity_label)}<span class="chip chip-corroborated">Official warning</span>
         ${isEnded(inc) ? `<span class="chip chip-tag">ended</span>` : ""}</div>
-      <span class="label text-faint">issued ${ago(inc.created_at)}</span>
+      <span class="label text-faint">Added ${ago(inc.created_at)}</span>
     </div>
     <h1 class="mt-3 text-xl sm:text-2xl font-extrabold tracking-tight leading-snug">${esc(inc.name)}</h1>
     <dl class="mt-4 grid gap-3 sm:grid-cols-2">

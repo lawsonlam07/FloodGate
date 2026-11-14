@@ -117,17 +117,20 @@ def script(detail: dict, lang: str = "en") -> dict:
     lines: list[tuple[str, str]] = []
 
     if inc.get("kind") == "official_warning":
-        lines.append(("intro", f"Official weather warning from {inc.get('source_label') or 'the Finnish Meteorological Institute'}."))
+        publisher = ((inc.get("sources") or [{}])[0].get("name")) or inc.get("source_label") or "an official source"
+        lines.append(("intro", f"Official warning from {publisher}."))
         lines.append(("fact", _sentence(inc.get("summary") or inc.get("name") or "")))
         until = (inc.get("valid") or {}).get("to")
         if until:
             try:
+                if not inc["id"].startswith("fmi-"):
+                    raise LookupError                 # only FMI is local to one time zone
                 tz, zone = ZoneInfo("Europe/Helsinki"), "Finnish time"
             except Exception:                         # slim containers may lack the time zone database
                 tz, zone = timezone.utc, "UTC"
             t = datetime.fromisoformat(until.replace("Z", "+00:00")).astimezone(tz)
             lines.append(("fact", f"Valid until {t:%H:%M} {zone}, {t.day} {t:%B}."))
-        lines.append(("outro", "Source: the official warning feed, shown on the FloodGate board."))
+        lines.append(("outro", f"Source: {publisher}'s official feed, shown on the FloodGate board."))
     else:
         verbatim = lang == source_language(inc["id"])        # same language as the pages: read the officials' words
         items = {it["id"]: it for it in detail.get("items") or []}

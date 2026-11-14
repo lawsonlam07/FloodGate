@@ -20,7 +20,7 @@ from typing import Awaitable, Callable
 
 import requests
 
-from . import fmi
+from . import feeds
 from .store import Store, now
 
 USER_AGENT = "floodgate-monitor/0.1 (hackathon prototype)"
@@ -112,23 +112,22 @@ class PageMonitor(Monitor):
 
 
 class CapFeedMonitor(Monitor):
-    """Polls an official CAP Atom feed (FMI warnings). Reports the full set of active warnings whenever the feed
-    changes; the pipeline turns them into official_warning incidents (and ends the ones that disappeared)."""
+    """Polls an official structured feed (FMI CAP, GDACS, USGS, UK Environment Agency; see backend/feeds.py).
+    Reports the full set of active warnings whenever the feed changes; the pipeline turns them into
+    official_warning incidents (and ends the ones that disappeared)."""
     type = "feed"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.last_hash: str | None = None
+        self.session = requests.Session()
 
     def check(self) -> dict | None:
-        r = requests.get(self.url, headers={"User-Agent": USER_AGENT}, timeout=30)
-        r.raise_for_status()
-        digest = hashlib.sha256(r.content).hexdigest()[:16]
+        digest, warnings = feeds.fetch(feeds.FEEDS.get(self.id, feeds.FMI), self.session, now())
         if digest == self.last_hash:
             return None
-        warnings = fmi.active_warnings(fmi.parse_feed(r.content), now())
-        severe = sum(w["colour"] in ("orange", "red") for w in warnings)
-        self.note = f"{len(warnings)} active warnings ({severe} orange/red)"
+        severe = sum(feeds.level_of(w) >= 3 for w in warnings)
+        self.note = f"{len(warnings)} active ({severe} severe)"
         first = self.last_hash is None
         self.last_hash = digest
         return {"warnings": warnings, "first_check": first}

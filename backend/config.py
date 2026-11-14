@@ -10,7 +10,9 @@ Environment:
   SITE_LOCAL_URL        where our own monitors fetch fake_site/ cheaply (default http://127.0.0.1:8765)
   CONTEXT_REPLAY_DIR    if set, serve saved Context.dev responses from this out/<run> dir instead of calling the API
   CREDIT_BUDGET         max Context.dev credits this server process may spend (default 1500)
-  FMI_MONITOR           "0" disables the real FMI warnings feed monitor (default on; it costs no credits)
+  FMI_MONITOR           "0" disables the real official feed monitors (default on; they cost no credits)
+  OFFICIAL_FEEDS        comma-separated feed ids to watch (default: all of fmi-warnings, gdacs, usgs-quakes,
+                        uk-ea-floods, meteoalarm; see backend/feeds.py)
 """
 
 from __future__ import annotations
@@ -19,6 +21,7 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from . import feeds as _feeds
 from .context_client import load_dotenv
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -124,11 +127,14 @@ INCIDENT_TEMPLATES = {
 }
 
 # ---- real-world official feeds --------------------------------------------------------------------------------
-# FMI's CAP feed is official structured data (like a sensor): read directly, no Context.dev credits. Each active
-# warning becomes an `official_warning` incident with its polygons; see backend/fmi.py.
-FEED_MONITORS = [
-    FeedMonitorConfig("fmi-warnings", "FMI weather warnings (CAP feed)", "https://alerts.fmi.fi/cap/feed/atom_en-GB.xml"),
-] if FMI_MONITOR else []
+# Official structured feeds (like sensors): read directly, no Context.dev credits. Each active warning becomes an
+# `official_warning` incident with its area; see backend/feeds.py (FMI, GDACS, USGS, UK Environment Agency).
+_FEED_NAMES = {"fmi-warnings": "FMI weather warnings (CAP feed)", "gdacs": "GDACS global disaster alerts",
+               "usgs-quakes": "USGS earthquakes (M4.5+, past day)", "uk-ea-floods": "UK flood warnings (Environment Agency)",
+               "meteoalarm": "MeteoAlarm orange/red warnings (Europe)"}
+_FEED_IDS = [x.strip() for x in os.environ.get("OFFICIAL_FEEDS", ",".join(_FEED_NAMES)).split(",") if x.strip() in _FEED_NAMES]
+FEED_MONITORS = [FeedMonitorConfig(f, _FEED_NAMES[f], _feeds.FEEDS[f].url, interval_s=_feeds.FEEDS[f].interval_s)
+                 for f in _FEED_IDS] if FMI_MONITOR else []
 
 # ---- data-driven fictional scenarios (scenario/<id>/scenario.json, see docs/SCENARIOS.md) ------------------------
 SCENARIO_ROOT = ROOT / "scenario"

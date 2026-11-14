@@ -64,6 +64,11 @@ function sortIncidents() {
   state.incidents.sort((a, b) => (b.severity - a.severity) || (b.updated_at || "").localeCompare(a.updated_at || ""));
 }
 
+const cap = (t) => (t ? t[0].toUpperCase() + t.slice(1) : t);
+const SHORT = { "Finnish Meteorological Institute": "FMI", "MeteoAlarm (Europe's national weather services)": "MeteoAlarm", "US Geological Survey": "USGS", "UK Environment Agency": "Environment Agency" };
+const officialShort = (inc) => { const n = officialOf(inc); return SHORT[n] || n.replace(/ \(.*\)$/, ""); };
+const officialOf = (inc) => (inc.sources || []).filter((x) => x.kind === "official").map((x) => x.name).join(", ") || inc.source_label || "";
+
 function incidentCard(inc) {
   const href = api.link(`incident.html?id=${encodeURIComponent(inc.id)}`);
   const highlights = (inc.highlights || []).slice(0, 3).map((h) => `
@@ -121,9 +126,9 @@ function renderIncidents() {
     + (compact.length ? `
     <details id="warn-group" class="card" ${open ? "open" : ""}>
       <summary class="px-3 py-3 flex items-center justify-between gap-2 min-h-[44px]">
-        <span class="label flex items-center gap-2">${icon("thunderstorm", "text-authority")}Weather &amp; other warnings
+        <span class="label flex items-center gap-2">Lower-level official warnings
           <span class="chip chip-tag tnum">${compact.length}</span></span>
-        <span class="flex items-center gap-2"><span class="label text-faint hidden sm:inline">official sources</span>${icon("expand_more", "chev text-muted")}</span>
+        <span class="flex items-center gap-2 min-w-0"><span class="label text-faint hidden sm:inline truncate">${esc([...new Set(compact.map(officialShort))].join(", "))}</span>${icon("expand_more", "chev text-muted")}</span>
       </summary>
       <div class="border-t border-line">${compact.map(warningRow).join("")}</div>
     </details>` : "");

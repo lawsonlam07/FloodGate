@@ -215,7 +215,7 @@ export function createLive(opts = {}) {
   }
 
   // ------------------------------------------------------------ runs
-  const isWarningId = (id) => o.getIncident(id)?.kind === "official_warning" || /^fmi-/.test(id || "");
+  const isWarningId = (id) => o.getIncident(id)?.kind === "official_warning" || /^(fmi|gdacs|usgs|ukea|meteo)-/.test(id || "");
   const incidentName = (id) => o.getIncident(id)?.name || String(id || "").replace(/-/g, " ").replace(/^\w/, (c) => c.toUpperCase());
   const incidentHref = (id, itemId) => api.link(`incident.html?id=${encodeURIComponent(id)}`) + (itemId ? `#${encodeURIComponent(itemId)}` : "");
   const canToast = (id) => o.toasts && !bell.quiet && !!o.inFocus(id);

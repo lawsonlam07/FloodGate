@@ -234,6 +234,9 @@ def item_severity(item: dict) -> int:
     status, cond = item["status"], item["condition"]
     if status == "verified":
         if cond == "warning_issued":
+            official = max((m.get("official_level") or 0 for m in item["members"]), default=0)
+            if official:                                  # a feed's own level (GDACS, USGS, Environment Agency)
+                return official
             quotes = " ".join(m.get("evidence_quote", "") for m in item["members"])
             colour = warning_colour_severity(item["title"], quotes)
             return colour if colour is not None else 3

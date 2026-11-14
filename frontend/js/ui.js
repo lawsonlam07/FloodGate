@@ -133,6 +133,7 @@ export function untilText(iso) {
 export function rangeText(valid) {
   if (!valid) return "";
   const f = (iso) => iso ? new Date(iso).toLocaleString([], { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false }) : "?";
+  if (!valid.to) return valid.from ? `Since ${f(valid.from)}, no end time given` : "No end time given";
   return `${f(valid.from)} → ${f(valid.to)}`;
 }
 
