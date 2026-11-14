@@ -1,0 +1,199 @@
+{
+  "id": "valdeluna-dam-failure",
+  "name": "Valdeluna dam failure",
+  "hazard": "dam_failure",
+  "scale": "catastrophic",
+  "language": "es",
+  "region": "Cantabrian Mountains, northern Spain",
+  "area": {"lat": 42.95, "lon": -5.45, "radius_km": 30, "label": "Valle del Lunar (fictional)"},
+  "summary": "After days of rain, a dam shows a breach and then fails; mass evacuation of the valley is ordered, arrival times are revised, bot posts push a scam 'rescue transport' link and a false second-dam rumour and a false 'water has stopped' post circulate.",
+  "sources": {
+    "official": {"name": "Centro de Coordinación de Emergencias del Valle del Lunar", "kind": "official"},
+    "news": {"name": "El Heraldo del Valle", "kind": "news"},
+    "social": {"name": "Valle del Lunar Vecinos", "kind": "social"}
+  },
+  "steps": [
+    {
+      "clock": "05:10",
+      "title": "Alerta por filtraciones en la presa",
+      "description": "Tras cinco días de lluvia, la presa de Valdeluna presenta filtraciones; alerta naranja y preparación de evacuación.",
+      "expect": "Orange alert; precautionary preparations; rumour that the dam has already collapsed.",
+      "pages": {
+        "official": {
+          "title": "Presa de Valdeluna: alerta por filtraciones",
+          "updated": "Parte n.º 1 · 14 de noviembre de 2026, 05:10",
+          "alert": {"level": "orange", "heading": "Alerta naranja: riesgo para la presa", "text": "Se han detectado filtraciones y deformaciones en el cuerpo de la presa de Valdeluna. Se prepara la evacuación de las zonas bajas del valle. Aún no hay orden de evacuar."},
+          "sections": [
+            {"heading": "Situación", "paragraphs": ["El embalse está al 98% de su capacidad tras cinco días de lluvias. Técnicos y ingenieros inspeccionan la presa. Se abren los desagües para bajar el nivel."]},
+            {"heading": "Qué debe hacer", "items": ["Si vive en Valdeluna, San Martín del Lunar o Vegarroja, prepare documentación, medicinas y ropa de abrigo.", "Identifique la ruta hacia las zonas altas: Cruz del Alto o el colegio de Santa Elena.", "Esté atento a las sirenas y a este sitio."]},
+            {"heading": "Carreteras", "items": ["La carretera LE-4 a lo largo del río está cerrada a partir del puente de la Fábrica."]}
+          ],
+          "not_true": ["La presa no se ha roto en este momento."],
+          "timeline": [{"time": "05:10", "text": "Alerta naranja. Preparación de evacuación."}]
+        },
+        "news": {
+          "kicker": "En directo",
+          "headline": "Alerta en la presa de Valdeluna: preparan evacuar el valle",
+          "standfirst": "Los técnicos vigilan filtraciones en el muro. Aún no hay orden de salida.",
+          "byline": "Redacción",
+          "published": "14/11/2026, 05:40",
+          "updated": "05:40",
+          "paragraphs": [
+            "Los servicios de emergencia han declarado la alerta naranja por filtraciones en la presa de Valdeluna. El embalse está casi lleno tras cinco días de lluvias persistentes.",
+            "En las redes se afirma que la presa ya se ha roto. Los responsables lo niegan por ahora: abren los desagües y piden estar preparados.",
+            "Se recomienda a los vecinos de las zonas bajas preparar documentación y medicinas."
+          ],
+          "quotes": [{"text": "Se oyen los desagües rugir toda la noche. Nadie en el pueblo ha dormido.", "by": "una vecina de Valdeluna"}],
+          "most_read": ["La fiesta de la matanza se celebra este domingo", "El equipo juvenil gana el torneo comarcal", "Abre una nueva panadería en la plaza"]
+        },
+        "social": {
+          "feed_name": "#Valdeluna",
+          "posts": [
+            {"name": "Marta G.", "handle": "marta_g", "joined": "Marzo 2014", "followers": 480, "time": "05:18", "text": "Los desagües de la presa están a tope, el río suena brutal. Fotos desde el puente 😟", "links": [], "reposts": 55, "likes": 72, "media": "photo: río crecido con agua marrón"},
+            {"name": "Javier", "handle": "javier_p", "joined": "Julio 2016", "followers": 260, "time": "05:25", "text": "LA PRESA SE HA ROTO!!! Corred!!!", "links": [], "reposts": 190, "likes": 40, "media": null},
+            {"name": "Lola", "handle": "lola_r", "joined": "Mayo 2018", "followers": 120, "time": "05:22", "text": "Mi marido trabaja en la presa y dice que hay filtraciones pero que la vigilan", "links": [], "reposts": 28, "likes": 35, "media": null},
+            {"name": "Paco", "handle": "paco_m", "joined": "Enero 2012", "followers": 90, "time": "05:30", "text": "Cortada la LE-4 en el puente de la Fábrica", "links": [], "reposts": 12, "likes": 18, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "06:25",
+      "title": "Rotura parcial: evacuación obligatoria",
+      "description": "Se produce una rotura parcial; alerta roja y evacuación obligatoria de las zonas bajas del valle (unas 9.000 personas).",
+      "expect": "The rumour of a breach is now confirmed; critical evacuation order.",
+      "pages": {
+        "official": {
+          "title": "Presa de Valdeluna: evacuación obligatoria",
+          "updated": "Parte n.º 2 · 14 de noviembre de 2026, 06:25",
+          "alert": {"level": "red", "heading": "Alerta roja: rotura parcial de la presa", "text": "A las 06:10 se ha producido una rotura parcial del muro de la presa de Valdeluna. Se ordena la evacuación inmediata de Valdeluna, San Martín del Lunar y Vegarroja. Unas 9.000 personas."},
+          "sections": [
+            {"heading": "Evacuación inmediata", "items": ["Abandone la zona baja del valle ahora; no recoja pertenencias.", "Diríjase a las zonas altas: Cruz del Alto o colegio de Santa Elena.", "Ayude a personas mayores y con movilidad reducida si puede hacerlo sin riesgo.", "No cruce puentes sobre el río."]},
+            {"heading": "Llegada del agua", "paragraphs": ["Se estima que el agua llegará a Valdeluna en unos 25 minutos y a San Martín del Lunar en 50 minutos."]},
+            {"heading": "Carreteras", "items": ["La LE-4 está cortada. Use la carretera de la Sierra (LE-12) hacia el norte."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "06:25", "text": "Rotura parcial. Evacuación obligatoria. 9.000 personas."}, {"time": "05:10", "text": "Alerta naranja por filtraciones."}]
+        },
+        "news": {
+          "kicker": "En directo",
+          "headline": "Se rompe parcialmente la presa de Valdeluna: evacuados 9.000 vecinos",
+          "standfirst": "Alerta roja en el valle. El agua llegará a Valdeluna en 25 minutos.",
+          "byline": "Redacción",
+          "published": "14/11/2026, 05:40",
+          "updated": "06:45",
+          "paragraphs": [
+            "Una rotura parcial de la presa de Valdeluna a las 06:10 ha obligado a evacuar a unas 9.000 personas de Valdeluna, San Martín del Lunar y Vegarroja.",
+            "La rotura confirma la alerta que los vecinos compartían desde primera hora, aunque la primera versión que hablaba de un colapso total no era exacta.",
+            "Los servicios de emergencia recomiendan alejarse del río y dirigirse a las zonas altas."
+          ],
+          "quotes": [{"text": "Cogimos a los niños y subimos a pie hasta la cruz. Se oía el estruendo.", "by": "un vecino de Vegarroja"}],
+          "most_read": ["La fiesta de la matanza se celebra este domingo", "El equipo juvenil gana el torneo comarcal", "Abre una nueva panadería en la plaza"]
+        },
+        "social": {
+          "feed_name": "#Valdeluna",
+          "posts": [
+            {"name": "Marta G.", "handle": "marta_g", "joined": "Marzo 2014", "followers": 480, "time": "06:30", "text": "EVACUACIÓN OFICIAL. Subid a Cruz del Alto, no uséis los puentes. Compartid!!", "links": [], "reposts": 520, "likes": 610, "media": null},
+            {"name": "Javier", "handle": "javier_p", "joined": "Julio 2016", "followers": 260, "time": "06:28", "text": "Fue verdad, rotura del muro. Lo vi desde la ladera: sale una masa de agua enorme", "links": [], "reposts": 180, "likes": 210, "media": "photo: agua marrón saliendo por una brecha en un muro"},
+            {"name": "Lola", "handle": "lola_r", "joined": "Mayo 2018", "followers": 120, "time": "06:33", "text": "Sirenas en todo el pueblo. Atasco en la LE-12 pero va fluyendo", "links": [], "reposts": 60, "likes": 75, "media": null},
+            {"name": "Carmen", "handle": "carmen_s", "joined": "Septiembre 2019", "followers": 70, "time": "06:35", "text": "Mi madre de 85 años está en Vegarroja y no puede andar, ¿alguien cerca?", "links": [], "reposts": 140, "likes": 90, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "07:40",
+      "title": "Zona ampliada y falsos servicios de rescate",
+      "description": "Se amplía la evacuación a 14.000 personas y se adelantan los tiempos de llegada; cuentas nuevas ofrecen transporte con un enlace falso.",
+      "expect": "Official update changes numbers and times; bot posts with scam link; second-dam rumour spreads.",
+      "pages": {
+        "official": {
+          "title": "Presa de Valdeluna: evacuación obligatoria",
+          "updated": "Parte n.º 3 · 14 de noviembre de 2026, 07:40",
+          "alert": {"level": "red", "heading": "Alerta roja: evacuación ampliada", "text": "La brecha ha crecido. La evacuación se amplía a Puente Alto y La Ribera: ya son unas 14.000 personas (antes 9.000). El agua ha llegado a Valdeluna."},
+          "sections": [
+            {"heading": "Zonas evacuadas", "items": ["Valdeluna, San Martín del Lunar, Vegarroja, Puente Alto y La Ribera.", "Puntos de acogida: Cruz del Alto, colegio de Santa Elena y polideportivo de Navalón.", "Los servicios de transporte oficiales solo son los autobuses con distintivo de emergencias."]},
+            {"heading": "Tiempos", "paragraphs": ["El agua llegará a Puente Alto en 35 minutos y a La Ribera en 60 minutos (cálculo revisado)."]},
+            {"heading": "Carreteras", "items": ["La LE-12 es la única vía de salida. Circule por el carril habilitado en un solo sentido."]},
+            {"heading": "Ayuda a personas con movilidad reducida", "paragraphs": ["Llame al 112 e indique su dirección. Los equipos están atendiendo primero los casos de Vegarroja."]}
+          ],
+          "not_true": ["No se ha roto ninguna otra presa del río. La presa de Las Hoces, aguas abajo, está estable.", "El enlace de transporte gratuito que circula por las redes no es oficial y es fraudulento."],
+          "timeline": [{"time": "07:40", "text": "Evacuación ampliada: 14.000 personas. Tiempos revisados."}, {"time": "06:25", "text": "Rotura parcial. Evacuación obligatoria."}, {"time": "05:10", "text": "Alerta naranja."}]
+        },
+        "social": {
+          "feed_name": "#Valdeluna",
+          "posts": [
+            {"name": "Rescate Valle", "handle": "rescate_valle", "joined": "Noviembre 2026", "followers": 6, "time": "07:25", "text": "¿Atrapado por el agua en Valdeluna? Transporte de rescate gratis, reserva ya: https://rescate-valle.example/reservar", "links": ["https://rescate-valle.example/reservar"], "reposts": 410, "likes": 9, "media": null},
+            {"name": "Ayuda Lunar 1", "handle": "ayuda_lunar1", "joined": "Noviembre 2026", "followers": 4, "time": "07:24", "text": "¿Atrapado por el agua en Valdeluna? Transporte de rescate gratis, reserva ya: https://rescate-valle.example/reservar", "links": ["https://rescate-valle.example/reservar"], "reposts": 360, "likes": 5, "media": null},
+            {"name": "Raúl", "handle": "raul_t", "joined": "Junio 2015", "followers": 300, "time": "07:35", "text": "Se ha roto TAMBIÉN la presa de Las Hoces, todo el valle va a quedar bajo el agua!!", "links": [], "reposts": 330, "likes": 85, "media": null},
+            {"name": "Marta G.", "handle": "marta_g", "joined": "Marzo 2014", "followers": 480, "time": "07:30", "text": "Agua ya en la plaza de Valdeluna. Estamos en Cruz del Alto, todos a salvo de momento", "links": [], "reposts": 290, "likes": 410, "media": "photo: plaza inundada vista desde una colina"}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "10:30",
+      "title": "El agua baja de ritmo, pero no se puede volver",
+      "description": "Un mensaje afirma que ya ha parado y se puede volver; las autoridades lo desmienten y detallan la situación de cada localidad.",
+      "expect": "Reassurance held back; news relays an unverified claim; official reports the second dam is stable.",
+      "pages": {
+        "official": {
+          "title": "Presa de Valdeluna: evacuación obligatoria",
+          "updated": "Parte n.º 4 · 14 de noviembre de 2026, 10:30",
+          "alert": {"level": "red", "heading": "Alerta roja: no regrese a la zona evacuada", "text": "El caudal que sale de la presa ha bajado, pero el muro sigue inestable. Mantengan la evacuación. La presa de Las Hoces está estable."},
+          "sections": [
+            {"heading": "Estado", "paragraphs": ["Valdeluna y San Martín del Lunar tienen agua en las calles. En Puente Alto y La Ribera el agua llegó a primera hora. Los equipos de rescate trabajan en barca y helicóptero."]},
+            {"heading": "Evacuados", "paragraphs": ["Unas 14.000 personas están en puntos de acogida. Se atiende a varias personas heridas leves."]},
+            {"heading": "Indicaciones", "items": ["No regrese a casa hasta que se emita un aviso oficial.", "Si ha perdido contacto con familiares, use el teléfono 112 o la web de localización.", "No comparta mensajes no verificados."]}
+          ],
+          "not_true": ["No es cierto que el agua haya parado ni que se pueda regresar a las zonas evacuadas.", "No se ha roto la presa de Las Hoces."],
+          "timeline": [{"time": "10:30", "text": "Muro inestable. Mantener evacuación."}, {"time": "07:40", "text": "Evacuación ampliada: 14.000 personas."}, {"time": "06:25", "text": "Rotura parcial. Evacuación obligatoria."}, {"time": "05:10", "text": "Alerta naranja."}]
+        },
+        "news": {
+          "kicker": "En directo",
+          "headline": "Valdeluna: 14.000 evacuados y la presa sigue inestable",
+          "standfirst": "Un mensaje que decía que el agua había parado se ha demostrado falso.",
+          "byline": "Redacción",
+          "published": "14/11/2026, 05:40",
+          "updated": "10:50",
+          "paragraphs": [
+            "El caudal de salida ha bajado desde primera hora, pero el muro no es seguro y las autoridades piden que nadie vuelva a las zonas evacuadas.",
+            "Según varios mensajes en redes, ya se podría regresar. El centro de coordinación lo desmiente.",
+            "Un mensaje que decía que también se había roto la presa de Las Hoces ha resultado falso: la presa está estable, aunque sin confirmar por inspección completa."
+          ],
+          "quotes": [{"text": "Quiero volver a casa, pero prefiero esperar. Mi vecino casi lo hace por un mensaje.", "by": "una evacuada en el polideportivo"}],
+          "most_read": ["La fiesta de la matanza se celebra este domingo", "El equipo juvenil gana el torneo comarcal", "Abre una nueva panadería en la plaza"]
+        },
+        "social": {
+          "feed_name": "#Valdeluna",
+          "posts": [
+            {"name": "Raúl", "handle": "raul_t", "joined": "Junio 2015", "followers": 300, "time": "10:05", "text": "Ya ha parado todo, el agua está bajando, ya podemos volver a casa a por cosas 🙌", "links": [], "reposts": 215, "likes": 150, "media": null},
+            {"name": "Marta G.", "handle": "marta_g", "joined": "Marzo 2014", "followers": 480, "time": "10:20", "text": "NO volváis. El centro de emergencias dice que el muro sigue inestable. Seguimos en Cruz del Alto.", "links": [], "reposts": 480, "likes": 700, "media": null},
+            {"name": "Carmen", "handle": "carmen_s", "joined": "Septiembre 2019", "followers": 70, "time": "09:50", "text": "Mi madre ya está a salvo, gracias a quienes la ayudaron en Vegarroja 💛", "links": [], "reposts": 320, "likes": 600, "media": null},
+            {"name": "Lola", "handle": "lola_r", "joined": "Mayo 2018", "followers": 120, "time": "10:10", "text": "En el polideportivo hace falta ropa de abrigo y mantas para niños", "links": [], "reposts": 140, "likes": 180, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "18:00",
+      "title": "Fin de la fase crítica",
+      "description": "La presa se estabiliza con el vaciado; se mantiene la evacuación para Valdeluna y San Martín del Lunar y se permite el regreso a La Ribera.",
+      "expect": "De-escalation: critical phase over; partial return.",
+      "pages": {
+        "official": {
+          "title": "Presa de Valdeluna: situación estable",
+          "updated": "Parte n.º 5 · 14 de noviembre de 2026, 18:00",
+          "alert": {"level": "orange", "heading": "Alerta naranja: fase crítica superada", "text": "Los técnicos consideran estabilizado el muro tras el vaciado controlado. La evacuación se levanta para La Ribera y se mantiene para el resto."},
+          "sections": [
+            {"heading": "Regreso", "items": ["La Ribera y Puente Alto: pueden regresar desde las 18:30, con precaución por barro y escombros.", "Valdeluna, San Martín del Lunar y Vegarroja: la evacuación continúa.", "Siguen abiertos los puntos de acogida."]},
+            {"heading": "Servicios", "items": ["Faltan agua potable y electricidad en las zonas evacuadas.", "La LE-12 reabre en doble sentido; la LE-4 sigue cortada."]},
+            {"heading": "Balance", "paragraphs": ["Se mantiene la atención a personas heridas leves. Se informará de los daños en el parte de mañana a las 9:00."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "18:00", "text": "Muro estabilizado. Regreso a La Ribera."}, {"time": "10:30", "text": "Muro inestable. Mantener evacuación."}, {"time": "07:40", "text": "Evacuación ampliada."}, {"time": "06:25", "text": "Rotura parcial."}, {"time": "05:10", "text": "Alerta naranja."}]
+        }
+      }
+    }
+  ]
+}

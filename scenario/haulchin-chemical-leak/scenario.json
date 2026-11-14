@@ -1,0 +1,145 @@
+{
+  "id": "haulchin-chemical-leak",
+  "name": "Haulchin chemical leak",
+  "hazard": "hazmat",
+  "scale": "moderate",
+  "language": "fr",
+  "region": "Wallonia, Belgium",
+  "area": {"lat": 50.38, "lon": 4.55, "radius_km": 5, "label": "Haulchin-sur-Sambre (fictional)"},
+  "summary": "A leak at a chemical depot triggers a shelter-in-place order; the zone is enlarged, an explosion rumour is denied, a false 'safe to go out' post spreads and the order is lifted in stages.",
+  "sources": {
+    "official": {"name": "Centre de Crise de Haulchin", "kind": "official"},
+    "news": {"name": "Le Courrier des Prés", "kind": "news"},
+    "social": {"name": "Haulchin Quartiers", "kind": "social"}
+  },
+  "steps": [
+    {
+      "clock": "09:35",
+      "title": "Fuite dans un dépôt chimique",
+      "description": "Une odeur âcre signalée près de la zone industrielle ; le centre de crise ordonne le confinement dans un rayon de 2 km.",
+      "expect": "Shelter-in-place order confirmed (orange); rumours of an explosion appear on social media.",
+      "pages": {
+        "official": {
+          "title": "Fuite de produit chimique à Haulchin-sur-Sambre",
+          "updated": "Communiqué n° 1 · 14 novembre 2026, 09h35",
+          "alert": {"level": "orange", "heading": "Alerte orange : confinement", "text": "Une fuite de gaz irritant s'est produite dans un dépôt de la zone industrielle des Prés. Les habitants dans un rayon de 2 km doivent se confiner immédiatement."},
+          "sections": [
+            {"heading": "Confinement", "items": ["Rentrez dans un bâtiment, fermez portes et fenêtres.", "Arrêtez la ventilation et la climatisation.", "Calfeutrez les ouvertures avec des linges humides si une odeur pénètre.", "N'allez pas chercher vos enfants à l'école : les écoles du secteur sont confinées."]},
+            {"heading": "Zone concernée", "paragraphs": ["Quartiers du Pont-Rouge, des Prés et du Centre-Gare. Les autres quartiers ne sont pas concernés."]},
+            {"heading": "Routes et transports", "items": ["La N 90 est fermée entre le pont de la Sambre et Marcelle.", "Les trains ne s'arrêtent plus à Haulchin."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "09h35", "text": "Premier communiqué. Confinement dans un rayon de 2 km."}]
+        },
+        "news": {
+          "kicker": "Info en continu",
+          "headline": "Fuite chimique à Haulchin : les habitants priés de rester chez eux",
+          "standfirst": "Une fuite de gaz irritant s'est produite dans la zone des Prés. Le centre de crise ordonne le confinement.",
+          "byline": "La rédaction",
+          "published": "14/11/2026, 10h00",
+          "updated": "10h00",
+          "paragraphs": [
+            "Vers 9h10, un dépôt de produits chimiques de la zone industrielle des Prés a signalé une fuite. Le centre de crise a ordonné le confinement des habitants dans un rayon de 2 km.",
+            "Des messages parlent d'une explosion et d'un nuage mortel. Les services de secours n'ont confirmé ni l'un ni l'autre. Quelques personnes ont consulté pour des irritations des yeux.",
+            "Les écoles du secteur ont confiné leurs élèves."
+          ],
+          "quotes": [{"text": "On sent une odeur piquante dans la rue, j'ai tout fermé.", "by": "une habitante du Pont-Rouge"}],
+          "most_read": ["Le FC Haulchin gagne 3 à 1", "Ouverture d'une boulangerie rue de l'Église", "La brocante de Noël revient dimanche"]
+        },
+        "social": {
+          "feed_name": "#haulchin",
+          "posts": [
+            {"name": "Nadia B.", "handle": "nadia_b", "joined": "Mai 2015", "followers": 330, "time": "09h40", "text": "Ça pique les yeux dehors, odeur horrible vers les Prés. Je rentre", "links": [], "reposts": 24, "likes": 40, "media": null},
+            {"name": "Thierry", "handle": "thierry_h", "joined": "Février 2013", "followers": 120, "time": "09h44", "text": "J'ai entendu une EXPLOSION à la zone industrielle, il y a des morts ?!", "links": [], "reposts": 61, "likes": 28, "media": null},
+            {"name": "Léa P.", "handle": "lea_p", "joined": "Août 2019", "followers": 205, "time": "09h38", "text": "École confinée, on nous dit de ne pas venir chercher les enfants. Je suis inquiète 😢", "links": [], "reposts": 17, "likes": 51, "media": null},
+            {"name": "Jo", "handle": "jo_trains", "joined": "Janvier 2018", "followers": 88, "time": "09h42", "text": "Plus aucun train à Haulchin, la gare est fermée", "links": [], "reposts": 12, "likes": 14, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "11:15",
+      "title": "Zone élargie, démenti de l'explosion",
+      "description": "Le rayon passe de 2 à 3 km avec le vent ; démenti de l'explosion ; un faux compte annonce que l'on peut sortir.",
+      "expect": "Official update changes the radius number; explosion rumour debunked; reassurance post held back.",
+      "pages": {
+        "official": {
+          "title": "Fuite de produit chimique à Haulchin-sur-Sambre",
+          "updated": "Communiqué n° 2 · 14 novembre 2026, 11h15",
+          "alert": {"level": "orange", "heading": "Alerte orange : confinement élargi", "text": "Le vent a tourné vers l'est. Le confinement est élargi à un rayon de 3 km (auparavant 2 km) et inclut désormais Marcelle-les-Bois."},
+          "sections": [
+            {"heading": "Confinement", "items": ["Restez à l'intérieur, fenêtres fermées, ventilation arrêtée.", "Ne sortez pas, même pour un court moment.", "En cas de gêne respiratoire persistante : appelez le 112."]},
+            {"heading": "Situation", "paragraphs": ["La fuite est maîtrisée à la source depuis 10h50. Le gaz résiduel se disperse. Des mesures de l'air sont en cours."]},
+            {"heading": "Écoles", "paragraphs": ["Les élèves resteront en sécurité dans leur école. Les parents seront prévenus du moment de la sortie."]}
+          ],
+          "not_true": ["Il n'y a pas eu d'explosion, et aucun décès n'est à déplorer.", "Aucun message du centre de crise n'a annoncé la fin du confinement."],
+          "timeline": [{"time": "11h15", "text": "Confinement élargi à 3 km. Fuite maîtrisée à la source."}, {"time": "09h35", "text": "Premier communiqué."}]
+        },
+        "social": {
+          "feed_name": "#haulchin",
+          "posts": [
+            {"name": "Info Haulchin Officiel", "handle": "info_haulchin_off", "joined": "Novembre 2026", "followers": 9, "time": "11h02", "text": "Fin d'alerte à Haulchin, vous pouvez sortir. Masque gratuit ici : https://masques-haulchin.example/retrait", "links": ["https://masques-haulchin.example/retrait"], "reposts": 230, "likes": 9, "media": null},
+            {"name": "Crise Haulchin", "handle": "crise_haulchin", "joined": "Novembre 2026", "followers": 3, "time": "11h01", "text": "Fin d'alerte à Haulchin, vous pouvez sortir. Masque gratuit ici : https://masques-haulchin.example/retrait", "links": ["https://masques-haulchin.example/retrait"], "reposts": 185, "likes": 4, "media": null},
+            {"name": "Nadia B.", "handle": "nadia_b", "joined": "Mai 2015", "followers": 330, "time": "11h10", "text": "Ils disent que le gaz est dissipé, je vais faire mes courses vite fait", "links": [], "reposts": 44, "likes": 38, "media": null},
+            {"name": "Thierry", "handle": "thierry_h", "joined": "Février 2013", "followers": 120, "time": "10h50", "text": "Pas d'explosion finalement, c'était un camion qui a claqué. Désolé du buzz", "links": [], "reposts": 7, "likes": 18, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "13:30",
+      "title": "Levée partielle du confinement",
+      "description": "Les mesures sont rassurantes : le confinement est levé pour le Centre-Gare et Marcelle, maintenu aux Prés et au Pont-Rouge.",
+      "expect": "Partial de-escalation, correct information contrasted with earlier fake 'all clear'.",
+      "pages": {
+        "official": {
+          "title": "Fuite de produit chimique à Haulchin-sur-Sambre",
+          "updated": "Communiqué n° 3 · 14 novembre 2026, 13h30",
+          "alert": {"level": "yellow", "heading": "Alerte jaune : confinement réduit", "text": "Les mesures de l'air sont normales à Centre-Gare et Marcelle-les-Bois, où le confinement est levé. Il reste en vigueur aux Prés et au Pont-Rouge jusqu'à 15h30."},
+          "sections": [
+            {"heading": "Ce qui change", "items": ["Levée : Centre-Gare, Marcelle-les-Bois.", "Maintenu jusqu'à 15h30 : les Prés et le Pont-Rouge.", "Les écoles du Centre-Gare rouvrent, les parents peuvent venir chercher les enfants."]},
+            {"heading": "Santé", "paragraphs": ["Une trentaine de personnes ont consulté pour des irritations légères. Aucune hospitalisation prolongée."]},
+            {"heading": "Routes", "items": ["La N 90 reste fermée jusqu'à nouvel ordre."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "13h30", "text": "Levée partielle du confinement."}, {"time": "11h15", "text": "Confinement élargi à 3 km."}, {"time": "09h35", "text": "Premier communiqué."}]
+        },
+        "news": {
+          "kicker": "Info en continu",
+          "headline": "Fuite chimique : le confinement levé en partie à Haulchin",
+          "standfirst": "Les quartiers du Pont-Rouge et des Prés restent confinés jusqu'à 15h30.",
+          "byline": "La rédaction",
+          "published": "14/11/2026, 10h00",
+          "updated": "13h45",
+          "paragraphs": [
+            "Après les mesures de la qualité de l'air, le centre de crise a levé le confinement pour le Centre-Gare et Marcelle-les-Bois. Il reste en vigueur aux Prés et au Pont-Rouge jusqu'à 15h30.",
+            "Les messages annonçant une fin d'alerte générale à la mi-journée étaient faux, rappelle le centre de crise. Il met aussi en garde contre un lien de distribution de masques.",
+            "Une trentaine de personnes ont consulté pour des irritations légères."
+          ],
+          "quotes": [{"text": "Heureusement que j'ai attendu l'avis officiel avant de sortir.", "by": "un habitant des Prés"}],
+          "most_read": ["Le FC Haulchin gagne 3 à 1", "Ouverture d'une boulangerie rue de l'Église", "La brocante de Noël revient dimanche"]
+        }
+      }
+    },
+    {
+      "clock": "15:45",
+      "title": "Fin du confinement",
+      "description": "Le confinement est entièrement levé ; la N 90 rouvre le lendemain.",
+      "expect": "All-clear for the shelter-in-place order.",
+      "pages": {
+        "official": {
+          "title": "Fuite de produit chimique à Haulchin-sur-Sambre",
+          "updated": "Communiqué n° 4 · 14 novembre 2026, 15h45",
+          "alert": null,
+          "sections": [
+            {"heading": "Fin d'alerte", "paragraphs": ["Le confinement est levé dans tous les quartiers depuis 15h30. L'air est revenu à la normale selon les mesures des équipes spécialisées."]},
+            {"heading": "Transports", "items": ["Les trains s'arrêtent de nouveau à Haulchin à partir de 16h30.", "La N 90 rouvrira demain à 6h00."]},
+            {"heading": "Conseils", "items": ["Aérez vos logements.", "Rincez les fruits et légumes du jardin avant consommation, par précaution."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "15h45", "text": "Fin du confinement."}, {"time": "13h30", "text": "Levée partielle."}, {"time": "11h15", "text": "Confinement élargi à 3 km."}, {"time": "09h35", "text": "Premier communiqué."}]
+        }
+      }
+    }
+  ]
+}

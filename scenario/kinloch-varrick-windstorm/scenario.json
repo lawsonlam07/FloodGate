@@ -1,0 +1,199 @@
+{
+  "id": "kinloch-varrick-windstorm",
+  "name": "Kinloch Varrick windstorm",
+  "hazard": "storm",
+  "scale": "major",
+  "language": "en",
+  "region": "Highlands, Scotland",
+  "area": {"lat": 57.42, "lon": -5.62, "radius_km": 14, "label": "Kinloch Varrick (fictional)"},
+  "summary": "A violent windstorm cancels ferries, fells trees and closes the Carrick Narrows Bridge; a bridge-damage rumour is denied, a scam 'emergency hotel' link spreads and power figures are revised before the storm eases.",
+  "sources": {
+    "official": {"name": "Varrick & Western Isles Resilience Partnership", "kind": "official"},
+    "news": {"name": "The Varrick Courier", "kind": "news"},
+    "social": {"name": "Varrick Community Chat", "kind": "social"}
+  },
+  "steps": [
+    {
+      "clock": "06:30",
+      "title": "Yellow wind warning",
+      "description": "A deepening low is forecast to bring gusts of up to 80 mph by afternoon.",
+      "expect": "Early advisory-level warning; ferry disruption rumours appear.",
+      "pages": {
+        "official": {
+          "title": "Storm Corran: warning for Kinloch Varrick and coast",
+          "updated": "Update 1 · 14 November 2026, 06:30",
+          "alert": {"level": "yellow", "heading": "Yellow warning: strong winds", "text": "Gusts of 60 to 70 mph are expected on the coast from 12:00, with a risk of falling trees and disruption to travel."},
+          "sections": [
+            {"heading": "Travel", "items": ["Varrick Isles Ferries is running a normal timetable this morning but expects cancellations from midday.", "High-sided vehicles are advised to avoid the Carrick Narrows Bridge from 12:00."]},
+            {"heading": "What to do", "items": ["Secure garden furniture, bins and trampolines.", "Charge phones and check on elderly neighbours.", "Avoid walking along sea fronts and cliff paths."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "06:30", "text": "Yellow wind warning issued."}]
+        },
+        "news": {
+          "kicker": "Weather",
+          "headline": "Storm Corran to hit Varrick coast this afternoon",
+          "standfirst": "Gusts of up to 70 mph are forecast. Ferries may be cancelled from midday.",
+          "byline": "Courier staff",
+          "published": "14/11/2026, 07:10",
+          "updated": "07:10",
+          "paragraphs": [
+            "A yellow wind warning has been issued for Kinloch Varrick and the surrounding coast ahead of Storm Corran, which is expected to strengthen through the day.",
+            "Varrick Isles Ferries says sailings are running for now but warns that crossings after 12:00 are likely to be cancelled.",
+            "Residents are being advised to secure loose items and avoid unnecessary journeys this afternoon."
+          ],
+          "quotes": [{"text": "We have already lashed down the boats. You can feel it building.", "by": "a harbour worker"}],
+          "most_read": ["Highland games date set for next summer", "Local bakery wins national pie award", "New cycle path opens by the loch"]
+        },
+        "social": {
+          "feed_name": "#StormCorran",
+          "posts": [
+            {"name": "Fiona M.", "handle": "fiona_m", "joined": "March 2014", "followers": 520, "time": "06:45", "text": "Wind already howling on the shore road. Not looking forward to this afternoon 😬", "links": [], "reposts": 11, "likes": 45, "media": null},
+            {"name": "Callum R.", "handle": "callumr", "joined": "June 2017", "followers": 190, "time": "06:50", "text": "Heard all ferries are cancelled for the whole day already??", "links": [], "reposts": 20, "likes": 8, "media": null},
+            {"name": "Ishbel", "handle": "ishbel_k", "joined": "January 2012", "followers": 240, "time": "06:40", "text": "Garden furniture in the shed, bins roped to the fence. Ready as I'll ever be", "links": [], "reposts": 3, "likes": 19, "media": null},
+            {"name": "Dougie", "handle": "dougie_p", "joined": "May 2019", "followers": 80, "time": "06:55", "text": "School bus still running, apparently", "links": [], "reposts": 1, "likes": 6, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "11:50",
+      "title": "Upgraded to orange, ferries cancelled",
+      "description": "Gusts are reaching 85 mph. Ferries are cancelled and the Carrick Narrows Bridge restricts all high-sided vehicles.",
+      "expect": "Ferry cancellation confirmed; escalation to orange; rumours of bridge damage begin.",
+      "pages": {
+        "official": {
+          "title": "Storm Corran: warning for Kinloch Varrick and coast",
+          "updated": "Update 2 · 14 November 2026, 11:50",
+          "alert": {"level": "orange", "heading": "Orange warning: severe winds", "text": "Gusts have reached 85 mph. Expect widespread tree falls, structural damage and power cuts. Do not travel unless essential."},
+          "sections": [
+            {"heading": "Ferries", "items": ["All Varrick Isles Ferries sailings are cancelled for the rest of today.", "Passengers should not travel to the terminals."]},
+            {"heading": "Roads and bridges", "items": ["Carrick Narrows Bridge is closed to high-sided vehicles, caravans and motorbikes.", "The A890 is blocked by fallen trees near Achnaban."]},
+            {"heading": "Power", "paragraphs": ["About 6,000 homes are without electricity. Engineers cannot work in the current wind."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "11:50", "text": "Raised to orange. Ferries cancelled. A890 blocked."}, {"time": "06:30", "text": "Yellow wind warning issued."}]
+        },
+        "social": {
+          "feed_name": "#StormCorran",
+          "posts": [
+            {"name": "Callum R.", "handle": "callumr", "joined": "June 2017", "followers": 190, "time": "11:58", "text": "Ferries really are cancelled now, my sister is stuck on the island 😟", "links": [], "reposts": 38, "likes": 55, "media": null},
+            {"name": "Morag", "handle": "morag_t", "joined": "April 2016", "followers": 310, "time": "11:55", "text": "Huge tree down across the A890 at Achnaban, no way through. Photo", "links": [], "reposts": 64, "likes": 90, "media": "photo: large fallen tree across a road"},
+            {"name": "Hamish B.", "handle": "hamishb", "joined": "October 2013", "followers": 140, "time": "11:52", "text": "Carrick Narrows Bridge looks like it's swaying badly, think it's cracked??", "links": [], "reposts": 47, "likes": 21, "media": null},
+            {"name": "Ishbel", "handle": "ishbel_k", "joined": "January 2012", "followers": 240, "time": "11:40", "text": "Lights flickering on and off here, expecting a cut any minute", "links": [], "reposts": 8, "likes": 14, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "14:15",
+      "title": "Red warning, bridge closed to all traffic",
+      "description": "The warning goes red. The bridge is closed to all traffic as a precaution; officials deny structural damage.",
+      "expect": "Bridge closure confirmed, damage rumour debunked, power figure rises.",
+      "pages": {
+        "official": {
+          "title": "Storm Corran: warning for Kinloch Varrick and coast",
+          "updated": "Update 3 · 14 November 2026, 14:15",
+          "alert": {"level": "red", "heading": "Red warning: danger to life", "text": "Gusts of up to 95 mph are recorded. Stay indoors. Flying debris and falling trees are a danger to life."},
+          "sections": [
+            {"heading": "Bridge closure", "paragraphs": ["Carrick Narrows Bridge is closed to ALL traffic, including pedestrians, from 13:40 as a precaution while winds exceed safe limits. It will be inspected once wind speeds fall."]},
+            {"heading": "Roads", "items": ["A890 blocked at Achnaban and Loch Fada.", "Only emergency vehicles should be on the road."]},
+            {"heading": "Power", "paragraphs": ["An estimated 14,000 homes are now without power. Restoration cannot begin until the wind falls."]},
+            {"heading": "Shelter", "paragraphs": ["Kinloch Varrick Community Hall is open as a warm refuge for anyone who has lost power and cannot stay safely at home."]}
+          ],
+          "not_true": ["Reports that the Carrick Narrows Bridge is cracked or damaged are not true. The bridge is closed as a precaution only.", "No evacuation of Kinloch Varrick has been ordered."],
+          "timeline": [{"time": "14:15", "text": "Red warning. Bridge closed to all traffic. 14,000 homes without power."}, {"time": "11:50", "text": "Orange warning. Ferries cancelled."}, {"time": "06:30", "text": "Yellow wind warning issued."}]
+        },
+        "news": {
+          "kicker": "Live",
+          "headline": "Red warning as Corran peaks: bridge shut, 14,000 without power",
+          "standfirst": "The Carrick Narrows Bridge has been closed to all traffic. Officials say it is a precaution, not damage.",
+          "byline": "Courier staff",
+          "published": "14/11/2026, 07:10",
+          "updated": "14:30",
+          "paragraphs": [
+            "A red warning is now in force. Gusts of 95 mph have been recorded and the partnership says there is a danger to life from flying debris.",
+            "The Carrick Narrows Bridge closed to all traffic at 13:40. Posts online claim the structure is cracked; the partnership says this is untrue and the closure is a precaution until it can be inspected.",
+            "About 14,000 homes are without power and ferries remain cancelled."
+          ],
+          "quotes": [{"text": "I have never heard the wind sound like this. We are staying in the hallway.", "by": "a Kinloch Varrick resident"}],
+          "most_read": ["Highland games date set for next summer", "Local bakery wins national pie award", "New cycle path opens by the loch"]
+        },
+        "social": {
+          "feed_name": "#StormCorran",
+          "posts": [
+            {"name": "Varrick Storm Aid", "handle": "varrick_storm_aid", "joined": "November 2026", "followers": 8, "time": "14:05", "text": "Stranded by Corran? Book an emergency hotel room free of charge here: https://storm-rooms.example/varrick", "links": ["https://storm-rooms.example/varrick"], "reposts": 210, "likes": 7, "media": null},
+            {"name": "Corran Help 24", "handle": "corran_help24", "joined": "November 2026", "followers": 4, "time": "14:04", "text": "Stranded by Corran? Book an emergency hotel room free of charge here: https://storm-rooms.example/varrick", "links": ["https://storm-rooms.example/varrick"], "reposts": 175, "likes": 3, "media": null},
+            {"name": "Hamish B.", "handle": "hamishb", "joined": "October 2013", "followers": 140, "time": "13:55", "text": "Bridge is now fully closed. I was wrong about the cracks, looks solid just shut.", "links": [], "reposts": 33, "likes": 61, "media": "photo: barrier across a closed bridge"},
+            {"name": "Fiona M.", "handle": "fiona_m", "joined": "March 2014", "followers": 520, "time": "14:10", "text": "Power just went out across the whole street. Hall is open for anyone who needs a warm space 🕯️", "links": [], "reposts": 89, "likes": 140, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "17:30",
+      "title": "Wind easing, power figures revised",
+      "description": "The red warning drops to orange. The power-cut estimate is revised down to 9,000 homes; a post claims everything is fine and roads are open.",
+      "expect": "De-escalation; official update changes a number; reassurance post held back.",
+      "pages": {
+        "official": {
+          "title": "Storm Corran: warning for Kinloch Varrick and coast",
+          "updated": "Update 4 · 14 November 2026, 17:30",
+          "alert": {"level": "orange", "heading": "Orange warning: winds easing", "text": "Gusts have fallen to 60 mph and are still easing. Dangerous conditions remain; stay off the roads."},
+          "sections": [
+            {"heading": "Power", "paragraphs": ["The earlier estimate was too high. About 9,000 homes (previously 14,000) are without power. Crews are starting repairs where it is safe."]},
+            {"heading": "Bridge and roads", "items": ["Carrick Narrows Bridge stays closed until engineers inspect it at first light tomorrow.", "A890 remains blocked at Achnaban and Loch Fada."]},
+            {"heading": "Ferries", "paragraphs": ["Ferry services are not expected to resume before midday tomorrow."]},
+            {"heading": "Safety", "items": ["Never touch fallen power lines.", "Use torches, not candles, where possible.", "Do not run generators indoors."]}
+          ],
+          "not_true": ["Reports that the bridge has reopened and roads are clear are not true."],
+          "timeline": [{"time": "17:30", "text": "Lowered to orange. 9,000 homes without power."}, {"time": "14:15", "text": "Red warning. Bridge closed."}, {"time": "11:50", "text": "Orange warning."}, {"time": "06:30", "text": "Yellow wind warning."}]
+        },
+        "social": {
+          "feed_name": "#StormCorran",
+          "posts": [
+            {"name": "Dougie", "handle": "dougie_p", "joined": "May 2019", "followers": 80, "time": "17:20", "text": "Wind has dropped, bridge is open again and the roads are all clear. Come on home folks!", "links": [], "reposts": 72, "likes": 41, "media": null},
+            {"name": "Morag", "handle": "morag_t", "joined": "April 2016", "followers": 310, "time": "17:25", "text": "Do NOT trust that, the A890 is still blocked and the bridge is shut. I'm looking at it.", "links": [], "reposts": 68, "likes": 105, "media": "photo: blocked road with warning lights"},
+            {"name": "Ishbel", "handle": "ishbel_k", "joined": "January 2012", "followers": 240, "time": "17:15", "text": "Hall is doing hot soup, power still off here. Thank you volunteers ❤️", "links": [], "reposts": 55, "likes": 120, "media": null},
+            {"name": "Callum R.", "handle": "callumr", "joined": "June 2017", "followers": 190, "time": "17:05", "text": "Crews out on Shore Road already. Never seen them so fast", "links": [], "reposts": 14, "likes": 38, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "08:00",
+      "title": "Next morning: bridge reopens, warnings end",
+      "description": "Engineers reopen the bridge at first light; ferries restart at noon; most power restored.",
+      "expect": "All-clear: bridge reopened after inspection; warnings ended.",
+      "pages": {
+        "official": {
+          "title": "Storm Corran: recovery for Kinloch Varrick and coast",
+          "updated": "Update 5 · 15 November 2026, 08:00",
+          "alert": null,
+          "sections": [
+            {"heading": "Warnings", "paragraphs": ["All weather warnings ended at 06:00. Winds are now below 30 mph."]},
+            {"heading": "Bridge and roads", "items": ["Carrick Narrows Bridge reopened at 07:30 after inspection. No structural damage was found.", "A890 reopened at Loch Fada. Achnaban remains single lane while trees are cleared."]},
+            {"heading": "Ferries and power", "items": ["Ferry services are due to resume at 12:00, with a reduced timetable.", "About 1,800 homes remain without power; most are expected back by this evening."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "08:00", "text": "Warnings ended. Bridge reopened."}, {"time": "17:30", "text": "Lowered to orange. 9,000 homes without power."}, {"time": "14:15", "text": "Red warning."}]
+        },
+        "news": {
+          "kicker": "Update",
+          "headline": "Varrick wakes to storm clean-up as bridge reopens",
+          "standfirst": "Engineers found no damage to the Carrick Narrows Bridge. Ferries restart at noon.",
+          "byline": "Courier staff",
+          "published": "14/11/2026, 07:10",
+          "updated": "08:20",
+          "paragraphs": [
+            "Carrick Narrows Bridge reopened at 07:30 after inspection, confirming officials' statements that it had not been damaged by Storm Corran.",
+            "About 1,800 homes remain without power, down from a peak of 14,000 estimated yesterday afternoon, which was later revised to 9,000.",
+            "Ferries will resume a reduced service at noon."
+          ],
+          "quotes": [{"text": "We lost a few slates and a fence, but we are lucky compared to others.", "by": "a resident of Achnaban"}],
+          "most_read": ["Highland games date set for next summer", "Local bakery wins national pie award", "New cycle path opens by the loch"]
+        }
+      }
+    }
+  ]
+}

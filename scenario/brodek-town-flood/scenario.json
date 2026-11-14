@@ -1,0 +1,154 @@
+{
+  "id": "brodek-town-flood",
+  "name": "Brodek river flood",
+  "hazard": "flood",
+  "scale": "moderate",
+  "language": "cs",
+  "region": "South Bohemia, Czech Republic",
+  "area": {"lat": 49.28, "lon": 14.72, "radius_km": 5, "label": "Brodek nad Lužnicí (fictional)"},
+  "summary": "A river floods a town centre; the flood level is raised, a dam-break rumour is denied, a scam donation link spreads and a premature 'water is falling' post is risky.",
+  "sources": {
+    "official": {"name": "Městský úřad a krizový štáb Brodek", "kind": "official"},
+    "news": {"name": "Brodecký zpravodaj", "kind": "news"},
+    "social": {"name": "Brodek Fórum", "kind": "social"}
+  },
+  "steps": [
+    {
+      "clock": "07:30",
+      "title": "Řeka stoupá, druhý stupeň povodňové aktivity",
+      "description": "Po vydatných deštích stoupá řeka Lužnice; oranžové varování a uzavření nábřeží.",
+      "expect": "Orange flood warning; rumours of a dam break upstream.",
+      "pages": {
+        "official": {
+          "title": "Povodeň v Brodku nad Lužnicí",
+          "updated": "Informace č. 1 · 14. listopadu 2026, 7:30",
+          "alert": {"level": "orange", "heading": "Oranžové varování: povodeň", "text": "Hladina Lužnice stoupá. V 7:00 dosáhla 3,1 m, kulminace se očekává kolem poledne. Zatím neplatí příkaz k evakuaci."},
+          "sections": [
+            {"heading": "Uzavírky", "items": ["Nábřeží a ulice Pod Lávkou jsou uzavřeny.", "Lávka přes Lužnici je uzavřena pro pěší.", "Autobusy jedou po objízdné trase přes Horní most."]},
+            {"heading": "Co dělat", "items": ["Přemístěte vozidla a cennosti z ulic u řeky.", "Připravte si evakuační zavazadlo s dokumenty a léky.", "Neprocházejte zaplavenými místy."]},
+            {"heading": "Pytle s pískem", "paragraphs": ["Pytle s pískem vydává zdarma technická služba ve dvoře radnice, Náměstí 1."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "7:30", "text": "Oranžové varování. Uzavřeno nábřeží."}]
+        },
+        "news": {
+          "kicker": "Živě",
+          "headline": "Lužnice stoupá, v Brodku uzavřeli nábřeží",
+          "standfirst": "Kulminace se čeká v poledne. Úřady zatím evakuaci nevyhlásily.",
+          "byline": "Redakce",
+          "published": "14. 11. 2026, 8:00",
+          "updated": "8:00",
+          "paragraphs": [
+            "Po třech dnech vytrvalého deště vystoupila hladina Lužnice v Brodku na 3,1 metru. Krizový štáb vydal oranžové varování a uzavřel nábřeží a lávku.",
+            "Na sociálních sítích se šíří informace o protržení přehrady nad městem. Krizový štáb ji zatím nepotvrdil ani nevyvrátil a ověřuje ji u správce vodního díla.",
+            "Radnice rozdává zdarma pytle s pískem."
+          ],
+          "quotes": [{"text": "Voda je už u zábradlí, ale zatím sklepy v našem domě suché.", "by": "obyvatelka ulice Pod Lávkou"}],
+          "most_read": ["Hokejisté vyhráli v prodloužení", "Nová cyklostezka k rybníku Svět", "Vánoční trhy začnou v sobotu"]
+        },
+        "social": {
+          "feed_name": "#brodek",
+          "posts": [
+            {"name": "Petra N.", "handle": "petran", "joined": "Květen 2014", "followers": 380, "time": "7:42", "text": "Lužnice je na úrovni zábradlí, nábřeží zavřené 😟", "links": [], "reposts": 25, "likes": 50, "media": "photo: hnědá voda u zábradlí nábřeží"},
+            {"name": "Tomáš K.", "handle": "tomask", "joined": "Únor 2012", "followers": 150, "time": "7:50", "text": "Prý praskla přehrada nad Brodkem!!! Jděte pryč od řeky!", "links": [], "reposts": 74, "likes": 31, "media": null},
+            {"name": "Jana", "handle": "jana_b", "joined": "Říjen 2019", "followers": 90, "time": "7:38", "text": "Pytle s pískem na radnici, fronta už je dlouhá. Přineste si lopatu", "links": [], "reposts": 16, "likes": 28, "media": null},
+            {"name": "Martin", "handle": "martin_s", "joined": "Březen 2017", "followers": 66, "time": "7:35", "text": "Autobus nejede přes Dolní most, jede se objížďkou", "links": [], "reposts": 4, "likes": 7, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "10:50",
+      "title": "Třetí stupeň, evakuace části centra",
+      "description": "Hladina je vyšší, než se čekalo; červené varování a povinná evakuace ulic u řeky.",
+      "expect": "Escalation to red; evacuation ordered; official corrects the peak figure; dam break debunked.",
+      "pages": {
+        "official": {
+          "title": "Povodeň v Brodku nad Lužnicí",
+          "updated": "Informace č. 2 · 14. listopadu 2026, 10:50",
+          "alert": {"level": "red", "heading": "Červené varování: povinná evakuace", "text": "Hladina dosáhla 3,9 m a stále stoupá. Kulminace se nyní očekává ve 14:00 na přibližně 4,3 m (dříve 3,6 m). Nařizuje se evakuace ulic Pod Lávkou, Nábřeží a části Náměstí."},
+          "sections": [
+            {"heading": "Evakuace", "paragraphs": ["Evakuace se týká přibližně 600 obyvatel."], "items": ["Sběrné místo: sportovní hala na Sídlišti.", "Vezměte doklady, léky a domácí zvířata.", "Elektřina bude v zóně vypnuta ve 12:00."]},
+            {"heading": "Uzavírky", "items": ["Dolní most je uzavřen, Horní most je průjezdný.", "Okresní silnice II/135 uzavřena."]},
+            {"heading": "Přehrada", "paragraphs": ["Správce vodního díla potvrdil, že hráz přehrady Lužná je v pořádku a voda je regulovaně vypouštěna."]}
+          ],
+          "not_true": ["Informace o protržení přehrady nad Brodkem je nepravdivá. Hráz je neporušena.", "Zatím není nařízena evakuace celého města, jen určených ulic."],
+          "timeline": [{"time": "10:50", "text": "Červené varování. Evakuace 600 obyvatel. Opravena předpověď kulminace."}, {"time": "7:30", "text": "Oranžové varování."}]
+        },
+        "social": {
+          "feed_name": "#brodek",
+          "posts": [
+            {"name": "Petra N.", "handle": "petran", "joined": "Květen 2014", "followers": 380, "time": "10:58", "text": "Evakuace potvrzená, hasiči chodí od dveří ke dveřím. Hala na Sídlišti je otevřená.", "links": [], "reposts": 120, "likes": 190, "media": null},
+            {"name": "Pomoc Brodek", "handle": "pomoc_brodek", "joined": "Listopad 2026", "followers": 4, "time": "10:40", "text": "Povodeň Brodek – pomozte lidem bez domova, pošlete příspěvek: https://sbirka-brodek.example/darovat", "links": ["https://sbirka-brodek.example/darovat"], "reposts": 275, "likes": 6, "media": null},
+            {"name": "Brodek Sbírka 1", "handle": "brodek_sbirka1", "joined": "Listopad 2026", "followers": 6, "time": "10:39", "text": "Povodeň Brodek – pomozte lidem bez domova, pošlete příspěvek: https://sbirka-brodek.example/darovat", "links": ["https://sbirka-brodek.example/darovat"], "reposts": 233, "likes": 3, "media": null},
+            {"name": "Tomáš K.", "handle": "tomask", "joined": "Únor 2012", "followers": 150, "time": "10:20", "text": "Tak přehrada je OK, ale voda stoupá dál, Pod Lávkou už je pod vodou", "links": [], "reposts": 40, "likes": 55, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "13:10",
+      "title": "Voda klesá? Zatím ne",
+      "description": "Příspěvek tvrdí, že voda klesá a lze se vrátit; krizový štáb to vyvrací a prodlužuje evakuaci.",
+      "expect": "Risky reassurance held back; news relays the unverified claim; official update extends zone.",
+      "pages": {
+        "official": {
+          "title": "Povodeň v Brodku nad Lužnicí",
+          "updated": "Informace č. 3 · 14. listopadu 2026, 13:10",
+          "alert": {"level": "red", "heading": "Červené varování: evakuace pokračuje", "text": "Hladina dosáhla 4,2 m, kulminace se očekává kolem 15:00. Evakuace se rozšiřuje o ulici Zahradní a Sídliště-jih (celkem asi 950 obyvatel)."},
+          "sections": [
+            {"heading": "Evakuace", "items": ["Sběrná místa: sportovní hala, základní škola Komenského.", "Do zóny se nevracejte do odvolání krizovým štábem.", "Zdravotně postižení občané mohou volat 156 pro dopravu."]},
+            {"heading": "Uzavírky", "items": ["Dolní most a silnice II/135 zůstávají uzavřeny.", "Horní most je v provozu."]},
+            {"heading": "Opatření", "paragraphs": ["Hasiči čerpají vodu z podchodu u nádraží. Zdravotnická záchranná služba má pohotovost v hale."]}
+          ],
+          "not_true": ["Informace, že hladina již klesá a lidé se mohou vrátit domů, je nepravdivá."],
+          "timeline": [{"time": "13:10", "text": "Evakuace rozšířena na 950 obyvatel."}, {"time": "10:50", "text": "Červené varování."}, {"time": "7:30", "text": "Oranžové varování."}]
+        },
+        "news": {
+          "kicker": "Živě",
+          "headline": "Povodeň v Brodku: evakuovat se bude až 950 lidí",
+          "standfirst": "Hladina Lužnice dosáhla 4,2 metru. Úřady vyvracejí zprávy o poklesu vody.",
+          "byline": "Redakce",
+          "published": "14. 11. 2026, 8:00",
+          "updated": "13:25",
+          "paragraphs": [
+            "Krizový štáb rozšířil evakuaci o ulici Zahradní a Sídliště-jih. Celkem se jedná o zhruba 950 obyvatel.",
+            "Podle příspěvku na sociálních sítích prý voda už klesá a lidé se mohou vrátit domů. Krizový štáb to označil za nepravdivé.",
+            "Přehrada nad městem je podle správce neporušená."
+          ],
+          "quotes": [{"text": "Zachránili jsme jen to nejnutnější, klíčové je, že jsme všichni v bezpečí.", "by": "evakuovaný obyvatel"}],
+          "most_read": ["Hokejisté vyhráli v prodloužení", "Nová cyklostezka k rybníku Svět", "Vánoční trhy začnou v sobotu"]
+        },
+        "social": {
+          "feed_name": "#brodek",
+          "posts": [
+            {"name": "Radek V.", "handle": "radekv", "joined": "Září 2016", "followers": 270, "time": "13:00", "text": "Voda už klesá o 10 cm, jedu domů pro věci, nebojte se 👍", "links": [], "reposts": 88, "likes": 96, "media": null},
+            {"name": "Petra N.", "handle": "petran", "joined": "Květen 2014", "followers": 380, "time": "13:05", "text": "Nevěřte tomu, Radek se mýlí, před chvílí jsem byla u mostu a voda stoupá!", "links": [], "reposts": 61, "likes": 102, "media": "photo: voda u zábradlí Dolního mostu"},
+            {"name": "Jana", "handle": "jana_b", "joined": "Říjen 2019", "followers": 90, "time": "12:40", "text": "Sportovní hala je plná, vezměte si deky a termosky", "links": [], "reposts": 35, "likes": 74, "media": null},
+            {"name": "Tomáš K.", "handle": "tomask", "joined": "Únor 2012", "followers": 150, "time": "12:30", "text": "Zahradní už evakuují, hasiči na každém rohu", "links": [], "reposts": 19, "likes": 24, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "18:20",
+      "title": "Kulminace překonána",
+      "description": "Voda po kulminaci klesá; evakuace trvá, varování sníženo na oranžové.",
+      "expect": "De-escalation: peak passed, warning lowered, evacuation continues overnight.",
+      "pages": {
+        "official": {
+          "title": "Povodeň v Brodku nad Lužnicí",
+          "updated": "Informace č. 4 · 14. listopadu 2026, 18:20",
+          "alert": {"level": "orange", "heading": "Oranžové varování: voda klesá", "text": "Lužnice kulminovala v 15:20 na 4,25 m a nyní klesá, v 18:00 měla 3,8 m. Evakuace trvá přes noc."},
+          "sections": [
+            {"heading": "Evakuace", "items": ["Do evakuované zóny se nevracejte; rozhodnutí o návratu bude zítra v 9:00.", "Sportovní hala zůstává otevřena přes noc."]},
+            {"heading": "Uzavírky", "items": ["Dolní most a silnice II/135 uzavřeny.", "Horní most je průjezdný."]},
+            {"heading": "Po povodni", "paragraphs": ["Po poklesu vody budou prověřovány sklepy a elektrické přípojky. Škody hlaste na městském úřadě."]}
+          ],
+          "not_true": ["Sbírka na účtu uvedeném na sociálních sítích není oficiální. Město žádnou sbírku přes odkaz nevede."],
+          "timeline": [{"time": "18:20", "text": "Kulminace překonána. Varování sníženo."}, {"time": "13:10", "text": "Evakuace rozšířena na 950 obyvatel."}, {"time": "10:50", "text": "Červené varování."}, {"time": "7:30", "text": "Oranžové varování."}]
+        }
+      }
+    }
+  ]
+}

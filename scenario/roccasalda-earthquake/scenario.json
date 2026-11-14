@@ -1,0 +1,194 @@
+{
+  "id": "roccasalda-earthquake",
+  "name": "Roccasalda earthquake",
+  "hazard": "earthquake",
+  "scale": "major",
+  "language": "it",
+  "region": "Marche and Umbria Apennines, Italy",
+  "area": {"lat": 42.78, "lon": 13.14, "radius_km": 12, "label": "Roccasalda (fictional)"},
+  "summary": "A night-time earthquake damages an old hill town; a rumour of a collapsed tower is partly confirmed, a bridge-collapse and hospital rumour are denied, a quake-prediction hoax and scam donation link spread, and evacuation figures grow.",
+  "sources": {
+    "official": {"name": "Centro Operativo Comunale Roccasalda", "kind": "official"},
+    "news": {"name": "Il Corriere della Valle del Sale", "kind": "news"},
+    "social": {"name": "Roccasalda in Piazza", "kind": "social"}
+  },
+  "steps": [
+    {
+      "clock": "03:50",
+      "title": "Forte scossa nella notte",
+      "description": "Una scossa di magnitudo 5,6 colpisce Roccasalda alle 03:34; prime segnalazioni di danni nel centro storico.",
+      "expect": "Orange alert, damage reports, unverified rumours of collapses.",
+      "pages": {
+        "official": {
+          "title": "Terremoto a Roccasalda",
+          "updated": "Comunicato n. 1 · 14 novembre 2026, 03:50",
+          "alert": {"level": "orange", "heading": "Allerta arancione: terremoto", "text": "Alle 03:34 una scossa di magnitudo 5,6 è stata avvertita in tutta la valle. Sono in corso verifiche sui danni nel centro storico. Non è ancora disposta alcuna evacuazione."},
+          "sections": [
+            {"heading": "Situazione", "paragraphs": ["Si registrano crepe e cadute di calcinacci in diversi edifici del centro storico. Alcune persone sono state soccorse per lievi ferite. Le squadre di vigili del fuoco e protezione civile stanno controllando gli edifici."]},
+            {"heading": "Cosa fare", "items": ["Uscite dagli edifici se vedete crepe importanti e raggiungete le aree di attesa: Piazza Nuova, campo sportivo, parcheggio del cimitero.", "Non rientrate in casa per prendere oggetti.", "Evitate di usare l'auto se non è necessario.", "Usate gli SMS per comunicare e lasciate libere le linee per le emergenze."]},
+            {"heading": "Strade", "items": ["Via del Borgo chiusa per caduta di calcinacci.", "La SP 21 è transitabile con prudenza."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "03:50", "text": "Primo comunicato. Verifiche sugli edifici in corso."}]
+        },
+        "social": {
+          "feed_name": "#terremotoRoccasalda",
+          "posts": [
+            {"name": "Giulia P.", "handle": "giulia_p", "joined": "Marzo 2015", "followers": 410, "time": "03:41", "text": "Scossa fortissima, siamo tutti in strada. Crepe sul palazzo vicino alla chiesa 😰", "links": [], "reposts": 96, "likes": 150, "media": "photo: persone in strada di notte, calcinacci a terra"},
+            {"name": "Marco B.", "handle": "marcob", "joined": "Ottobre 2012", "followers": 230, "time": "03:46", "text": "Dicono che la torre civica sia crollata!! Qualcuno può confermare?", "links": [], "reposts": 140, "likes": 63, "media": null},
+            {"name": "Anna", "handle": "anna_r", "joined": "Giugno 2019", "followers": 110, "time": "03:43", "text": "Il ponte sul Sale è crollato, non si passa più!!!", "links": [], "reposts": 118, "likes": 28, "media": null},
+            {"name": "Don Luigi", "handle": "donluigi", "joined": "Gennaio 2014", "followers": 180, "time": "03:48", "text": "Chiesa aperta per chi vuole stare al riparo, ma state attenti ai calcinacci", "links": [], "reposts": 22, "likes": 54, "media": null}
+          ]
+        },
+        "news": {
+          "kicker": "Ultim'ora",
+          "headline": "Terremoto di magnitudo 5,6 nella Valle del Sale: danni a Roccasalda",
+          "standfirst": "La scossa alle 03:34 ha svegliato l'intera valle. Verifiche in corso sul centro storico.",
+          "byline": "La redazione",
+          "published": "14/11/2026, 04:20",
+          "updated": "04:20",
+          "paragraphs": [
+            "Una forte scossa di terremoto, di magnitudo 5,6, ha colpito alle 03:34 Roccasalda e i comuni vicini. Nel centro storico si segnalano crepe e cadute di calcinacci.",
+            "Sui social circolano notizie di un crollo della torre civica e del ponte sul Sale. Il centro operativo comunale non le ha confermate; sono in corso i controlli.",
+            "I cittadini sono invitati a raggiungere le aree di attesa e a non rientrare in casa."
+          ],
+          "quotes": [{"text": "Il letto si è mosso per quasi trenta secondi, poi il buio e la polvere.", "by": "una residente di via del Borgo"}],
+          "most_read": ["La sagra della castagna chiude con il record di visitatori", "Il Roccasalda calcio batte la capolista", "Nuovo orario del mercato del giovedì"]
+        }
+      }
+    },
+    {
+      "clock": "06:30",
+      "title": "Evacuazione del centro storico, torre danneggiata",
+      "description": "Il COC ordina l'evacuazione del centro storico: la cima della torre civica è crollata, ma il ponte è integro.",
+      "expect": "Rumour partly confirmed (tower), bridge collapse debunked, critical evacuation.",
+      "pages": {
+        "official": {
+          "title": "Terremoto a Roccasalda",
+          "updated": "Comunicato n. 2 · 14 novembre 2026, 06:30",
+          "alert": {"level": "red", "heading": "Allerta rossa: evacuazione del centro storico", "text": "Dopo i sopralluoghi è ordinata l'evacuazione immediata del centro storico (zona A). Circa 1.100 persone sono interessate."},
+          "sections": [
+            {"heading": "Danni verificati", "items": ["La cima della torre civica è crollata in parte; l'area intorno è interdetta.", "La chiesa di San Venanzio ha lesioni gravi alla facciata.", "Sono state rilevate lesioni in circa 40 edifici del centro storico."]},
+            {"heading": "Evacuazione", "items": ["Zona A (centro storico): lasciare le abitazioni, portare documenti e farmaci.", "Punto di accoglienza: palestra comunale e tensostruttura al campo sportivo.", "Gli animali domestici possono essere portati al campo sportivo."]},
+            {"heading": "Strade", "items": ["Via del Borgo e Piazza Vecchia chiuse.", "Il ponte sul Sale è integro ed è aperto al traffico."]}
+          ],
+          "not_true": ["La notizia del crollo del ponte sul Sale è falsa: il ponte è stato controllato ed è integro.", "Non risultano vittime. Alcune persone hanno riportato ferite lievi."],
+          "timeline": [{"time": "06:30", "text": "Evacuazione della zona A. Torre civica parzialmente crollata. Ponte integro."}, {"time": "03:50", "text": "Primo comunicato."}]
+        },
+        "news": {
+          "kicker": "Ultim'ora",
+          "headline": "Terremoto, evacuato il centro storico di Roccasalda: parzialmente crollata la torre civica",
+          "standfirst": "Circa 1.100 persone lasciano le case. Il ponte sul Sale, di cui si era parlato come crollato, è invece integro.",
+          "byline": "La redazione",
+          "published": "14/11/2026, 04:20",
+          "updated": "06:50",
+          "paragraphs": [
+            "Il centro operativo comunale ha ordinato l'evacuazione del centro storico dopo i sopralluoghi. La sommità della torre civica è in parte crollata, come segnalato nella notte da alcuni residenti.",
+            "Falsa invece la notizia, circolata sui social, del crollo del ponte sul Sale: tecnici e vigili del fuoco lo hanno verificato ed è aperto.",
+            "Non ci sono vittime. Le persone ferite lievemente sono state medicate sul posto."
+          ],
+          "quotes": [{"text": "Abbiamo preso solo documenti e medicine. Speriamo di rientrare presto.", "by": "un evacuato di via del Borgo"}],
+          "most_read": ["La sagra della castagna chiude con il record di visitatori", "Il Roccasalda calcio batte la capolista", "Nuovo orario del mercato del giovedì"]
+        },
+        "social": {
+          "feed_name": "#terremotoRoccasalda",
+          "posts": [
+            {"name": "Giulia P.", "handle": "giulia_p", "joined": "Marzo 2015", "followers": 410, "time": "06:20", "text": "La cima della torre è venuta giù davvero, foto di adesso. Il centro storico è transennato", "links": [], "reposts": 210, "likes": 330, "media": "photo: torre con la sommità mancante, nastro rosso e bianco"},
+            {"name": "Anna", "handle": "anna_r", "joined": "Giugno 2019", "followers": 110, "time": "06:25", "text": "Ho passato il ponte sul Sale ora, è in piedi. Scusate l'allarme di prima.", "links": [], "reposts": 74, "likes": 130, "media": null},
+            {"name": "Marco B.", "handle": "marcob", "joined": "Ottobre 2012", "followers": 230, "time": "06:12", "text": "Evacuazione ufficiale, vigili del fuoco bussano a ogni porta", "links": [], "reposts": 98, "likes": 100, "media": null},
+            {"name": "Elena", "handle": "elena_s", "joined": "Aprile 2017", "followers": 140, "time": "06:05", "text": "Tensostruttura al campo sportivo aperta, hanno portato coperte e caffè ❤️", "links": [], "reposts": 61, "likes": 125, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "10:20",
+      "title": "Replica forte e voci false",
+      "description": "Una replica di magnitudo 4,6 spaventa la valle; account nuovi diffondono una raccolta fondi truffa e la finta previsione di una scossa; si dice che l'ospedale sia evacuato.",
+      "expect": "Bots with scam link, near-identical posts, hospital evacuation rumour relayed by the news, reassurance post.",
+      "pages": {
+        "social": {
+          "feed_name": "#terremotoRoccasalda",
+          "posts": [
+            {"name": "Aiuto Roccasalda", "handle": "aiuto_roccasalda", "joined": "Novembre 2026", "followers": 5, "time": "10:08", "text": "Terremoto: aiutiamo gli sfollati di Roccasalda! Dona subito qui: https://dona-roccasalda.example/sfollati", "links": ["https://dona-roccasalda.example/sfollati"], "reposts": 340, "likes": 11, "media": null},
+            {"name": "Sfollati Valle", "handle": "sfollati_valle", "joined": "Novembre 2026", "followers": 3, "time": "10:07", "text": "Terremoto: aiutiamo gli sfollati di Roccasalda! Dona subito qui: https://dona-roccasalda.example/sfollati", "links": ["https://dona-roccasalda.example/sfollati"], "reposts": 295, "likes": 6, "media": null},
+            {"name": "Roberto", "handle": "roberto_t", "joined": "Settembre 2016", "followers": 260, "time": "10:12", "text": "Hanno evacuato l'ospedale della valle dopo la replica, pazienti nei cortili!", "links": [], "reposts": 150, "likes": 48, "media": null},
+            {"name": "Luca M.", "handle": "lucam", "joined": "Gennaio 2018", "followers": 190, "time": "10:15", "text": "Gli esperti dicono che le scosse sono finite, si può rientrare in casa senza problemi", "links": [], "reposts": 88, "likes": 70, "media": null},
+            {"name": "Giulia P.", "handle": "giulia_p", "joined": "Marzo 2015", "followers": 410, "time": "10:02", "text": "Replica fortissima ora, polvere dalle mura. Siamo tutti al campo sportivo", "links": [], "reposts": 120, "likes": 190, "media": null}
+          ]
+        },
+        "news": {
+          "kicker": "Ultim'ora",
+          "headline": "Replica di magnitudo 4,6: paura nella valle, nessun nuovo crollo confermato",
+          "standfirst": "Una nuova forte scossa alle 10:01. Sui social si parla di ospedale evacuato, ma non ci sono conferme.",
+          "byline": "La redazione",
+          "published": "14/11/2026, 04:20",
+          "updated": "10:40",
+          "paragraphs": [
+            "Alle 10:01 una replica di magnitudo 4,6 è stata avvertita con forza a Roccasalda. Il centro operativo è in verifica sui possibili ulteriori danni.",
+            "Sui social si parla di un'evacuazione dell'ospedale di valle: la notizia al momento non è confermata dalle autorità sanitarie.",
+            "Il comune invita inoltre a diffidare di raccolte fondi circolate in rete tramite link non ufficiali."
+          ],
+          "quotes": [{"text": "Siamo rimasti nel prato fino a quando la terra ha smesso di tremare.", "by": "una famiglia al campo sportivo"}],
+          "most_read": ["La sagra della castagna chiude con il record di visitatori", "Il Roccasalda calcio batte la capolista", "Nuovo orario del mercato del giovedì"]
+        }
+      }
+    },
+    {
+      "clock": "14:00",
+      "title": "Smentite e cifre aggiornate",
+      "description": "Il COC aggiorna la magnitudo a 5,8 e porta a 1.800 gli sfollati; smentisce ospedale, raccolta fondi e previsione di un terremoto stanotte.",
+      "expect": "Official update changes numbers (magnitude and evacuees); multiple rumours debunked; scam link called out.",
+      "pages": {
+        "official": {
+          "title": "Terremoto a Roccasalda",
+          "updated": "Comunicato n. 3 · 14 novembre 2026, 14:00",
+          "alert": {"level": "red", "heading": "Allerta rossa: evacuazione estesa", "text": "La magnitudo della scossa delle 03:34 è stata rivista a 5,8 (prima 5,6). Sono ora evacuate circa 1.800 persone: la zona B (Borgo Nuovo) si aggiunge alla zona A."},
+          "sections": [
+            {"heading": "Evacuazione", "items": ["Zone interessate: zona A (centro storico) e zona B (Borgo Nuovo).", "Accoglienza: palestra comunale, tensostruttura al campo sportivo e due alberghi convenzionati.", "Non rientrare in casa fino a nuova comunicazione."]},
+            {"heading": "Ospedale", "paragraphs": ["L'ospedale di valle funziona regolarmente e non è stato evacuato. Alcuni reparti hanno spostato temporaneamente i letti dei piani alti per precauzione."]},
+            {"heading": "Strade", "items": ["Via del Borgo, Piazza Vecchia e Via Nuova chiuse.", "SP 21 aperta."]},
+            {"heading": "Donazioni", "paragraphs": ["Il comune non ha avviato alcuna raccolta fondi tramite link. Gli unici canali ufficiali sono indicati su questo sito."]}
+          ],
+          "not_true": ["L'ospedale di valle non è stato evacuato.", "Il link di raccolta fondi circolato sui social non è del comune: è una truffa.", "Nessun ente prevede una nuova forte scossa in orari precisi; le previsioni di date e ore sono false.", "Non è vero che le scosse sono finite: possono continuare nelle prossime settimane."],
+          "timeline": [{"time": "14:00", "text": "Magnitudo rivista a 5,8. Evacuati 1.800. Smentite diffuse."}, {"time": "06:30", "text": "Evacuazione zona A."}, {"time": "03:50", "text": "Primo comunicato."}]
+        },
+        "news": {
+          "kicker": "Aggiornamento",
+          "headline": "Roccasalda, magnitudo rivista a 5,8: sfollati salgono a 1.800",
+          "standfirst": "Il comune smentisce l'evacuazione dell'ospedale e avverte di una raccolta fondi truffa.",
+          "byline": "La redazione",
+          "published": "14/11/2026, 04:20",
+          "updated": "14:20",
+          "paragraphs": [
+            "Il centro operativo ha rivisto la magnitudo della scossa principale a 5,8. Con l'estensione della zona rossa al Borgo Nuovo, gli sfollati salgono da 1.100 a circa 1.800.",
+            "L'ospedale non è stato evacuato, a differenza di quanto sostenuto in rete. Il comune precisa anche che la raccolta fondi con link circolata dal mattino è una truffa.",
+            "Nei prossimi giorni sono possibili nuove repliche."
+          ],
+          "quotes": [{"text": "Meno male che abbiamo aspettato il comunicato prima di muoverci per l'ospedale.", "by": "un residente di Borgo Nuovo"}],
+          "most_read": ["La sagra della castagna chiude con il record di visitatori", "Il Roccasalda calcio batte la capolista", "Nuovo orario del mercato del giovedì"]
+        }
+      }
+    },
+    {
+      "clock": "20:30",
+      "title": "Notte più calma, primi rientri",
+      "description": "Dopo i controlli, la zona B è dichiarata agibile; il centro storico resta chiuso.",
+      "expect": "De-escalation: partial return for zone B, zone A remains closed.",
+      "pages": {
+        "official": {
+          "title": "Terremoto a Roccasalda",
+          "updated": "Comunicato n. 4 · 14 novembre 2026, 20:30",
+          "alert": {"level": "orange", "heading": "Allerta arancione: rientri parziali", "text": "Dopo le verifiche tecniche, gli abitanti di Borgo Nuovo (zona B) possono rientrare. Il centro storico (zona A) resta interdetto."},
+          "sections": [
+            {"heading": "Rientri", "items": ["Zona B: rientro consentito da subito, con prudenza.", "Zona A: divieto di accesso fino a nuovo avviso. Circa 1.100 persone restano accolte nelle strutture.", "Accesso accompagnato per ritirare farmaci: domani dalle 9:00 al varco di Via Nuova."]},
+            {"heading": "Repliche", "paragraphs": ["Nel pomeriggio si sono registrate repliche di magnitudo inferiore a 3,5. Non sono previsti nuovi danni."]},
+            {"heading": "Aiuti", "paragraphs": ["Il numero verde del comune è attivo 24 ore su 24."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "20:30", "text": "Rientro in zona B. Zona A interdetta."}, {"time": "14:00", "text": "Magnitudo rivista a 5,8. Evacuati 1.800."}, {"time": "06:30", "text": "Evacuazione zona A."}, {"time": "03:50", "text": "Primo comunicato."}]
+        }
+      }
+    }
+  ]
+}

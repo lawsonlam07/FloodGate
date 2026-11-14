@@ -1,0 +1,125 @@
+{
+  "id": "zalesice-warehouse-fire",
+  "name": "Zalesice warehouse fire",
+  "hazard": "fire",
+  "scale": "minor",
+  "language": "pl",
+  "region": "Łódź Voivodeship, Poland",
+  "area": {"lat": 51.62, "lon": 19.88, "radius_km": 3, "label": "Zalesice Nowe (fictional)"},
+  "summary": "A warehouse fire sends smoke over a village; the advisory radius grows, a toxic-cloud rumour is denied and a premature 'open the windows' post is risky.",
+  "sources": {
+    "official": {"name": "Straż i Ratownictwo Zalesice", "kind": "official"},
+    "news": {"name": "Kurier Zalesicki", "kind": "news"},
+    "social": {"name": "Zalesice Info", "kind": "social"}
+  },
+  "steps": [
+    {
+      "clock": "13:10",
+      "title": "Pożar magazynu, dym nad wsią",
+      "description": "Pożar hali magazynowej; wydano żółty komunikat o zamknięciu okien w promieniu 2 km.",
+      "expect": "Advisory-level fire; smoke guidance confirmed; an unverified rumour about toxic chemicals starts.",
+      "pages": {
+        "official": {
+          "title": "Pożar magazynu w Zalesicach Nowych",
+          "updated": "Komunikat nr 1 · 14 listopada 2026, 13:10",
+          "alert": {"level": "yellow", "heading": "Żółty komunikat: zadymienie", "text": "W hali magazynowej przy ul. Fabrycznej trwa pożar. Dym znosi wiatr w kierunku wsi Zalesice Stare. Nie ma nakazu ewakuacji."},
+          "sections": [
+            {"heading": "Zalecenia dla mieszkańców", "items": ["Zamknij okna i drzwi, wyłącz wentylację i klimatyzację.", "Osoby z chorobami serca i płuc powinny pozostać w domach.", "Nie zbliżaj się do ul. Fabrycznej, nie utrudniaj dojazdu służbom."]},
+            {"heading": "Zasięg zadymienia", "paragraphs": ["Zalecenie dotyczy obszaru w promieniu około 2 km od hali, w kierunku wschodnim."]},
+            {"heading": "Utrudnienia", "items": ["Ul. Fabryczna zamknięta na odcinku od skrzyżowania z ul. Leśną.", "Objazd przez ul. Polną."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "13:10", "text": "Pierwszy komunikat. Na miejscu pracuje 8 zastępów."}]
+        },
+        "news": {
+          "kicker": "Na żywo",
+          "headline": "Pożar hali w Zalesicach Nowych. Mieszkańcy proszeni o zamknięcie okien",
+          "standfirst": "Nad wsią unosi się gęsty dym. Straż pracuje na miejscu, nie ogłoszono ewakuacji.",
+          "byline": "Redakcja Kuriera",
+          "published": "14.11.2026, 13:35",
+          "updated": "13:35",
+          "paragraphs": [
+            "Po godz. 12:40 w hali magazynowej przy ul. Fabrycznej wybuchł pożar. Służby apelują do mieszkańców Zalesic Starych o zamknięcie okien i wyłączenie wentylacji.",
+            "W mediach społecznościowych pojawiają się wpisy o rzekomym składowaniu w hali chemikaliów. Służby nie potwierdziły tej informacji.",
+            "Ulica Fabryczna jest zamknięta. Kierowcy powinni korzystać z objazdu ulicą Polną."
+          ],
+          "quotes": [{"text": "Dym jest czarny i czuć go nawet w domu mimo zamkniętych okien.", "by": "mieszkanka ul. Leśnej"}],
+          "most_read": ["Mistrzostwa powiatu w szachach juniorów", "Nowy rozkład autobusów od poniedziałku", "Piekarnia przy rynku obchodzi 30-lecie"]
+        },
+        "social": {
+          "feed_name": "#pożarZalesice",
+          "posts": [
+            {"name": "Kasia M.", "handle": "kasia_m", "joined": "Marzec 2016", "followers": 380, "time": "13:20", "text": "Z magazynu przy Fabrycznej ogromny czarny dym!! Zamykajcie okna 🔥", "links": [], "reposts": 41, "likes": 70, "media": "photo: czarny słup dymu nad dachami"},
+            {"name": "Tomek", "handle": "tomek_z", "joined": "Czerwiec 2014", "followers": 145, "time": "13:24", "text": "podobno w tym magazynie były chemikalia, to trujący dym?? ktoś wie", "links": [], "reposts": 19, "likes": 11, "media": null},
+            {"name": "Ola W.", "handle": "olaw", "joined": "Luty 2021", "followers": 90, "time": "13:18", "text": "Straż zamknęła Fabryczną, objazd Polną. Uważajcie", "links": [], "reposts": 8, "likes": 15, "media": null},
+            {"name": "Pan Jerzy", "handle": "jerzy58", "joined": "Styczeń 2012", "followers": 60, "time": "13:15", "text": "u nas w Zalesicach Starych już czuć spalenizną", "links": [], "reposts": 3, "likes": 6, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "15:00",
+      "title": "Zasięg zalecenia zwiększony, dementi",
+      "description": "Wiatr zmienia kierunek; zalecenie rozszerzone do 3 km. Służby dementują plotkę o toksycznej chmurze. Pojawia się ryzykowny wpis 'dym zniknął'.",
+      "expect": "Official update changes the radius number; chemical rumour debunked; reassurance post to be held back; bot posts with scam link.",
+      "pages": {
+        "official": {
+          "title": "Pożar magazynu w Zalesicach Nowych",
+          "updated": "Komunikat nr 2 · 14 listopada 2026, 15:00",
+          "alert": {"level": "yellow", "heading": "Żółty komunikat: zadymienie", "text": "Wiatr skręcił na południowy wschód. Zalecenie zamknięcia okien obowiązuje teraz w promieniu 3 km od hali i obejmuje także Zalesice Dolne."},
+          "sections": [
+            {"heading": "Zalecenia dla mieszkańców", "items": ["Pozostaw okna i drzwi zamknięte, wentylacja wyłączona.", "Nie suszyć prania na zewnątrz, dzieci niech pozostaną w domach.", "Zgłaszaj problemy z oddychaniem pod numerem alarmowym."]},
+            {"heading": "Zasięg zadymienia", "paragraphs": ["Zalecenie obejmuje promień 3 km (wcześniej 2 km): Zalesice Stare, Zalesice Dolne i osiedle Leśne."]},
+            {"heading": "Utrudnienia", "items": ["Ul. Fabryczna pozostaje zamknięta.", "Szkoła w Zalesicach Starych odwołuje zajęcia na jutro (poniedziałek)."]}
+          ],
+          "not_true": ["Informacje o magazynowaniu w hali substancji toksycznych są nieprawdziwe: w obiekcie składowano palety z artykułami papierniczymi i opakowaniami.", "Nie ogłoszono ewakuacji żadnej miejscowości."],
+          "timeline": [{"time": "15:00", "text": "Zasięg zalecenia zwiększony z 2 do 3 km. Dementi dotyczące chemikaliów."}, {"time": "13:10", "text": "Pierwszy komunikat. Na miejscu pracuje 8 zastępów."}]
+        },
+        "social": {
+          "feed_name": "#pożarZalesice",
+          "posts": [
+            {"name": "Alert Zalesice", "handle": "alert_zalesice_pl", "joined": "Listopad 2026", "followers": 6, "time": "14:52", "text": "PILNE! Toksyczna chmura nad Zalesicami. Odbierz darmową maskę ochronną: https://maski-zalesice.example/odbierz", "links": ["https://maski-zalesice.example/odbierz"], "reposts": 188, "likes": 4, "media": null},
+            {"name": "Pomoc Zalesice", "handle": "pomoc_zalesice1", "joined": "Listopad 2026", "followers": 3, "time": "14:51", "text": "PILNE! Toksyczna chmura nad Zalesicami. Odbierz darmową maskę ochronną: https://maski-zalesice.example/odbierz", "links": ["https://maski-zalesice.example/odbierz"], "reposts": 152, "likes": 2, "media": null},
+            {"name": "Tomek", "handle": "tomek_z", "joined": "Czerwiec 2014", "followers": 145, "time": "14:40", "text": "dym już prawie zniknął, można spokojnie otworzyć okna i wietrzyć 👍", "links": [], "reposts": 27, "likes": 33, "media": null},
+            {"name": "Kasia M.", "handle": "kasia_m", "joined": "Marzec 2016", "followers": 380, "time": "14:30", "text": "Wiatr się zmienił, teraz dym idzie na Dolne. Moja siostra tam mieszka, już czuć", "links": [], "reposts": 22, "likes": 41, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "18:20",
+      "title": "Pożar opanowany",
+      "description": "Pożar opanowany, zalecenie zniesione, ul. Fabryczna wciąż zamknięta.",
+      "expect": "All-clear for smoke advisory; road still closed.",
+      "pages": {
+        "official": {
+          "title": "Pożar magazynu w Zalesicach Nowych",
+          "updated": "Komunikat nr 3 · 14 listopada 2026, 18:20",
+          "alert": null,
+          "sections": [
+            {"heading": "Stan sytuacji", "paragraphs": ["Pożar został opanowany o godz. 17:45. Trwa dogaszanie. Zalecenie zamknięcia okien zostało odwołane o 18:15.", "Pomiary jakości powietrza w Zalesicach Starych i Dolnych nie wykazują przekroczeń norm."]},
+            {"heading": "Utrudnienia", "items": ["Ul. Fabryczna pozostaje zamknięta do jutra do godz. 10:00.", "Zajęcia w szkole w Zalesicach Starych odbędą się normalnie."]},
+            {"heading": "Dla mieszkańców", "items": ["Można już wietrzyć mieszkania.", "Nie klikaj w linki obiecujące darmowe maski. Służby nie rozdają masek przez internet."]}
+          ],
+          "not_true": ["Nie istniało zagrożenie toksyczną chmurą."],
+          "timeline": [{"time": "18:20", "text": "Pożar opanowany. Zalecenie odwołane."}, {"time": "15:00", "text": "Zasięg zalecenia zwiększony do 3 km."}, {"time": "13:10", "text": "Pierwszy komunikat."}]
+        },
+        "news": {
+          "kicker": "Aktualizacja",
+          "headline": "Pożar hali w Zalesicach opanowany. Zalecenie o zamknięciu okien odwołane",
+          "standfirst": "Strażacy dogaszają pogorzelisko. Ulica Fabryczna jeszcze do jutra zamknięta.",
+          "byline": "Redakcja Kuriera",
+          "published": "14.11.2026, 13:35",
+          "updated": "18:30",
+          "paragraphs": [
+            "Po kilku godzinach akcji strażacy opanowali pożar hali magazynowej. Wiatr zmienił w ciągu popołudnia kierunek, dlatego zalecenie zamknięcia okien rozszerzono z 2 do 3 km.",
+            "Służby zdementowały pogłoski o toksycznej chmurze oraz o rzekomych chemikaliach w magazynie. Ostrzegają też przed wpisami z linkami do darmowych masek.",
+            "Pomiary powietrza nie wykazały przekroczeń. Mieszkańcy mogą ponownie wietrzyć domy."
+          ],
+          "quotes": [{"text": "Najgorsze, że nie wiedzieliśmy, czy te plotki o chemii są prawdziwe.", "by": "mieszkaniec Zalesic Dolnych"}],
+          "most_read": ["Mistrzostwa powiatu w szachach juniorów", "Nowy rozkład autobusów od poniedziałku", "Piekarnia przy rynku obchodzi 30-lecie"]
+        }
+      }
+    }
+  ]
+}

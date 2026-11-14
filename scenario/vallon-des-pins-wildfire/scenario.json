@@ -1,0 +1,183 @@
+{
+  "id": "vallon-des-pins-wildfire",
+  "name": "Vallon-des-Pins forest fire",
+  "hazard": "fire",
+  "scale": "moderate",
+  "language": "fr",
+  "region": "Provence, France",
+  "area": {"lat": 43.78, "lon": 6.32, "radius_km": 6, "label": "Vallon-des-Pins (fictional)"},
+  "summary": "A forest fire threatens two villages; a partial evacuation is confirmed, a fake 'all clear' and a scam donation link circulate, and the evacuation is extended before the fire is contained.",
+  "sources": {
+    "official": {"name": "Préfecture du Val-des-Pins et Secours du Vallon", "kind": "official"},
+    "news": {"name": "Le Journal du Vallon", "kind": "news"},
+    "social": {"name": "Vallon Infos Locales", "kind": "social"}
+  },
+  "steps": [
+    {
+      "clock": "13:15",
+      "title": "Départ de feu au-dessus du hameau",
+      "description": "Fumée visible, vigilance orange feux de forêt, aucune consigne d'évacuation.",
+      "expect": "Orange alert, unverified social reports that the village will be evacuated.",
+      "pages": {
+        "official": {
+          "title": "Feu de forêt à Vallon-des-Pins",
+          "updated": "Point de situation n° 1 · 14 novembre 2026, 13h15",
+          "alert": {"level": "orange", "heading": "Vigilance orange : feu de forêt", "text": "Un feu de forêt s'est déclaré à 12h40 sur le versant nord du Mont Rouge. Il progresse vers l'est, poussé par un vent d'ouest soutenu."},
+          "sections": [
+            {"heading": "Situation", "paragraphs": ["Environ 25 hectares sont touchés. Quatre-vingts sapeurs-pompiers et deux avions bombardiers d'eau sont engagés. Aucun habitant n'est menacé pour l'instant."]},
+            {"heading": "Routes", "items": ["La D 22 est fermée entre Vallon-des-Pins et Saint-Aubert.", "Accès réservé aux secours."]},
+            {"heading": "Que faire", "items": ["Évitez le secteur et ne montez pas filmer le feu.", "Gardez les accès aux véhicules de secours dégagés.", "Restez informés par ce site et la radio locale."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "13h15", "text": "Premier point de situation. Vigilance orange."}]
+        },
+        "news": {
+          "kicker": "En direct",
+          "headline": "Feu de forêt au-dessus de Vallon-des-Pins : 25 hectares brûlés",
+          "standfirst": "Les pompiers combattent les flammes sur le Mont Rouge. Aucune évacuation n'a été décidée à ce stade.",
+          "byline": "Par la rédaction",
+          "published": "14/11/2026, 13h45",
+          "updated": "13h45",
+          "paragraphs": [
+            "Un feu de forêt a démarré en début d'après-midi sur les pentes du Mont Rouge. La préfecture a placé le secteur en vigilance orange et fermé la D 22.",
+            "Sur les réseaux sociaux, des internautes évoquent une évacuation imminente de Saint-Aubert. Les secours n'ont rien annoncé de tel pour le moment.",
+            "Deux bombardiers d'eau effectuent des rotations depuis le lac du Vallon."
+          ],
+          "quotes": [{"text": "On voit une grosse colonne de fumée, mais le feu est encore loin des maisons.", "by": "une habitante de Saint-Aubert"}],
+          "most_read": ["Le marché de Noël s'installe place de la Mairie", "Le club de pétanque fête ses 50 ans", "Travaux sur la route de la Gare jusqu'à jeudi"]
+        },
+        "social": {
+          "feed_name": "#feuVallon",
+          "posts": [
+            {"name": "Julie R.", "handle": "julie_r", "joined": "Mars 2016", "followers": 420, "time": "13h20", "text": "Énorme fumée sur le Mont Rouge, on entend les avions 🔥", "links": [], "reposts": 52, "likes": 80, "media": "photo: colonne de fumée au-dessus d'une colline boisée"},
+            {"name": "Paul M.", "handle": "paulm", "joined": "Juin 2012", "followers": 190, "time": "13h26", "text": "Ils vont évacuer Saint-Aubert, mon cousin pompier me l'a dit", "links": [], "reposts": 33, "likes": 25, "media": null},
+            {"name": "Camille", "handle": "camille_v", "joined": "Janvier 2020", "followers": 98, "time": "13h18", "text": "D22 fermée, gendarmes au rond-point. Prévoyez un détour", "links": [], "reposts": 14, "likes": 22, "media": null},
+            {"name": "Marc D.", "handle": "marcd", "joined": "Avril 2014", "followers": 66, "time": "13h22", "text": "Le vent est bien fort aujourd'hui, ça sent mauvais pour la forêt", "links": [], "reposts": 3, "likes": 9, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "15h10",
+      "title": "Évacuation partielle de Saint-Aubert",
+      "description": "Le feu atteint 140 hectares et le Hameau des Pins est évacué ; la rumeur d'hier se confirme en partie.",
+      "expect": "Rumour confirmed: partial evacuation ordered. Severity critical (evacuation).",
+      "pages": {
+        "official": {
+          "title": "Feu de forêt à Vallon-des-Pins",
+          "updated": "Point de situation n° 2 · 14 novembre 2026, 15h10",
+          "alert": {"level": "red", "heading": "Vigilance rouge : évacuation partielle", "text": "Le feu a progressé de 25 à 140 hectares. Évacuation obligatoire du Hameau des Pins et du quartier des Oliviers à Saint-Aubert."},
+          "sections": [
+            {"heading": "Évacuation", "paragraphs": ["Environ 380 habitants sont concernés. Le reste de Saint-Aubert et Vallon-des-Pins ne sont pas évacués."], "items": ["Point de rassemblement et hébergement : gymnase de Vallon-des-Pins.", "Emportez papiers, médicaments, animaux de compagnie.", "Quittez les lieux en voiture par la D 40 uniquement."]},
+            {"heading": "Routes", "items": ["La D 22 et la D 40 (sens sortant) sont ouvertes aux évacuations.", "Le col du Mont Rouge est fermé."]},
+            {"heading": "Que faire", "items": ["Si vous n'êtes pas dans la zone, restez chez vous, volets fermés.", "N'appelez le 112 que pour une urgence vitale."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "15h10", "text": "Évacuation du Hameau des Pins et des Oliviers. Vigilance rouge."}, {"time": "13h15", "text": "Premier point de situation. Vigilance orange."}]
+        },
+        "news": {
+          "kicker": "En direct",
+          "headline": "Feu de forêt : 380 habitants évacués à Saint-Aubert",
+          "standfirst": "Le feu a atteint 140 hectares. La préfecture a ordonné l'évacuation de deux quartiers.",
+          "byline": "Par la rédaction",
+          "published": "14/11/2026, 13h45",
+          "updated": "15h25",
+          "paragraphs": [
+            "Le feu du Mont Rouge a pris de l'ampleur en deux heures, passant de 25 à 140 hectares. La préfecture a ordonné l'évacuation du Hameau des Pins et du quartier des Oliviers, soit environ 380 personnes.",
+            "L'évacuation de Saint-Aubert évoquée plus tôt sur les réseaux est donc en partie confirmée, mais le reste du village n'est pas concerné.",
+            "Les évacués sont accueillis au gymnase de Vallon-des-Pins."
+          ],
+          "quotes": [{"text": "On a pris les papiers et le chien, et on est partis en dix minutes.", "by": "un évacué du Hameau des Pins"}],
+          "most_read": ["Le marché de Noël s'installe place de la Mairie", "Le club de pétanque fête ses 50 ans", "Travaux sur la route de la Gare jusqu'à jeudi"]
+        },
+        "social": {
+          "feed_name": "#feuVallon",
+          "posts": [
+            {"name": "Julie R.", "handle": "julie_r", "joined": "Mars 2016", "followers": 420, "time": "15h12", "text": "Évacuation confirmée pour les Oliviers et le Hameau. Gymnase de Vallon ouvert. Courage à tous 💛", "links": [], "reposts": 140, "likes": 210, "media": null},
+            {"name": "Paul M.", "handle": "paulm", "joined": "Juin 2012", "followers": 190, "time": "15h05", "text": "Mon cousin avait raison, ils évacuent. Les flammes sont bien visibles depuis la route", "links": [], "reposts": 41, "likes": 36, "media": "photo: flammes sur la crête au crépuscule"},
+            {"name": "Sophie L.", "handle": "sophie_l", "joined": "Septembre 2017", "followers": 245, "time": "15h00", "text": "Embouteillage sur la D40, tout le monde roule doucement, ça se passe calmement", "links": [], "reposts": 18, "likes": 30, "media": null},
+            {"name": "Marc D.", "handle": "marcd", "joined": "Avril 2014", "followers": 66, "time": "14h50", "text": "Plus de réseau mobile chez nous, quelqu'un sait pour les routes ?", "links": [], "reposts": 5, "likes": 8, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "17h30",
+      "title": "Fausse levée d'alerte et arnaque aux dons",
+      "description": "Des comptes récents annoncent la fin du danger et un lien de dons ; les secours démentent et étendent l'évacuation.",
+      "expect": "Bot posts with scam link, reassurance post held back, official update changes number and extends evacuation, debunk.",
+      "pages": {
+        "official": {
+          "title": "Feu de forêt à Vallon-des-Pins",
+          "updated": "Point de situation n° 3 · 14 novembre 2026, 17h30",
+          "alert": {"level": "red", "heading": "Vigilance rouge : évacuation étendue", "text": "Le feu atteint 310 hectares. L'évacuation est étendue au quartier du Plan et au hameau de la Bastide : environ 720 personnes au total."},
+          "sections": [
+            {"heading": "Évacuation", "paragraphs": ["Le Hameau des Pins, les Oliviers, le Plan et la Bastide sont évacués. Le centre de Vallon-des-Pins reste hors de la zone."], "items": ["Hébergement : gymnase de Vallon-des-Pins (complet à 80 %) et salle des fêtes de Mirabel.", "Ne retournez pas chez vous avant l'avis officiel."]},
+            {"heading": "Moyens engagés", "paragraphs": ["120 sapeurs-pompiers, 4 bombardiers d'eau. Le feu n'est pas fixé."]},
+            {"heading": "Dons", "paragraphs": ["Aucune collecte de dons en ligne n'a été lancée par les autorités. Les appels reçus par lien sont frauduleux."]}
+          ],
+          "not_true": ["Le feu n'est pas maîtrisé. Les messages annonçant la fin de l'évacuation sont faux.", "Il n'y a pas de collecte officielle sur le site « vallon-dons.example » ni sur tout autre lien reçu sur les réseaux."],
+          "timeline": [{"time": "17h30", "text": "Évacuation étendue : 720 personnes. Démentis publiés."}, {"time": "15h10", "text": "Évacuation du Hameau des Pins et des Oliviers."}, {"time": "13h15", "text": "Premier point de situation."}]
+        },
+        "social": {
+          "feed_name": "#feuVallon",
+          "posts": [
+            {"name": "Solidarité Vallon", "handle": "solidarite_vallon", "joined": "Novembre 2026", "followers": 7, "time": "17h12", "text": "Incendie Vallon : aidons les sinistrés ! Faites un don ici : https://vallon-dons.example/aide", "links": ["https://vallon-dons.example/aide"], "reposts": 260, "likes": 8, "media": null},
+            {"name": "Aide Pins 83", "handle": "aide_pins83", "joined": "Novembre 2026", "followers": 4, "time": "17h11", "text": "Incendie Vallon : aidons les sinistrés ! Faites un don ici : https://vallon-dons.example/aide", "links": ["https://vallon-dons.example/aide"], "reposts": 212, "likes": 5, "media": null},
+            {"name": "Sophie L.", "handle": "sophie_l", "joined": "Septembre 2017", "followers": 245, "time": "17h05", "text": "Le vent est tombé, le feu est sous contrôle ! On peut rentrer chez nous 🙏", "links": [], "reposts": 96, "likes": 120, "media": null},
+            {"name": "Julie R.", "handle": "julie_r", "joined": "Mars 2016", "followers": 420, "time": "17h20", "text": "Attention, la Bastide vient d'être évacuée aussi, les gendarmes passent de porte en porte", "links": [], "reposts": 88, "likes": 130, "media": null}
+          ]
+        },
+        "news": {
+          "kicker": "En direct",
+          "headline": "Feu de Vallon : 310 hectares, évacuation étendue à 720 personnes",
+          "standfirst": "La préfecture dément toute fin d'alerte et alerte sur de faux appels aux dons.",
+          "byline": "Par la rédaction",
+          "published": "14/11/2026, 13h45",
+          "updated": "17h45",
+          "paragraphs": [
+            "Le feu du Mont Rouge a atteint 310 hectares en fin d'après-midi. L'évacuation, d'abord limitée à 380 habitants, concerne désormais environ 720 personnes.",
+            "Un message affirmant que le feu est maîtrisé et que l'on peut rentrer circule largement : il est faux, indique la préfecture.",
+            "Des comptes créés ces derniers jours diffusent un lien de dons frauduleux. Les autorités demandent de ne pas cliquer."
+          ],
+          "quotes": [{"text": "On a failli rentrer à cause du message sur le feu maîtrisé. Heureusement on a vérifié.", "by": "un évacué du Plan"}],
+          "most_read": ["Le marché de Noël s'installe place de la Mairie", "Le club de pétanque fête ses 50 ans", "Travaux sur la route de la Gare jusqu'à jeudi"]
+        }
+      }
+    },
+    {
+      "clock": "22h00",
+      "title": "Feu fixé, retour progressif",
+      "description": "Le feu est fixé dans la nuit ; fin de l'évacuation pour la Bastide, maintien pour les autres quartiers.",
+      "expect": "De-escalation: fire fixed, part of the evacuation lifted.",
+      "pages": {
+        "official": {
+          "title": "Feu de forêt à Vallon-des-Pins",
+          "updated": "Point de situation n° 4 · 14 novembre 2026, 22h00",
+          "alert": {"level": "orange", "heading": "Vigilance orange : feu fixé", "text": "Le feu est fixé à 335 hectares depuis 21h30. Les habitants de la Bastide peuvent rentrer. Les autres quartiers restent évacués cette nuit."},
+          "sections": [
+            {"heading": "Évacuation", "items": ["Retour autorisé : la Bastide.", "Toujours évacués : Hameau des Pins, les Oliviers, le Plan (environ 540 personnes).", "Prochain point à 8h00."]},
+            {"heading": "Routes", "items": ["D 22 rouverte sur 2 km, D 40 réservée aux véhicules de secours.", "Col du Mont Rouge fermé."]},
+            {"heading": "Surveillance", "paragraphs": ["Des patrouilles surveillent les points chauds pendant la nuit. Un bilan des dégâts sera publié demain."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "22h00", "text": "Feu fixé. Retour à la Bastide."}, {"time": "17h30", "text": "Évacuation étendue : 720 personnes."}, {"time": "15h10", "text": "Évacuation partielle."}, {"time": "13h15", "text": "Premier point de situation."}]
+        },
+        "news": {
+          "kicker": "En direct",
+          "headline": "Feu de Vallon fixé à 335 hectares, retour à la Bastide",
+          "standfirst": "Les pompiers surveillent les points chauds ; la plupart des évacués passeront la nuit au gymnase.",
+          "byline": "Par la rédaction",
+          "published": "14/11/2026, 13h45",
+          "updated": "22h10",
+          "paragraphs": [
+            "Après neuf heures de lutte, le feu est fixé à 335 hectares. Les habitants de la Bastide ont pu regagner leurs maisons.",
+            "Environ 540 personnes restent hébergées. Aucune victime grave n'est signalée par la préfecture."
+          ],
+          "quotes": [{"text": "On dormira au gymnase, l'essentiel c'est que les maisons tiennent.", "by": "un évacué des Oliviers"}],
+          "most_read": ["Le marché de Noël s'installe place de la Mairie", "Le club de pétanque fête ses 50 ans", "Travaux sur la route de la Gare jusqu'à jeudi"]
+        }
+      }
+    }
+  ]
+}

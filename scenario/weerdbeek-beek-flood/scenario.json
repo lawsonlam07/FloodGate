@@ -1,0 +1,125 @@
+{
+  "id": "weerdbeek-beek-flood",
+  "name": "Weerdbeek brook flood",
+  "hazard": "flood",
+  "scale": "minor",
+  "language": "nl",
+  "region": "Gelderland, Netherlands",
+  "area": {"lat": 52.08, "lon": 6.12, "radius_km": 3, "label": "Weerdbeek (fictional)"},
+  "summary": "A brook overflows and closes a road and a footbridge; a collapse rumour and a scam sandbag link appear before the road reopens.",
+  "sources": {
+    "official": {"name": "Gemeente Weerdbeek Crisisinfo", "kind": "official"},
+    "news": {"name": "De Beekbode", "kind": "news"},
+    "social": {"name": "Weerdbeek Buurtplein", "kind": "social"}
+  },
+  "steps": [
+    {
+      "clock": "09:20",
+      "title": "Beek treedt buiten haar oevers",
+      "description": "Gele waarschuwing voor hoog water; Veerweg en de Molenbrug (voetgangers) gaan dicht.",
+      "expect": "Advisory-level flood, two closures confirmed by the municipality; a collapse rumour about the footbridge appears on social media.",
+      "pages": {
+        "official": {
+          "title": "Hoog water in de Weerdbeek",
+          "updated": "Bericht 1 · 14 november 2026, 09:20 uur",
+          "alert": {"level": "yellow", "heading": "Gele waarschuwing: hoog water", "text": "Na zware regen van afgelopen nacht is de Weerdbeek op meerdere plaatsen buiten haar oevers getreden. Er zijn geen evacuaties."},
+          "sections": [
+            {"heading": "Afsluitingen", "items": ["De Veerweg is afgesloten tussen de Kerkstraat en de Hoeve Oost.", "De Molenbrug (voetgangersbrug) is afgesloten voor alle verkeer.", "Fietsers kunnen omrijden via de Dijkweg."]},
+            {"heading": "Waterstand", "paragraphs": ["De waterstand bij meetpunt Weerdbeek-Oost is 1,9 meter. De piek wordt rond 13:00 uur verwacht op ongeveer 2,2 meter."]},
+            {"heading": "Wat kunt u doen", "items": ["Blijf weg van de oever en van de afgesloten wegen.", "Rijd niet door water op de weg.", "Zandzakken zijn gratis af te halen bij de gemeentewerf aan de Smidsweg."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "09:20", "text": "Gele waarschuwing afgegeven. Veerweg en Molenbrug afgesloten."}]
+        },
+        "news": {
+          "kicker": "Actueel",
+          "headline": "Beek loopt over: Veerweg en voetgangersbrug dicht",
+          "standfirst": "De Weerdbeek is vanochtend buiten haar oevers getreden. De gemeente waarschuwt voor hoog water, maar ziet geen reden tot evacuatie.",
+          "byline": "Door onze redactie",
+          "published": "14-11-2026, 09:45",
+          "updated": "09:45",
+          "paragraphs": [
+            "Na de zware regen van afgelopen nacht is de Weerdbeek vanochtend op meerdere plekken overgelopen. De gemeente heeft de Veerweg en de Molenbrug afgesloten en geeft een gele waarschuwing af.",
+            "Op sociale media wordt gemeld dat de Molenbrug is beschadigd. Daarvoor is geen bevestiging van de gemeente.",
+            "Bewoners kunnen gratis zandzakken ophalen bij de gemeentewerf. De piek van het water wordt rond het middaguur verwacht."
+          ],
+          "quotes": [{"text": "Het water staat tot aan de weilanden, maar onze straat is nog droog.", "by": "een bewoner van de Kerkstraat"}],
+          "most_read": ["Basisschool Het Eiken wint prijs voor schooltuin", "Dorpsfeest verplaatst naar zaterdag", "Nieuwe bakker opent in de Molenstraat"]
+        },
+        "social": {
+          "feed_name": "#weerdbeek",
+          "posts": [
+            {"name": "Joost v. D.", "handle": "joostvd", "joined": "Mei 2017", "followers": 530, "time": "09:31", "text": "Molenbrug is volgens mij ingestort!! Hoorde een enorme klap 😱", "links": [], "reposts": 14, "likes": 22, "media": null},
+            {"name": "Marijke", "handle": "marijke_w", "joined": "Maart 2015", "followers": 210, "time": "09:27", "text": "Veerweg staat blank bij de Hoeve Oost, niet doorheen rijden. Foto.", "links": [], "reposts": 31, "likes": 58, "media": "photo: ondergelopen weg met oranje afzetlint"},
+            {"name": "Henk Bos", "handle": "henkbos", "joined": "Januari 2013", "followers": 98, "time": "09:24", "text": "de beek is echt hoog vandaag, weilanden helemaal onder", "links": [], "reposts": 2, "likes": 9, "media": null},
+            {"name": "Sanne", "handle": "sanne_h", "joined": "Augustus 2020", "followers": 322, "time": "09:22", "text": "Fietsen naar werk wordt omrijden via de Dijkweg dus 😅", "links": [], "reposts": 1, "likes": 12, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "11:40",
+      "title": "Piek lager dan verwacht, oplichtingsposts",
+      "description": "Update 2 corrigeert de piekverwachting en weerlegt het instortingsgerucht; bots verspreiden een nepzandzakkenlink.",
+      "expect": "Official correction of the peak figure; collapse rumour debunked; bot posts with scam link flagged.",
+      "pages": {
+        "official": {
+          "title": "Hoog water in de Weerdbeek",
+          "updated": "Bericht 2 · 14 november 2026, 11:40 uur",
+          "alert": {"level": "yellow", "heading": "Gele waarschuwing: hoog water", "text": "De waterstand stijgt nog licht. De piek wordt nu verwacht op 2,0 meter rond 12:30 uur, lager dan eerder gemeld."},
+          "sections": [
+            {"heading": "Afsluitingen", "items": ["De Veerweg blijft afgesloten.", "De Molenbrug blijft afgesloten als voorzorgsmaatregel; de brug is onbeschadigd.", "Omrijden via de Dijkweg."]},
+            {"heading": "Waterstand", "paragraphs": ["Meetpunt Weerdbeek-Oost: 1,95 meter om 11:30 uur. Verwachte piek: 2,0 meter (eerder 2,2 meter)."]},
+            {"heading": "Zandzakken", "paragraphs": ["Zandzakken zijn uitsluitend gratis verkrijgbaar bij de gemeentewerf aan de Smidsweg. De gemeente vraagt nooit om betaling via een link."]}
+          ],
+          "not_true": ["Berichten dat de Molenbrug is ingestort zijn onjuist. De brug is dicht als voorzorg en is niet beschadigd.", "Er is geen evacuatie van Weerdbeek aangekondigd."],
+          "timeline": [{"time": "11:40", "text": "Piekverwachting aangepast naar 2,0 m. Instortingsbericht Molenbrug weerlegd."}, {"time": "09:20", "text": "Gele waarschuwing afgegeven. Veerweg en Molenbrug afgesloten."}]
+        },
+        "social": {
+          "feed_name": "#weerdbeek",
+          "posts": [
+            {"name": "Zandzak Hulp NL", "handle": "zandzak_hulp_nl", "joined": "November 2026", "followers": 4, "time": "11:36", "text": "Weerdbeek ramp! Bestel nu zandzakken met spoed, bezorging in 30 min: https://zandzak-spoed.example/weerdbeek", "links": ["https://zandzak-spoed.example/weerdbeek"], "reposts": 164, "likes": 3, "media": null},
+            {"name": "Hulp Weerdbeek 24", "handle": "hulp_weerdbeek24", "joined": "November 2026", "followers": 7, "time": "11:35", "text": "Weerdbeek ramp! Bestel nu zandzakken met spoed, bezorging in 30 min: https://zandzak-spoed.example/weerdbeek", "links": ["https://zandzak-spoed.example/weerdbeek"], "reposts": 141, "likes": 2, "media": null},
+            {"name": "Marijke", "handle": "marijke_w", "joined": "Maart 2015", "followers": 210, "time": "11:22", "text": "Molenbrug staat gewoon nog overeind, alleen dicht met hekken. Foto van net.", "links": [], "reposts": 40, "likes": 77, "media": "photo: Molenbrug met hekken, brug intact"},
+            {"name": "Joost v. D.", "handle": "joostvd", "joined": "Mei 2017", "followers": 530, "time": "11:15", "text": "Oké de klap was een omgevallen hek, brug is heel. Sorry mensen", "links": [], "reposts": 5, "likes": 19, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "16:30",
+      "title": "Veerweg weer open",
+      "description": "Het water zakt; Veerweg heropend, voetgangersbrug nog dicht tot inspectie; code geel ingetrokken.",
+      "expect": "De-escalation: road reopened, warning lifted, bridge remains closed until tomorrow.",
+      "pages": {
+        "official": {
+          "title": "Hoog water in de Weerdbeek",
+          "updated": "Bericht 3 · 14 november 2026, 16:30 uur",
+          "alert": null,
+          "sections": [
+            {"heading": "Stand van zaken", "paragraphs": ["De gele waarschuwing is om 16:00 uur ingetrokken. De waterstand bij Weerdbeek-Oost is gezakt naar 1,3 meter en daalt verder."]},
+            {"heading": "Wegen en bruggen", "items": ["De Veerweg is weer open voor verkeer.", "De Molenbrug blijft tot en met morgen 12:00 uur dicht voor inspectie."]},
+            {"heading": "Opruimen", "paragraphs": ["Meld modderoverlast of schade via het gemeentelijk meldpunt. Zandzakken kunnen nog tot zondag worden opgehaald."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "16:30", "text": "Waarschuwing ingetrokken. Veerweg open."}, {"time": "11:40", "text": "Piekverwachting aangepast naar 2,0 m."}, {"time": "09:20", "text": "Gele waarschuwing afgegeven."}]
+        },
+        "news": {
+          "kicker": "Actueel",
+          "headline": "Weerdbeek weer rustig: Veerweg open, Molenbrug nog dicht",
+          "standfirst": "Het water in de beek zakt. De gemeente heeft de waarschuwing ingetrokken.",
+          "byline": "Door onze redactie",
+          "published": "14-11-2026, 09:45",
+          "updated": "16:40",
+          "paragraphs": [
+            "De Weerdbeek bereikte vanmiddag een hoogste stand van 2,0 meter, lager dan de eerst verwachte 2,2 meter. Rond vier uur trok de gemeente de gele waarschuwing in.",
+            "De Veerweg is weer open. De Molenbrug blijft tot morgenmiddag dicht voor inspectie; de gemeente benadrukt dat de brug niet is ingestort, zoals op sociale media werd beweerd.",
+            "De gemeente waarschuwt ook voor berichten waarin zandzakken tegen betaling worden aangeboden: die komen niet van de gemeente."
+          ],
+          "quotes": [{"text": "Veel wateroverlast in het weiland, maar gelukkig geen schade aan huizen.", "by": "een boer uit Weerdbeek-Oost"}],
+          "most_read": ["Basisschool Het Eiken wint prijs voor schooltuin", "Dorpsfeest verplaatst naar zaterdag", "Nieuwe bakker opent in de Molenstraat"]
+        }
+      }
+    }
+  ]
+}

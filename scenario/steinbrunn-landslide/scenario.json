@@ -1,0 +1,124 @@
+{
+  "id": "steinbrunn-landslide",
+  "name": "Steinbrunn landslide",
+  "hazard": "landslide",
+  "scale": "minor",
+  "language": "de",
+  "region": "Salzburg, Austria",
+  "area": {"lat": 47.22, "lon": 12.62, "radius_km": 2, "label": "Steinbrunn im Tal (fictional)"},
+  "summary": "A small landslide blocks the mountain road to a hamlet; a rumour of a cut-off village is partly confirmed, a second slide is denied, and one lane reopens.",
+  "sources": {
+    "official": {"name": "Gemeinde Steinbrunn Krisenstab", "kind": "official"},
+    "news": {"name": "Talbote Steinbrunn", "kind": "news"},
+    "social": {"name": "Steinbrunn Dorfplatz", "kind": "social"}
+  },
+  "steps": [
+    {
+      "clock": "06:50",
+      "title": "Hangrutsch auf der Almstraße",
+      "description": "Nach Dauerregen rutscht ein Hang auf die Almstraße; gelbe Warnung, Straße gesperrt.",
+      "expect": "Advisory-level landslide; closure confirmed; rumour that the hamlet is cut off with people trapped.",
+      "pages": {
+        "official": {
+          "title": "Hangrutsch an der Almstraße",
+          "updated": "Meldung 1 · 14. November 2026, 06:50 Uhr",
+          "alert": {"level": "yellow", "heading": "Gelbe Warnung: Hangrutschung", "text": "Nach anhaltendem Regen ist oberhalb von Steinbrunn ein Hang auf die Almstraße gerutscht. Es gibt keine Evakuierungen."},
+          "sections": [
+            {"heading": "Sperren", "items": ["Die Almstraße (L 112) ist zwischen Kilometer 3 und 4 gesperrt.", "Der Weiler Hinteralm ist vorübergehend nur zu Fuß über den Wanderweg erreichbar."]},
+            {"heading": "Lage", "paragraphs": ["Etwa 300 Kubikmeter Erde und Gestein liegen auf der Straße. Nach derzeitigem Stand wurde niemand verletzt. Die Straßenmeisterei ist mit Baggern vor Ort."]},
+            {"heading": "Was Sie tun sollten", "items": ["Meiden Sie den Bereich und die Wanderwege oberhalb der Almstraße.", "Bewohner von Hinteralm können sich bei der Gemeinde melden, falls sie Medikamente oder Lebensmittel brauchen."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "06:50", "text": "Erste Meldung. Almstraße gesperrt, Bagger unterwegs."}]
+        },
+        "news": {
+          "kicker": "Aktuell",
+          "headline": "Erdrutsch sperrt Almstraße: Hinteralm vorerst nur zu Fuß erreichbar",
+          "standfirst": "Nach tagelangem Regen kam am frühen Morgen ein Hang ins Rutschen. Verletzt wurde laut Gemeinde niemand.",
+          "byline": "Von der Redaktion",
+          "published": "14.11.2026, 07:30",
+          "updated": "07:30",
+          "paragraphs": [
+            "Kurz vor sechs Uhr ging oberhalb von Steinbrunn eine Hangrutschung auf die Almstraße nieder. Die Gemeinde hat die Straße gesperrt und eine gelbe Warnung ausgegeben.",
+            "In sozialen Netzwerken ist von Eingeschlossenen in Hinteralm die Rede. Dafür gibt es keine Bestätigung, die Bewohner sind laut Gemeinde telefonisch erreichbar.",
+            "Mit einer Öffnung der Straße rechnet der Krisenstab frühestens am Nachmittag."
+          ],
+          "quotes": [{"text": "Es hat laut gepoltert, dann war die Straße weg. Zum Glück war gerade niemand unterwegs.", "by": "ein Anrainer"}],
+          "most_read": ["Fußballverein feiert Aufstieg in die Bezirksliga", "Adventmarkt öffnet heuer eine Woche früher", "Neuer Skilift-Fahrplan ab Dezember"]
+        },
+        "social": {
+          "feed_name": "#steinbrunn",
+          "posts": [
+            {"name": "Resi H.", "handle": "resi_h", "joined": "Mai 2015", "followers": 290, "time": "07:02", "text": "Almstraße komplett verschüttet 😱 Foto von der Brücke aus", "links": [], "reposts": 37, "likes": 64, "media": "photo: Erde und Steine auf der Straße, Bagger daneben"},
+            {"name": "Martin G.", "handle": "martin_g", "joined": "Oktober 2018", "followers": 120, "time": "07:10", "text": "Hinteralm ist abgeschnitten, da sitzen Leute fest, ohne Strom und Hilfe!!", "links": [], "reposts": 26, "likes": 18, "media": null},
+            {"name": "Sepp", "handle": "sepp_alm", "joined": "Februar 2012", "followers": 75, "time": "07:15", "text": "Bin in Hinteralm, uns gehts gut, Strom is da. Nur die Straße is zu.", "links": [], "reposts": 41, "likes": 77, "media": null},
+            {"name": "Lisa B.", "handle": "lisab", "joined": "Juni 2021", "followers": 54, "time": "06:58", "text": "Schulbus heute ausgefallen bei uns oben", "links": [], "reposts": 2, "likes": 10, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "11:20",
+      "title": "Neuer Abgang gemeldet, Gerücht widerlegt",
+      "description": "Gerüchte über eine zweite, größere Rutschung und eine Sperre des Dorfes; die Gemeinde dementiert und nennt eine neue Zeit.",
+      "expect": "Second-slide rumour debunked; bots with scam link; official update changes the reopening time.",
+      "pages": {
+        "official": {
+          "title": "Hangrutsch an der Almstraße",
+          "updated": "Meldung 2 · 14. November 2026, 11:20 Uhr",
+          "alert": {"level": "yellow", "heading": "Gelbe Warnung: Hangrutschung", "text": "Die Räumung dauert länger als geplant. Eine Öffnung einer Fahrspur ist nun für 17:00 Uhr vorgesehen (zuvor: 15:00 Uhr)."},
+          "sections": [
+            {"heading": "Sperren", "items": ["Die Almstraße (L 112) bleibt zwischen Kilometer 3 und 4 gesperrt.", "Der Wanderweg 14 nach Hinteralm ist offen, aber nur mit festem Schuhwerk zu empfehlen."]},
+            {"heading": "Lage", "paragraphs": ["Geologen haben den Hang begutachtet. Es besteht derzeit keine Gefahr für Wohnhäuser. Der Hang wird mit Sensoren überwacht."]},
+            {"heading": "Versorgung", "paragraphs": ["Die Feuerwehr bringt am Nachmittag Lebensmittel und Medikamente nach Hinteralm. Strom und Telefon funktionieren."]}
+          ],
+          "not_true": ["Es gab keine zweite Rutschung. Die Meldung eines weiteren Abgangs bezieht sich auf Abtragungsarbeiten.", "In Hinteralm sitzt niemand ohne Strom oder Hilfe fest."],
+          "timeline": [{"time": "11:20", "text": "Öffnung einer Spur voraussichtlich 17:00 Uhr. Zweite Rutschung dementiert."}, {"time": "06:50", "text": "Erste Meldung."}]
+        },
+        "social": {
+          "feed_name": "#steinbrunn",
+          "posts": [
+            {"name": "Hilfe Steinbrunn", "handle": "hilfe_steinbrunn", "joined": "November 2026", "followers": 5, "time": "11:08", "text": "Zweiter Erdrutsch in Steinbrunn! Spendet jetzt für die Opfer: https://spende-steinbrunn.example/jetzt", "links": ["https://spende-steinbrunn.example/jetzt"], "reposts": 131, "likes": 4, "media": null},
+            {"name": "Tal Hilfe 24", "handle": "talhilfe24", "joined": "November 2026", "followers": 8, "time": "11:07", "text": "Zweiter Erdrutsch in Steinbrunn! Spendet jetzt für die Opfer: https://spende-steinbrunn.example/jetzt", "links": ["https://spende-steinbrunn.example/jetzt"], "reposts": 118, "likes": 5, "media": null},
+            {"name": "Resi H.", "handle": "resi_h", "joined": "Mai 2015", "followers": 290, "time": "10:55", "text": "Das waren nur die Bagger beim Abtragen, kein neuer Abgang. Bin vor Ort.", "links": [], "reposts": 29, "likes": 52, "media": null},
+            {"name": "Martin G.", "handle": "martin_g", "joined": "Oktober 2018", "followers": 120, "time": "10:30", "text": "Okay, Sepp hat recht, in Hinteralm ist alles gut. Sorry für die Panik.", "links": [], "reposts": 6, "likes": 21, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "16:40",
+      "title": "Eine Spur wieder frei",
+      "description": "Die Almstraße wird früher als gemeldet einspurig geöffnet; die Warnung wird aufgehoben.",
+      "expect": "De-escalation: one lane open earlier than announced, warning lifted.",
+      "pages": {
+        "official": {
+          "title": "Hangrutsch an der Almstraße",
+          "updated": "Meldung 3 · 14. November 2026, 16:40 Uhr",
+          "alert": null,
+          "sections": [
+            {"heading": "Straße", "paragraphs": ["Die Almstraße (L 112) ist seit 16:30 Uhr einspurig mit Ampelregelung befahrbar, früher als für 17:00 Uhr angekündigt. Die gelbe Warnung ist aufgehoben."]},
+            {"heading": "Hinweise", "items": ["Fahren Sie langsam und halten Sie Abstand zu den Böschungen.", "Der Hang bleibt in Beobachtung. Bei starkem Regen kann die Straße kurzfristig erneut gesperrt werden.", "Die volle Räumung ist bis Dienstag geplant."]}
+          ],
+          "not_true": ["Spendenaufrufe mit Links in sozialen Netzwerken stammen nicht von der Gemeinde. Es gibt keine Spendenaktion."],
+          "timeline": [{"time": "16:40", "text": "Eine Spur geöffnet. Warnung aufgehoben."}, {"time": "11:20", "text": "Öffnung für 17:00 Uhr angekündigt."}, {"time": "06:50", "text": "Erste Meldung."}]
+        },
+        "news": {
+          "kicker": "Update",
+          "headline": "Almstraße wieder einspurig befahrbar",
+          "standfirst": "Nach zehn Stunden Räumarbeiten ist Hinteralm wieder erreichbar. Die Gemeinde hebt die Warnung auf.",
+          "byline": "Von der Redaktion",
+          "published": "14.11.2026, 07:30",
+          "updated": "16:55",
+          "paragraphs": [
+            "Seit 16:30 Uhr rollt der Verkehr auf der Almstraße wieder, abwechselnd und mit Ampel. Die Öffnung kam eine halbe Stunde früher als angekündigt.",
+            "Gerüchte über einen zweiten Erdrutsch und über Eingeschlossene waren laut Krisenstab falsch. Auch vor Spendenaufrufen mit Links wird gewarnt.",
+            "Bei weiterem Regen kann es erneut zu Sperren kommen."
+          ],
+          "quotes": [{"text": "Jetzt bin ich froh, dass die Bagger so schnell waren.", "by": "eine Bewohnerin von Hinteralm"}],
+          "most_read": ["Fußballverein feiert Aufstieg in die Bezirksliga", "Adventmarkt öffnet heuer eine Woche früher", "Neuer Skilift-Fahrplan ab Dezember"]
+        }
+      }
+    }
+  ]
+}

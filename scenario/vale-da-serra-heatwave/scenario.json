@@ -1,0 +1,154 @@
+{
+  "id": "vale-da-serra-heatwave",
+  "name": "Vale da Serra heatwave",
+  "hazard": "heatwave",
+  "scale": "moderate",
+  "language": "pt",
+  "region": "Beira Baixa, Portugal",
+  "area": {"lat": 39.92, "lon": -7.55, "radius_km": 8, "label": "Vale da Serra (fictional)"},
+  "summary": "A heatwave brings an orange then red warning and water restrictions; a wildfire rumour is first false, then a small fire is confirmed, and a fake water-delivery link spreads.",
+  "sources": {
+    "official": {"name": "Câmara e Proteção Civil de Vale da Serra", "kind": "official"},
+    "news": {"name": "Jornal da Beira Serra", "kind": "news"},
+    "social": {"name": "Vale da Serra Comunidade", "kind": "social"}
+  },
+  "steps": [
+    {
+      "clock": "11:00",
+      "title": "Aviso laranja de calor",
+      "description": "Temperaturas de 40 graus; aviso laranja e restrições à rega.",
+      "expect": "Orange heat warning and first water restriction; rumour of a wildfire near the village.",
+      "pages": {
+        "official": {
+          "title": "Onda de calor em Vale da Serra",
+          "updated": "Boletim n.º 1 · 14 de novembro de 2026, 11:00",
+          "alert": {"level": "orange", "heading": "Aviso laranja: tempo muito quente", "text": "Prevêem-se temperaturas máximas de 40 °C nos próximos três dias. Risco elevado de incêndio rural e pressão sobre o abastecimento de água."},
+          "sections": [
+            {"heading": "Restrições de água", "items": ["Proibida a rega de jardins e a lavagem de carros entre as 8h00 e as 20h00.", "Piscinas privadas não podem ser enchidas.", "Os depósitos estão a 62% da capacidade."]},
+            {"heading": "Saúde", "items": ["Beba água com frequência, mesmo sem sede.", "Evite sair entre as 11h e as 17h.", "Atenção a idosos, crianças e animais."]},
+            {"heading": "Locais com ar condicionado", "paragraphs": ["O Pavilhão Municipal e a Biblioteca estão abertos das 10h às 20h como espaços de refúgio."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "11:00", "text": "Aviso laranja. Restrições de água em vigor."}]
+        },
+        "news": {
+          "kicker": "Atualidade",
+          "headline": "Vale da Serra prepara-se para três dias de calor extremo",
+          "standfirst": "A Proteção Civil emitiu aviso laranja e proibiu a rega diurna. Os depósitos de água estão a 62%.",
+          "byline": "Redação",
+          "published": "14/11/2026, 11:30",
+          "updated": "11:30",
+          "paragraphs": [
+            "Com máximas previstas de 40 graus, a autarquia de Vale da Serra declarou aviso laranja e restringiu o uso de água para rega e lavagem de carros.",
+            "Há quem fale nas redes sociais de um incêndio na serra junto ao Monte Alto. A Proteção Civil diz não ter registo de qualquer ocorrência.",
+            "O Pavilhão Municipal fica aberto como abrigo climático."
+          ],
+          "quotes": [{"text": "Em novembro nunca vi isto. A terra está seca como em agosto.", "by": "agricultor de Vale da Serra"}],
+          "most_read": ["Feira do queijo regressa no fim de semana", "Escola de música abre inscrições", "Obras na Rua Direita terminam em dezembro"]
+        },
+        "social": {
+          "feed_name": "#valedaserra",
+          "posts": [
+            {"name": "Rui P.", "handle": "ruip", "joined": "Março 2015", "followers": 300, "time": "11:12", "text": "Já vai nos 38 graus às 11h!! Impossível trabalhar na obra 🥵", "links": [], "reposts": 14, "likes": 40, "media": null},
+            {"name": "Inês", "handle": "ines_m", "joined": "Maio 2018", "followers": 150, "time": "11:20", "text": "Vi fumo perto do Monte Alto, deve ser incêndio!!!", "links": [], "reposts": 52, "likes": 25, "media": null},
+            {"name": "D. Rosa", "handle": "dona_rosa", "joined": "Janeiro 2013", "followers": 80, "time": "11:08", "text": "Quem me diz até que horas posso regar a horta? Já li a regra mas não percebi", "links": [], "reposts": 2, "likes": 4, "media": null},
+            {"name": "Paulo C.", "handle": "pauloc", "joined": "Agosto 2016", "followers": 210, "time": "11:15", "text": "Pavilhão aberto com ar condicionado, levem os idosos 👍", "links": [], "reposts": 33, "likes": 58, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "14:30",
+      "title": "Aviso vermelho e restrições mais duras",
+      "description": "Sobe para aviso vermelho com 43 graus; água só para uso essencial; boato de incêndio é desmentido.",
+      "expect": "Escalation to red; official update changes water numbers; fire rumour debunked; bots with scam water link.",
+      "pages": {
+        "official": {
+          "title": "Onda de calor em Vale da Serra",
+          "updated": "Boletim n.º 2 · 14 de novembro de 2026, 14:30",
+          "alert": {"level": "red", "heading": "Aviso vermelho: tempo muito quente", "text": "Foram registados 43 °C. Os depósitos baixaram para 48%. A água fica limitada a usos essenciais até nova ordem."},
+          "sections": [
+            {"heading": "Restrições de água", "items": ["Proibida qualquer rega e lavagem de veículos, durante as 24 horas.", "Cortes de água programados das 23h00 às 6h00 em Monte Alto e Ribeira.", "A distribuição de água engarrafada é feita no Pavilhão Municipal."]},
+            {"heading": "Saúde", "items": ["Evite qualquer esforço ao ar livre.", "Em caso de tonturas ou febre alta, ligue 112."]},
+            {"heading": "Incêndios", "paragraphs": ["O risco máximo de incêndio rural mantém-se. É proibido fazer lume ou queimadas."]}
+          ],
+          "not_true": ["Não há registo de qualquer incêndio na serra junto ao Monte Alto. O fumo visto resultava de uma queima de restos de poda que já foi apagada.", "A Câmara não vai cortar a água durante o dia."],
+          "timeline": [{"time": "14:30", "text": "Aviso vermelho. Depósitos a 48%. Cortes noturnos programados."}, {"time": "11:00", "text": "Aviso laranja."}]
+        },
+        "social": {
+          "feed_name": "#valedaserra",
+          "posts": [
+            {"name": "Água Já VS", "handle": "agua_ja_vs", "joined": "Novembro 2026", "followers": 3, "time": "14:12", "text": "Sem água em Vale da Serra? Entrega urgente de bidões em 1h: https://agua-urgente.example/serra", "links": ["https://agua-urgente.example/serra"], "reposts": 190, "likes": 5, "media": null},
+            {"name": "Entrega Serra", "handle": "entrega_serra", "joined": "Novembro 2026", "followers": 6, "time": "14:11", "text": "Sem água em Vale da Serra? Entrega urgente de bidões em 1h: https://agua-urgente.example/serra", "links": ["https://agua-urgente.example/serra"], "reposts": 157, "likes": 2, "media": null},
+            {"name": "Inês", "handle": "ines_m", "joined": "Maio 2018", "followers": 150, "time": "13:50", "text": "Afinal o fumo era de uma queima de ramos, já apagaram. Desculpem o alarme 🙏", "links": [], "reposts": 9, "likes": 31, "media": null},
+            {"name": "Rui P.", "handle": "ruip", "joined": "Março 2015", "followers": 300, "time": "14:20", "text": "43 graus e vão cortar a água de noite?? Com que cabeça", "links": [], "reposts": 28, "likes": 33, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "17:40",
+      "title": "Incêndio confirmado na encosta sul",
+      "description": "Um foco de incêndio real é combatido perto de Ribeira; sem evacuação; um post diz que já refrescou e é seguro sair.",
+      "expect": "Fire reported by officials; reassurance post held back; news relays an unconfirmed claim of evacuation.",
+      "pages": {
+        "official": {
+          "title": "Onda de calor em Vale da Serra",
+          "updated": "Boletim n.º 3 · 14 de novembro de 2026, 17:40",
+          "alert": {"level": "red", "heading": "Aviso vermelho: calor e incêndio rural", "text": "Às 16:55 deflagrou um incêndio rural na encosta sul, a 1,5 km de Ribeira. Estão no local 60 bombeiros e 2 meios aéreos. Não há ordem de evacuação."},
+          "sections": [
+            {"heading": "Incêndio", "paragraphs": ["O fogo tem cerca de 12 hectares. Não ameaça habitações neste momento. A estrada municipal 1021 está cortada entre Ribeira e o Cruzeiro."]},
+            {"heading": "Se vive em Ribeira", "items": ["Prepare uma mochila de emergência e fique atento às notificações.", "Mantenha os acessos livres para os bombeiros."]},
+            {"heading": "Calor", "items": ["As máximas continuam acima de 40 °C. Não vá para a rua, mesmo ao fim da tarde."]}
+          ],
+          "not_true": ["Não foi dada ordem de evacuação de Ribeira nem de Monte Alto."],
+          "timeline": [{"time": "17:40", "text": "Incêndio de 12 ha na encosta sul. Sem evacuação."}, {"time": "14:30", "text": "Aviso vermelho."}, {"time": "11:00", "text": "Aviso laranja."}]
+        },
+        "news": {
+          "kicker": "Em atualização",
+          "headline": "Incêndio deflagra perto de Ribeira em plena onda de calor",
+          "standfirst": "Mais de 60 bombeiros combatem um fogo de 12 hectares. Não há evacuações.",
+          "byline": "Redação",
+          "published": "14/11/2026, 11:30",
+          "updated": "17:55",
+          "paragraphs": [
+            "O incêndio rural na encosta sul de Vale da Serra, que começou às 16h55, ocupava ao fim da tarde cerca de 12 hectares. A Proteção Civil confirma não haver risco para as casas.",
+            "Nas redes sociais, circulam mensagens a dizer que Ribeira foi evacuada. A Proteção Civil nega essa informação.",
+            "As temperaturas mantêm-se acima dos 40 graus e o aviso vermelho continua."
+          ],
+          "quotes": [{"text": "O fumo vê-se de longe, mas por agora o fogo vai pelo monte, não pelas casas.", "by": "residente em Ribeira"}],
+          "most_read": ["Feira do queijo regressa no fim de semana", "Escola de música abre inscrições", "Obras na Rua Direita terminam em dezembro"]
+        },
+        "social": {
+          "feed_name": "#valedaserra",
+          "posts": [
+            {"name": "Paulo C.", "handle": "pauloc", "joined": "Agosto 2016", "followers": 210, "time": "17:30", "text": "Já está mais fresco e o fogo está controlado, podem sair e ir passear 👍", "links": [], "reposts": 61, "likes": 70, "media": null},
+            {"name": "Inês", "handle": "ines_m", "joined": "Maio 2018", "followers": 150, "time": "17:25", "text": "Agora é a sério: fogo mesmo atrás de Ribeira, helicópteros a passar. Foto", "links": [], "reposts": 130, "likes": 180, "media": "photo: coluna de fumo sobre a encosta"},
+            {"name": "Luís", "handle": "luis_r", "joined": "Junho 2019", "followers": 95, "time": "17:35", "text": "Disseram que Ribeira vai ser evacuada, estou a fazer as malas", "links": [], "reposts": 74, "likes": 20, "media": null},
+            {"name": "D. Rosa", "handle": "dona_rosa", "joined": "Janeiro 2013", "followers": 80, "time": "17:20", "text": "Os bombeiros fecharam a estrada para o Cruzeiro", "links": [], "reposts": 12, "likes": 18, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "21:15",
+      "title": "Incêndio dominado, calor a abrandar",
+      "description": "Incêndio dominado, aviso baixa para laranja, restrições de água mantêm-se.",
+      "expect": "De-escalation: fire contained, warning lowered, restrictions remain.",
+      "pages": {
+        "official": {
+          "title": "Onda de calor em Vale da Serra",
+          "updated": "Boletim n.º 4 · 14 de novembro de 2026, 21:15",
+          "alert": {"level": "orange", "heading": "Aviso laranja: tempo muito quente", "text": "O incêndio foi dominado às 20h30 após 28 hectares ardidos. O aviso baixa para laranja. As restrições de água mantêm-se."},
+          "sections": [
+            {"heading": "Incêndio", "paragraphs": ["Está dominado e em fase de rescaldo. A estrada 1021 reabre amanhã às 8h00. Ninguém ficou ferido com gravidade."]},
+            {"heading": "Água", "items": ["Depósitos a 45%.", "Rega e lavagens continuam proibidas.", "Cortes noturnos mantêm-se das 23h00 às 6h00 em Monte Alto e Ribeira."]},
+            {"heading": "Calor", "paragraphs": ["As máximas de amanhã serão de 37 °C. O Pavilhão Municipal mantém-se aberto até às 20h."]}
+          ],
+          "not_true": ["Os links que prometem entrega de água grátis não são da Câmara. Use apenas o Pavilhão Municipal."],
+          "timeline": [{"time": "21:15", "text": "Incêndio dominado. Aviso laranja."}, {"time": "17:40", "text": "Incêndio de 12 ha."}, {"time": "14:30", "text": "Aviso vermelho."}, {"time": "11:00", "text": "Aviso laranja."}]
+        }
+      }
+    }
+  ]
+}

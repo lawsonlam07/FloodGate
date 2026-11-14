@@ -1,0 +1,127 @@
+{
+  "id": "granvik-storm-powercut",
+  "name": "Granvik storm power cut",
+  "hazard": "power_outage",
+  "scale": "minor",
+  "language": "sv",
+  "region": "Dalarna, Sweden",
+  "area": {"lat": 60.05, "lon": 14.85, "radius_km": 5, "label": "Granvik (fictional)"},
+  "summary": "A storm fells trees and cuts power to a few villages; the restoration time slips, a carbon-monoxide warning is confirmed and a generator scam link spreads.",
+  "sources": {
+    "official": {"name": "Granvik Kommun och Elnät Granvik", "kind": "official"},
+    "news": {"name": "Granviks Tidning", "kind": "news"},
+    "social": {"name": "Granvik Bygdeforum", "kind": "social"}
+  },
+  "steps": [
+    {
+      "clock": "07:40",
+      "title": "Stormen fäller träd, strömmen går",
+      "description": "Gul varning för vind; strömavbrott i tre byar och en väg avstängd.",
+      "expect": "Advisory-level storm effects; outage confirmed; rumour that the whole municipality is dark.",
+      "pages": {
+        "official": {
+          "title": "Storm och strömavbrott i Granvik",
+          "updated": "Information 1 · 14 november 2026, 07:40",
+          "alert": {"level": "yellow", "heading": "Gul varning: kraftig vind", "text": "Kraftiga vindbyar har fällt träd över ledningar. Cirka 1 200 hushåll i Östanvik, Sjöbacken och Lillmon saknar ström. Ingen evakuering."},
+          "sections": [
+            {"heading": "Strömavbrott", "paragraphs": ["Elnät Granvik uppskattar att strömmen är tillbaka senast kl. 13:00. Arbetet försvåras av nedfallna träd."]},
+            {"heading": "Vägar", "items": ["Länsväg 311 är avstängd mellan Östanvik och Sjöbacken på grund av nedfallna träd.", "Följ skyltad omledning via Skogsvägen."]},
+            {"heading": "Så här gör du", "items": ["Håll avstånd till nedfallna elledningar, anta att de är strömförande.", "Anmäl strömavbrott till Elnät Granvik, ring inte 112 om ingen är i fara.", "Ha ficklampa och varma kläder tillgängliga."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "07:40", "text": "Första information. Gul varning för vind."}]
+        },
+        "news": {
+          "kicker": "Just nu",
+          "headline": "Strömlöst i tre byar efter nattens storm",
+          "standfirst": "Omkring 1 200 hushåll saknar ström. Länsväg 311 är avstängd.",
+          "byline": "Granviks Tidnings redaktion",
+          "published": "14 nov 2026, 08:05",
+          "updated": "08:05",
+          "paragraphs": [
+            "Under natten drog en kraftig storm över Granvik. Träd föll över elledningar vid Östanvik, Sjöbacken och Lillmon, och hushållen där är utan ström sedan klockan fem.",
+            "På sociala medier hävdas att hela kommunen är strömlös. Det stämmer inte enligt Elnät Granvik, som endast nämner de tre byarna.",
+            "Länsväg 311 är avstängd för trafik. Elnätet räknar med att strömmen är tillbaka vid lunchtid."
+          ],
+          "quotes": [{"text": "Vi eldar i kakelugnen och dricker kaffe på gasolköket, det är ganska mysigt.", "by": "en boende i Lillmon"}],
+          "most_read": ["Ishockeylaget vann hemmamatchen med 4-2", "Nytt café öppnar vid torget", "Skolans julmarknad flyttas till fredag"]
+        },
+        "social": {
+          "feed_name": "#granvik",
+          "posts": [
+            {"name": "Lena S.", "handle": "lena_s", "joined": "April 2016", "followers": 260, "time": "07:52", "text": "Hela Granvik är utan ström!! Inget fungerar 😡", "links": [], "reposts": 16, "likes": 20, "media": null},
+            {"name": "Anders", "handle": "anders_lm", "joined": "Juni 2013", "followers": 140, "time": "07:48", "text": "Stora granen över 311 vid Östanvik, vägen är helt blockerad. Foto.", "links": [], "reposts": 33, "likes": 45, "media": "photo: stor gran över vägen"},
+            {"name": "Maja E.", "handle": "majae", "joined": "Oktober 2020", "followers": 75, "time": "07:44", "text": "ström borta i Sjöbacken sen 5. Någon som vet när den kommer tillbaka?", "links": [], "reposts": 4, "likes": 8, "media": null},
+            {"name": "Olle B.", "handle": "olleb", "joined": "Mars 2011", "followers": 322, "time": "07:42", "text": "Hemma i Granvik centrum har vi ström som vanligt, bara byarna ute.", "links": [], "reposts": 9, "likes": 17, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "12:30",
+      "title": "Ny tid för återställning, bluff och varning för kolmonoxid",
+      "description": "Elnät Granvik flyttar fram tiden till 18:00. Falska konton sprider en länk till generatorer. Kommunen varnar för kolmonoxid.",
+      "expect": "Official update changes the restoration deadline; scam generator link flagged; a risky 'power is back' reassurance post held back.",
+      "pages": {
+        "official": {
+          "title": "Storm och strömavbrott i Granvik",
+          "updated": "Information 2 · 14 november 2026, 12:30",
+          "alert": {"level": "yellow", "heading": "Gul varning: strömavbrott", "text": "Avbrottet blir längre än beräknat. Strömmen väntas nu vara tillbaka senast kl. 18:00 (tidigare 13:00)."},
+          "sections": [
+            {"heading": "Strömavbrott", "paragraphs": ["Ytterligare ett träd har fallit över en huvudledning vid Lillmon. Cirka 850 hushåll saknar fortfarande ström: Östanvik är åter i drift, Sjöbacken och Lillmon väntar."]},
+            {"heading": "Värmestuga", "paragraphs": ["Bygdegården i Sjöbacken är öppen som värmestuga till 20:00, med kaffe och möjlighet att ladda telefoner."]},
+            {"heading": "Säkerhet", "items": ["Använd aldrig grill, gasolkamin eller generator inomhus: risk för kolmonoxidförgiftning.", "Generatorer ska stå utomhus, minst fem meter från fönster."]},
+            {"heading": "Vägar", "items": ["Länsväg 311 öppnades 11:15 i ena körfältet. Kör sakta."]}
+          ],
+          "not_true": ["Uppgifterna om att hela kommunen saknar ström stämmer inte.", "Kommunen delar inte ut generatorer via länkar på sociala medier."],
+          "timeline": [{"time": "12:30", "text": "Ny tid: ström tillbaka senast 18:00. Värmestuga öppnad."}, {"time": "07:40", "text": "Första information. Gul varning för vind."}]
+        },
+        "social": {
+          "feed_name": "#granvik",
+          "posts": [
+            {"name": "Generator Nu", "handle": "generator_nu_se", "joined": "November 2026", "followers": 5, "time": "12:18", "text": "Strömlös i Granvik? Gratis generator till alla drabbade, anmäl dig här: https://gratis-generator.example/granvik", "links": ["https://gratis-generator.example/granvik"], "reposts": 203, "likes": 6, "media": null},
+            {"name": "Hjälp Granvik", "handle": "hjalp_granvik99", "joined": "November 2026", "followers": 2, "time": "12:17", "text": "Strömlös i Granvik? Gratis generator till alla drabbade, anmäl dig här: https://gratis-generator.example/granvik", "links": ["https://gratis-generator.example/granvik"], "reposts": 175, "likes": 3, "media": null},
+            {"name": "Olle B.", "handle": "olleb", "joined": "Mars 2011", "followers": 322, "time": "12:05", "text": "Strömmen är tillbaka i Lillmon nu, så ni kan köra igång allt igen!", "links": [], "reposts": 24, "likes": 29, "media": null},
+            {"name": "Maja E.", "handle": "majae", "joined": "Oktober 2020", "followers": 75, "time": "12:10", "text": "Värmestugan i Sjöbacken är öppen, kaffe och laddning. Tack bygdegården 🙏", "links": [], "reposts": 38, "likes": 70, "media": "photo: bygdegård med öppna dörrar"},
+            {"name": "Anders", "handle": "anders_lm", "joined": "Juni 2013", "followers": 140, "time": "11:50", "text": "Aggregat inne i garaget hos grannen, kolmonoxid är på riktigt farligt, kör ute!", "links": [], "reposts": 52, "likes": 61, "media": null}
+          ]
+        }
+      }
+    },
+    {
+      "clock": "17:10",
+      "title": "Strömmen är tillbaka",
+      "description": "Elnät Granvik återställer strömmen före utsatt tid; varningen hävs.",
+      "expect": "De-escalation: restoration confirmed ahead of the 18:00 deadline.",
+      "pages": {
+        "official": {
+          "title": "Storm och strömavbrott i Granvik",
+          "updated": "Information 3 · 14 november 2026, 17:10",
+          "alert": null,
+          "sections": [
+            {"heading": "Läget", "paragraphs": ["Strömmen är åter i alla hushåll sedan kl. 16:50, före den utsatta tiden 18:00. Gul varning är hävd."]},
+            {"heading": "Vägar och värmestuga", "items": ["Länsväg 311 är öppen i båda körfälten.", "Värmestugan i Sjöbacken stänger kl. 19:00."]},
+            {"heading": "Efteråt", "items": ["Kontrollera frysen och kylskåpet.", "Anmäl nedfallna träd på privat mark till fastighetsägaren, på kommunal mark till kommunen."]}
+          ],
+          "not_true": [],
+          "timeline": [{"time": "17:10", "text": "Ström återställd. Varning hävd."}, {"time": "12:30", "text": "Ny tid: ström tillbaka senast 18:00."}, {"time": "07:40", "text": "Första information."}]
+        },
+        "news": {
+          "kicker": "Uppdatering",
+          "headline": "Strömmen tillbaka i byarna efter stormen",
+          "standfirst": "Elnät Granvik klarade av reparationerna före utsatt tid. Varningen är hävd.",
+          "byline": "Granviks Tidnings redaktion",
+          "published": "14 nov 2026, 08:05",
+          "updated": "17:25",
+          "paragraphs": [
+            "Klockan 16:50 var strömmen tillbaka för de sista hushållen i Lillmon, enligt Elnät Granvik. Beskedet kom en timme före den senast utsatta tiden.",
+            "Kommunen varnar för bluffinlägg som lovar gratis generatorer via länkar. Inga sådana erbjudanden finns.",
+            "Värmestugan i Sjöbacken stänger i kväll."
+          ],
+          "quotes": [{"text": "Skönt att få på lamporna igen. Tack till dem som jobbade ute i vinden.", "by": "en boende i Sjöbacken"}],
+          "most_read": ["Ishockeylaget vann hemmamatchen med 4-2", "Nytt café öppnar vid torget", "Skolans julmarknad flyttas till fredag"]
+        }
+      }
+    }
+  ]
+}
