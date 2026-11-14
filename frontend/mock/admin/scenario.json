@@ -1,0 +1,88 @@
+{
+ "scenario": "halvik",
+ "current_step": 3,
+ "steps": [
+  {
+   "n": 0,
+   "clock": "10:30",
+   "title": "Before the storm",
+   "description": "Calm. Rescue Services page shows the weekend forecast only; quiet news and social feeds.",
+   "changes": [
+    "rescue",
+    "herald",
+    "board"
+   ]
+  },
+  {
+   "n": 1,
+   "clock": "11:10",
+   "title": "Orange storm surge warning",
+   "description": "Rescue Services issues an orange warning; the Herald writes a short preview story.",
+   "changes": [
+    "rescue",
+    "herald"
+   ]
+  },
+  {
+   "n": 2,
+   "clock": "12:20",
+   "title": "Water on Coast Road",
+   "description": "First eyewitness posts of flooding; a new account claims Harbour Bridge has collapsed.",
+   "changes": [
+    "board"
+   ]
+  },
+  {
+   "n": 3,
+   "clock": "13:45",
+   "title": "Red warning, bridge closed",
+   "description": "Warning raised to red, Harbour Bridge closed as a precaution. The collapse rumour spreads (212 reposts); the Herald relays it as unverified.",
+   "changes": [
+    "rescue",
+    "herald",
+    "board"
+   ]
+  },
+  {
+   "n": 4,
+   "clock": "14:20",
+   "title": "Saltmarsh evacuation, rumour debunked",
+   "description": "Update no. 4: Saltmarsh south of Ferry Street must leave by 16:00; Rescue Services says the bridge collapse is false.",
+   "changes": [
+    "rescue",
+    "herald"
+   ]
+  },
+  {
+   "n": 5,
+   "clock": "15:30",
+   "title": "Premature all-clear",
+   "description": "Residents post that the water is going down. Rescue Services: no all-clear has been given.",
+   "changes": [
+    "board",
+    "rescue"
+   ]
+  }
+ ],
+ "pages": [
+  {
+   "id": "rescue",
+   "name": "Halvik Rescue Services",
+   "url": "/sites/rescue/"
+  },
+  {
+   "id": "herald",
+   "name": "The Halvik Herald",
+   "url": "/sites/herald/storm-surge-live.html"
+  },
+  {
+   "id": "board",
+   "name": "Halvik Board",
+   "url": "/sites/board/"
+  }
+ ],
+ "autoplay": {
+  "running": false,
+  "interval_s": 60
+ }
+}

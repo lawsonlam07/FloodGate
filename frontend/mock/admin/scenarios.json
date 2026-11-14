@@ -1,0 +1,1315 @@
+{
+ "scenarios": [
+  {
+   "id": "halvik",
+   "name": "Halvik storm surge",
+   "hazard": "storm_surge",
+   "scale": "major",
+   "language": "en",
+   "region": "Bothnian Sea coast, Finland",
+   "summary": "A storm surge hits a fictional coastal town; a bridge-collapse rumour and a scam evacuation post spread before officials debunk them.",
+   "incident_id": "halvik-storm-surge",
+   "area": {
+    "lat": 61.95,
+    "lon": 21.47,
+    "radius_km": 6,
+    "label": "Halvik (fictional)"
+   },
+   "steps": [
+    {
+     "n": 0,
+     "clock": "10:30",
+     "title": "Before the storm",
+     "description": "A normal Saturday: no warnings, a festival story, everyday posts. No incident should appear.",
+     "expect": "",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 1,
+     "clock": "11:10",
+     "title": "Orange storm surge warning",
+     "description": "Rescue Services issue an orange warning; the Herald reports it; people notice the wind and waves.",
+     "expect": "",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 2,
+     "clock": "12:45",
+     "title": "Raised to red, first rumour",
+     "description": "The warning goes red. On social media someone asks whether Saltmarsh is being evacuated (unconfirmed).",
+     "expect": "",
+     "changes": [
+      "official",
+      "social"
+     ]
+    },
+    {
+     "n": 3,
+     "clock": "13:45",
+     "title": "Bridge closed, Saltmarsh evacuated",
+     "description": "Rescue Services close Harbour Bridge and order part of Saltmarsh to leave, confirming the rumour. A photo shows the bridge closed but intact.",
+     "expect": "",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 4,
+     "clock": "14:28",
+     "title": "Rumour swarm",
+     "description": "Near-identical bot posts claim the bridge collapsed (212 reposts), a scam post says all of Halvik is being evacuated, and a resident says the water is going down. The Herald relays the collapse claim as unconfirmed. No official word yet.",
+     "expect": "",
+     "changes": [
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 5,
+     "clock": "14:31",
+     "title": "Official debunk",
+     "description": "Rescue Services publish update 4 with a 'Not true' section; the Herald adds the official denial.",
+     "expect": "",
+     "changes": [
+      "official",
+      "news"
+     ]
+    },
+    {
+     "n": 6,
+     "clock": "15:05",
+     "title": "Evacuation extended",
+     "description": "Update 5 extends the evacuation to Old Harbour and debunks 'all of Halvik' and 'water going down'.",
+     "expect": "",
+     "changes": [
+      "official"
+     ]
+    }
+   ],
+   "pages": [
+    {
+     "id": "official",
+     "source_id": "halvik-rescue",
+     "name": "Halvik Rescue Services",
+     "kind": "official",
+     "url": "/sites/rescue/"
+    },
+    {
+     "id": "news",
+     "source_id": "halvik-herald",
+     "name": "The Halvik Herald",
+     "kind": "news",
+     "url": "/sites/herald/storm-surge-live.html"
+    },
+    {
+     "id": "social",
+     "source_id": "halvik-board",
+     "name": "Halvik Board",
+     "kind": "social",
+     "url": "/sites/board/"
+    }
+   ],
+   "current_step": 3,
+   "autoplay": {
+    "running": false,
+    "interval_s": 60
+   },
+   "pipeline": {
+    "halvik-rescue": {
+     "source_id": "halvik-rescue",
+     "source_name": "Halvik Rescue Services",
+     "incident_id": "halvik-storm-surge",
+     "stage": "done",
+     "elapsed_ms": 21400,
+     "detail": "2 status changes, 3 alerts",
+     "at": "2026-11-14T10:12:00Z"
+    },
+    "halvik-herald": {
+     "source_id": "halvik-herald",
+     "source_name": "The Halvik Herald",
+     "incident_id": "halvik-storm-surge",
+     "stage": "done",
+     "elapsed_ms": 18800,
+     "detail": "1 status change",
+     "at": "2026-11-14T10:12:00Z"
+    },
+    "halvik-board": {
+     "source_id": "halvik-board",
+     "source_name": "Halvik Board",
+     "incident_id": "halvik-storm-surge",
+     "stage": "done",
+     "elapsed_ms": 16200,
+     "detail": "no status changes",
+     "at": "2026-11-14T10:12:00Z"
+    }
+   }
+  },
+  {
+   "id": "brodek-town-flood",
+   "name": "Brodek river flood",
+   "hazard": "flood",
+   "scale": "moderate",
+   "language": "cs",
+   "region": "South Bohemia, Czech Republic",
+   "summary": "A river floods a town centre; the flood level is raised, a dam-break rumour is denied, a scam donation link spreads and a premature 'water is falling' post is risky.",
+   "incident_id": "brodek-town-flood",
+   "area": {
+    "lat": 49.28,
+    "lon": 14.72,
+    "radius_km": 5,
+    "label": "Brodek nad Lužnicí (fictional)"
+   },
+   "steps": [
+    {
+     "n": 0,
+     "clock": "07:30",
+     "title": "Řeka stoupá, druhý stupeň povodňové aktivity",
+     "description": "Po vydatných deštích stoupá řeka Lužnice; oranžové varování a uzavření nábřeží.",
+     "expect": "Orange flood warning; rumours of a dam break upstream.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 1,
+     "clock": "10:50",
+     "title": "Třetí stupeň, evakuace části centra",
+     "description": "Hladina je vyšší, než se čekalo; červené varování a povinná evakuace ulic u řeky.",
+     "expect": "Escalation to red; evacuation ordered; official corrects the peak figure; dam break debunked.",
+     "changes": [
+      "official",
+      "social"
+     ]
+    },
+    {
+     "n": 2,
+     "clock": "13:10",
+     "title": "Voda klesá? Zatím ne",
+     "description": "Příspěvek tvrdí, že voda klesá a lze se vrátit; krizový štáb to vyvrací a prodlužuje evakuaci.",
+     "expect": "Risky reassurance held back; news relays the unverified claim; official update extends zone.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 3,
+     "clock": "18:20",
+     "title": "Kulminace překonána",
+     "description": "Voda po kulminaci klesá; evakuace trvá, varování sníženo na oranžové.",
+     "expect": "De-escalation: peak passed, warning lowered, evacuation continues overnight.",
+     "changes": [
+      "official"
+     ]
+    }
+   ],
+   "pages": [
+    {
+     "id": "official",
+     "source_id": "brodek-town-flood-official",
+     "name": "Městský úřad a krizový štáb Brodek",
+     "kind": "official",
+     "url": "/sites/brodek-town-flood/official/"
+    },
+    {
+     "id": "news",
+     "source_id": "brodek-town-flood-news",
+     "name": "Brodecký zpravodaj",
+     "kind": "news",
+     "url": "/sites/brodek-town-flood/news/"
+    },
+    {
+     "id": "social",
+     "source_id": "brodek-town-flood-social",
+     "name": "Brodek Fórum",
+     "kind": "social",
+     "url": "/sites/brodek-town-flood/social/"
+    }
+   ],
+   "current_step": 2,
+   "autoplay": {
+    "running": false,
+    "interval_s": 60
+   },
+   "pipeline": {}
+  },
+  {
+   "id": "granvik-storm-powercut",
+   "name": "Granvik storm power cut",
+   "hazard": "power_outage",
+   "scale": "minor",
+   "language": "sv",
+   "region": "Dalarna, Sweden",
+   "summary": "A storm fells trees and cuts power to a few villages; the restoration time slips, a carbon-monoxide warning is confirmed and a generator scam link spreads.",
+   "incident_id": "granvik-storm-powercut",
+   "area": {
+    "lat": 60.05,
+    "lon": 14.85,
+    "radius_km": 5,
+    "label": "Granvik (fictional)"
+   },
+   "steps": [
+    {
+     "n": 0,
+     "clock": "07:40",
+     "title": "Stormen fäller träd, strömmen går",
+     "description": "Gul varning för vind; strömavbrott i tre byar och en väg avstängd.",
+     "expect": "Advisory-level storm effects; outage confirmed; rumour that the whole municipality is dark.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 1,
+     "clock": "12:30",
+     "title": "Ny tid för återställning, bluff och varning för kolmonoxid",
+     "description": "Elnät Granvik flyttar fram tiden till 18:00. Falska konton sprider en länk till generatorer. Kommunen varnar för kolmonoxid.",
+     "expect": "Official update changes the restoration deadline; scam generator link flagged; a risky 'power is back' reassurance post held back.",
+     "changes": [
+      "official",
+      "social"
+     ]
+    },
+    {
+     "n": 2,
+     "clock": "17:10",
+     "title": "Strömmen är tillbaka",
+     "description": "Elnät Granvik återställer strömmen före utsatt tid; varningen hävs.",
+     "expect": "De-escalation: restoration confirmed ahead of the 18:00 deadline.",
+     "changes": [
+      "official",
+      "news"
+     ]
+    }
+   ],
+   "pages": [
+    {
+     "id": "official",
+     "source_id": "granvik-storm-powercut-official",
+     "name": "Granvik Kommun och Elnät Granvik",
+     "kind": "official",
+     "url": "/sites/granvik-storm-powercut/official/"
+    },
+    {
+     "id": "news",
+     "source_id": "granvik-storm-powercut-news",
+     "name": "Granviks Tidning",
+     "kind": "news",
+     "url": "/sites/granvik-storm-powercut/news/"
+    },
+    {
+     "id": "social",
+     "source_id": "granvik-storm-powercut-social",
+     "name": "Granvik Bygdeforum",
+     "kind": "social",
+     "url": "/sites/granvik-storm-powercut/social/"
+    }
+   ],
+   "current_step": -1,
+   "autoplay": {
+    "running": false,
+    "interval_s": 60
+   },
+   "pipeline": {}
+  },
+  {
+   "id": "haulchin-chemical-leak",
+   "name": "Haulchin chemical leak",
+   "hazard": "hazmat",
+   "scale": "moderate",
+   "language": "fr",
+   "region": "Wallonia, Belgium",
+   "summary": "A leak at a chemical depot triggers a shelter-in-place order; the zone is enlarged, an explosion rumour is denied, a false 'safe to go out' post spreads and the order is lifted in stages.",
+   "incident_id": "haulchin-chemical-leak",
+   "area": {
+    "lat": 50.38,
+    "lon": 4.55,
+    "radius_km": 5,
+    "label": "Haulchin-sur-Sambre (fictional)"
+   },
+   "steps": [
+    {
+     "n": 0,
+     "clock": "09:35",
+     "title": "Fuite dans un dépôt chimique",
+     "description": "Une odeur âcre signalée près de la zone industrielle ; le centre de crise ordonne le confinement dans un rayon de 2 km.",
+     "expect": "Shelter-in-place order confirmed (orange); rumours of an explosion appear on social media.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 1,
+     "clock": "11:15",
+     "title": "Zone élargie, démenti de l'explosion",
+     "description": "Le rayon passe de 2 à 3 km avec le vent ; démenti de l'explosion ; un faux compte annonce que l'on peut sortir.",
+     "expect": "Official update changes the radius number; explosion rumour debunked; reassurance post held back.",
+     "changes": [
+      "official",
+      "social"
+     ]
+    },
+    {
+     "n": 2,
+     "clock": "13:30",
+     "title": "Levée partielle du confinement",
+     "description": "Les mesures sont rassurantes : le confinement est levé pour le Centre-Gare et Marcelle, maintenu aux Prés et au Pont-Rouge.",
+     "expect": "Partial de-escalation, correct information contrasted with earlier fake 'all clear'.",
+     "changes": [
+      "official",
+      "news"
+     ]
+    },
+    {
+     "n": 3,
+     "clock": "15:45",
+     "title": "Fin du confinement",
+     "description": "Le confinement est entièrement levé ; la N 90 rouvre le lendemain.",
+     "expect": "All-clear for the shelter-in-place order.",
+     "changes": [
+      "official"
+     ]
+    }
+   ],
+   "pages": [
+    {
+     "id": "official",
+     "source_id": "haulchin-chemical-leak-official",
+     "name": "Centre de Crise de Haulchin",
+     "kind": "official",
+     "url": "/sites/haulchin-chemical-leak/official/"
+    },
+    {
+     "id": "news",
+     "source_id": "haulchin-chemical-leak-news",
+     "name": "Le Courrier des Prés",
+     "kind": "news",
+     "url": "/sites/haulchin-chemical-leak/news/"
+    },
+    {
+     "id": "social",
+     "source_id": "haulchin-chemical-leak-social",
+     "name": "Haulchin Quartiers",
+     "kind": "social",
+     "url": "/sites/haulchin-chemical-leak/social/"
+    }
+   ],
+   "current_step": -1,
+   "autoplay": {
+    "running": false,
+    "interval_s": 60
+   },
+   "pipeline": {}
+  },
+  {
+   "id": "kalamithra-tsunami-warning",
+   "name": "Kalamithra tsunami warning",
+   "hazard": "tsunami",
+   "scale": "catastrophic",
+   "language": "el",
+   "region": "Cyclades, Greece",
+   "summary": "A strong offshore earthquake triggers a tsunami warning for a small island group; coastal evacuation is ordered, wave forecasts are revised, a false 'all clear' and a scam shelter link circulate, and the warning is eventually lifted in stages.",
+   "incident_id": "kalamithra-tsunami-warning",
+   "area": {
+    "lat": 36.62,
+    "lon": 25.95,
+    "radius_km": 30,
+    "label": "Νησιά Καλάμιθρα (φανταστικά)"
+   },
+   "steps": [
+    {
+     "n": 0,
+     "clock": "02:15",
+     "title": "Ισχυρός σεισμός στο πέλαγος",
+     "description": "Σεισμός 6,9 Ρίχτερ νότια των νησιών· πορτοκαλί προειδοποίηση και αναμονή αξιολόγησης για τσουνάμι.",
+     "expect": "Orange alert after quake; rumour of tsunami already hitting.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 1,
+     "clock": "02:40",
+     "title": "Προειδοποίηση τσουνάμι και εκκένωση ακτών",
+     "description": "Κόκκινη προειδοποίηση: το πρώτο κύμα αναμένεται στις 03:05· εκκένωση παράκτιων ζωνών προς υψώματα.",
+     "expect": "Critical warning, evacuation, rumour of earlier wave partly corrected.",
+     "changes": [
+      "official",
+      "social"
+     ]
+    },
+    {
+     "n": 2,
+     "clock": "03:25",
+     "title": "Πρώτο κύμα, αναθεώρηση ύψους",
+     "description": "Το πρώτο κύμα φτάνει στις 03:07 με ύψος 1,8 μ.· αναμένεται μεγαλύτερο δεύτερο κύμα (3 μ.). Ψεύτικο λινκ για καταφύγια.",
+     "expect": "Wave confirmed; official changes expected height; bots with scam link; news relays an unverified claim.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 3,
+     "clock": "05:30",
+     "title": "Ψεύτικο «τέλος συναγερμού»",
+     "description": "Ανάρτηση ισχυρίζεται ότι τελείωσαν όλα τα κύματα· οι αρχές επιμένουν στην εκκένωση και σημειώνουν επιπλέον μετασεισμό 5,9.",
+     "expect": "Risky reassurance held back; official debunks; aftershock reported.",
+     "changes": [
+      "official",
+      "social"
+     ]
+    },
+    {
+     "n": 4,
+     "clock": "08:20",
+     "title": "Λήξη προειδοποίησης, σταδιακή επιστροφή",
+     "description": "Η προειδοποίηση λήγει στις 08:00· επιστροφή επιτρέπεται εκτός από τη ζώνη λιμανιού.",
+     "expect": "All-clear in stages; port zone stays closed.",
+     "changes": [
+      "official",
+      "news"
+     ]
+    }
+   ],
+   "pages": [
+    {
+     "id": "official",
+     "source_id": "kalamithra-tsunami-warning-official",
+     "name": "Κέντρο Έκτακτης Ανάγκης Νήσων Καλάμιθρα",
+     "kind": "official",
+     "url": "/sites/kalamithra-tsunami-warning/official/"
+    },
+    {
+     "id": "news",
+     "source_id": "kalamithra-tsunami-warning-news",
+     "name": "Η Φωνή των Νησιών",
+     "kind": "news",
+     "url": "/sites/kalamithra-tsunami-warning/news/"
+    },
+    {
+     "id": "social",
+     "source_id": "kalamithra-tsunami-warning-social",
+     "name": "Καλάμιθρα Νησιώτες",
+     "kind": "social",
+     "url": "/sites/kalamithra-tsunami-warning/social/"
+    }
+   ],
+   "current_step": -1,
+   "autoplay": {
+    "running": false,
+    "interval_s": 60
+   },
+   "pipeline": {}
+  },
+  {
+   "id": "kinloch-varrick-windstorm",
+   "name": "Kinloch Varrick windstorm",
+   "hazard": "storm",
+   "scale": "major",
+   "language": "en",
+   "region": "Highlands, Scotland",
+   "summary": "A violent windstorm cancels ferries, fells trees and closes the Carrick Narrows Bridge; a bridge-damage rumour is denied, a scam 'emergency hotel' link spreads and power figures are revised before the storm eases.",
+   "incident_id": "kinloch-varrick-windstorm",
+   "area": {
+    "lat": 57.42,
+    "lon": -5.62,
+    "radius_km": 14,
+    "label": "Kinloch Varrick (fictional)"
+   },
+   "steps": [
+    {
+     "n": 0,
+     "clock": "06:30",
+     "title": "Yellow wind warning",
+     "description": "A deepening low is forecast to bring gusts of up to 80 mph by afternoon.",
+     "expect": "Early advisory-level warning; ferry disruption rumours appear.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 1,
+     "clock": "11:50",
+     "title": "Upgraded to orange, ferries cancelled",
+     "description": "Gusts are reaching 85 mph. Ferries are cancelled and the Carrick Narrows Bridge restricts all high-sided vehicles.",
+     "expect": "Ferry cancellation confirmed; escalation to orange; rumours of bridge damage begin.",
+     "changes": [
+      "official",
+      "social"
+     ]
+    },
+    {
+     "n": 2,
+     "clock": "14:15",
+     "title": "Red warning, bridge closed to all traffic",
+     "description": "The warning goes red. The bridge is closed to all traffic as a precaution; officials deny structural damage.",
+     "expect": "Bridge closure confirmed, damage rumour debunked, power figure rises.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 3,
+     "clock": "17:30",
+     "title": "Wind easing, power figures revised",
+     "description": "The red warning drops to orange. The power-cut estimate is revised down to 9,000 homes; a post claims everything is fine and roads are open.",
+     "expect": "De-escalation; official update changes a number; reassurance post held back.",
+     "changes": [
+      "official",
+      "social"
+     ]
+    },
+    {
+     "n": 4,
+     "clock": "08:00",
+     "title": "Next morning: bridge reopens, warnings end",
+     "description": "Engineers reopen the bridge at first light; ferries restart at noon; most power restored.",
+     "expect": "All-clear: bridge reopened after inspection; warnings ended.",
+     "changes": [
+      "official",
+      "news"
+     ]
+    }
+   ],
+   "pages": [
+    {
+     "id": "official",
+     "source_id": "kinloch-varrick-windstorm-official",
+     "name": "Varrick & Western Isles Resilience Partnership",
+     "kind": "official",
+     "url": "/sites/kinloch-varrick-windstorm/official/"
+    },
+    {
+     "id": "news",
+     "source_id": "kinloch-varrick-windstorm-news",
+     "name": "The Varrick Courier",
+     "kind": "news",
+     "url": "/sites/kinloch-varrick-windstorm/news/"
+    },
+    {
+     "id": "social",
+     "source_id": "kinloch-varrick-windstorm-social",
+     "name": "Varrick Community Chat",
+     "kind": "social",
+     "url": "/sites/kinloch-varrick-windstorm/social/"
+    }
+   ],
+   "current_step": 1,
+   "autoplay": {
+    "running": true,
+    "interval_s": 45
+   },
+   "pipeline": {
+    "kinloch-varrick-windstorm-official": {
+     "source_id": "kinloch-varrick-windstorm-official",
+     "source_name": "Varrick & Western Isles Resilience Partnership",
+     "incident_id": "kinloch-varrick-windstorm",
+     "stage": "extracting",
+     "elapsed_ms": 3200,
+     "detail": "Context.dev scrape + JSON extraction",
+     "at": "2026-11-14T10:12:00Z"
+    },
+    "kinloch-varrick-windstorm-social": {
+     "source_id": "kinloch-varrick-windstorm-social",
+     "source_name": "Varrick Community Chat",
+     "incident_id": "kinloch-varrick-windstorm",
+     "stage": "grouping",
+     "elapsed_ms": 15900,
+     "detail": "claude-haiku-5-5",
+     "at": "2026-11-14T10:12:00Z"
+    }
+   }
+  },
+  {
+   "id": "roccasalda-earthquake",
+   "name": "Roccasalda earthquake",
+   "hazard": "earthquake",
+   "scale": "major",
+   "language": "it",
+   "region": "Marche and Umbria Apennines, Italy",
+   "summary": "A night-time earthquake damages an old hill town; a rumour of a collapsed tower is partly confirmed, a bridge-collapse and hospital rumour are denied, a quake-prediction hoax and scam donation link spread, and evacuation figures grow.",
+   "incident_id": "roccasalda-earthquake",
+   "area": {
+    "lat": 42.78,
+    "lon": 13.14,
+    "radius_km": 12,
+    "label": "Roccasalda (fictional)"
+   },
+   "steps": [
+    {
+     "n": 0,
+     "clock": "03:50",
+     "title": "Forte scossa nella notte",
+     "description": "Una scossa di magnitudo 5,6 colpisce Roccasalda alle 03:34; prime segnalazioni di danni nel centro storico.",
+     "expect": "Orange alert, damage reports, unverified rumours of collapses.",
+     "changes": [
+      "official",
+      "social",
+      "news"
+     ]
+    },
+    {
+     "n": 1,
+     "clock": "06:30",
+     "title": "Evacuazione del centro storico, torre danneggiata",
+     "description": "Il COC ordina l'evacuazione del centro storico: la cima della torre civica è crollata, ma il ponte è integro.",
+     "expect": "Rumour partly confirmed (tower), bridge collapse debunked, critical evacuation.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 2,
+     "clock": "10:20",
+     "title": "Replica forte e voci false",
+     "description": "Una replica di magnitudo 4,6 spaventa la valle; account nuovi diffondono una raccolta fondi truffa e la finta previsione di una scossa; si dice che l'ospedale sia evacuato.",
+     "expect": "Bots with scam link, near-identical posts, hospital evacuation rumour relayed by the news, reassurance post.",
+     "changes": [
+      "social",
+      "news"
+     ]
+    },
+    {
+     "n": 3,
+     "clock": "14:00",
+     "title": "Smentite e cifre aggiornate",
+     "description": "Il COC aggiorna la magnitudo a 5,8 e porta a 1.800 gli sfollati; smentisce ospedale, raccolta fondi e previsione di un terremoto stanotte.",
+     "expect": "Official update changes numbers (magnitude and evacuees); multiple rumours debunked; scam link called out.",
+     "changes": [
+      "official",
+      "news"
+     ]
+    },
+    {
+     "n": 4,
+     "clock": "20:30",
+     "title": "Notte più calma, primi rientri",
+     "description": "Dopo i controlli, la zona B è dichiarata agibile; il centro storico resta chiuso.",
+     "expect": "De-escalation: partial return for zone B, zone A remains closed.",
+     "changes": [
+      "official"
+     ]
+    }
+   ],
+   "pages": [
+    {
+     "id": "official",
+     "source_id": "roccasalda-earthquake-official",
+     "name": "Centro Operativo Comunale Roccasalda",
+     "kind": "official",
+     "url": "/sites/roccasalda-earthquake/official/"
+    },
+    {
+     "id": "news",
+     "source_id": "roccasalda-earthquake-news",
+     "name": "Il Corriere della Valle del Sale",
+     "kind": "news",
+     "url": "/sites/roccasalda-earthquake/news/"
+    },
+    {
+     "id": "social",
+     "source_id": "roccasalda-earthquake-social",
+     "name": "Roccasalda in Piazza",
+     "kind": "social",
+     "url": "/sites/roccasalda-earthquake/social/"
+    }
+   ],
+   "current_step": 4,
+   "autoplay": {
+    "running": false,
+    "interval_s": 60
+   },
+   "pipeline": {
+    "roccasalda-earthquake-official": {
+     "source_id": "roccasalda-earthquake-official",
+     "source_name": "Centro Operativo Comunale Roccasalda",
+     "incident_id": "roccasalda-earthquake",
+     "stage": "done",
+     "elapsed_ms": 19700,
+     "detail": "1 status change, 1 alert",
+     "at": "2026-11-14T10:12:00Z"
+    }
+   }
+  },
+  {
+   "id": "steinbrunn-landslide",
+   "name": "Steinbrunn landslide",
+   "hazard": "landslide",
+   "scale": "minor",
+   "language": "de",
+   "region": "Salzburg, Austria",
+   "summary": "A small landslide blocks the mountain road to a hamlet; a rumour of a cut-off village is partly confirmed, a second slide is denied, and one lane reopens.",
+   "incident_id": "steinbrunn-landslide",
+   "area": {
+    "lat": 47.22,
+    "lon": 12.62,
+    "radius_km": 2,
+    "label": "Steinbrunn im Tal (fictional)"
+   },
+   "steps": [
+    {
+     "n": 0,
+     "clock": "06:50",
+     "title": "Hangrutsch auf der Almstraße",
+     "description": "Nach Dauerregen rutscht ein Hang auf die Almstraße; gelbe Warnung, Straße gesperrt.",
+     "expect": "Advisory-level landslide; closure confirmed; rumour that the hamlet is cut off with people trapped.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 1,
+     "clock": "11:20",
+     "title": "Neuer Abgang gemeldet, Gerücht widerlegt",
+     "description": "Gerüchte über eine zweite, größere Rutschung und eine Sperre des Dorfes; die Gemeinde dementiert und nennt eine neue Zeit.",
+     "expect": "Second-slide rumour debunked; bots with scam link; official update changes the reopening time.",
+     "changes": [
+      "official",
+      "social"
+     ]
+    },
+    {
+     "n": 2,
+     "clock": "16:40",
+     "title": "Eine Spur wieder frei",
+     "description": "Die Almstraße wird früher als gemeldet einspurig geöffnet; die Warnung wird aufgehoben.",
+     "expect": "De-escalation: one lane open earlier than announced, warning lifted.",
+     "changes": [
+      "official",
+      "news"
+     ]
+    }
+   ],
+   "pages": [
+    {
+     "id": "official",
+     "source_id": "steinbrunn-landslide-official",
+     "name": "Gemeinde Steinbrunn Krisenstab",
+     "kind": "official",
+     "url": "/sites/steinbrunn-landslide/official/"
+    },
+    {
+     "id": "news",
+     "source_id": "steinbrunn-landslide-news",
+     "name": "Talbote Steinbrunn",
+     "kind": "news",
+     "url": "/sites/steinbrunn-landslide/news/"
+    },
+    {
+     "id": "social",
+     "source_id": "steinbrunn-landslide-social",
+     "name": "Steinbrunn Dorfplatz",
+     "kind": "social",
+     "url": "/sites/steinbrunn-landslide/social/"
+    }
+   ],
+   "current_step": -1,
+   "autoplay": {
+    "running": false,
+    "interval_s": 60
+   },
+   "pipeline": {}
+  },
+  {
+   "id": "valdeluna-dam-failure",
+   "name": "Valdeluna dam failure",
+   "hazard": "dam_failure",
+   "scale": "catastrophic",
+   "language": "es",
+   "region": "Cantabrian Mountains, northern Spain",
+   "summary": "After days of rain, a dam shows a breach and then fails; mass evacuation of the valley is ordered, arrival times are revised, bot posts push a scam 'rescue transport' link and a false second-dam rumour and a false 'water has stopped' post circulate.",
+   "incident_id": "valdeluna-dam-failure",
+   "area": {
+    "lat": 42.95,
+    "lon": -5.45,
+    "radius_km": 30,
+    "label": "Valle del Lunar (fictional)"
+   },
+   "steps": [
+    {
+     "n": 0,
+     "clock": "05:10",
+     "title": "Alerta por filtraciones en la presa",
+     "description": "Tras cinco días de lluvia, la presa de Valdeluna presenta filtraciones; alerta naranja y preparación de evacuación.",
+     "expect": "Orange alert; precautionary preparations; rumour that the dam has already collapsed.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 1,
+     "clock": "06:25",
+     "title": "Rotura parcial: evacuación obligatoria",
+     "description": "Se produce una rotura parcial; alerta roja y evacuación obligatoria de las zonas bajas del valle (unas 9.000 personas).",
+     "expect": "The rumour of a breach is now confirmed; critical evacuation order.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 2,
+     "clock": "07:40",
+     "title": "Zona ampliada y falsos servicios de rescate",
+     "description": "Se amplía la evacuación a 14.000 personas y se adelantan los tiempos de llegada; cuentas nuevas ofrecen transporte con un enlace falso.",
+     "expect": "Official update changes numbers and times; bot posts with scam link; second-dam rumour spreads.",
+     "changes": [
+      "official",
+      "social"
+     ]
+    },
+    {
+     "n": 3,
+     "clock": "10:30",
+     "title": "El agua baja de ritmo, pero no se puede volver",
+     "description": "Un mensaje afirma que ya ha parado y se puede volver; las autoridades lo desmienten y detallan la situación de cada localidad.",
+     "expect": "Reassurance held back; news relays an unverified claim; official reports the second dam is stable.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 4,
+     "clock": "18:00",
+     "title": "Fin de la fase crítica",
+     "description": "La presa se estabiliza con el vaciado; se mantiene la evacuación para Valdeluna y San Martín del Lunar y se permite el regreso a La Ribera.",
+     "expect": "De-escalation: critical phase over; partial return.",
+     "changes": [
+      "official"
+     ]
+    }
+   ],
+   "pages": [
+    {
+     "id": "official",
+     "source_id": "valdeluna-dam-failure-official",
+     "name": "Centro de Coordinación de Emergencias del Valle del Lunar",
+     "kind": "official",
+     "url": "/sites/valdeluna-dam-failure/official/"
+    },
+    {
+     "id": "news",
+     "source_id": "valdeluna-dam-failure-news",
+     "name": "El Heraldo del Valle",
+     "kind": "news",
+     "url": "/sites/valdeluna-dam-failure/news/"
+    },
+    {
+     "id": "social",
+     "source_id": "valdeluna-dam-failure-social",
+     "name": "Valle del Lunar Vecinos",
+     "kind": "social",
+     "url": "/sites/valdeluna-dam-failure/social/"
+    }
+   ],
+   "current_step": -1,
+   "autoplay": {
+    "running": false,
+    "interval_s": 60
+   },
+   "pipeline": {}
+  },
+  {
+   "id": "vale-da-serra-heatwave",
+   "name": "Vale da Serra heatwave",
+   "hazard": "heatwave",
+   "scale": "moderate",
+   "language": "pt",
+   "region": "Beira Baixa, Portugal",
+   "summary": "A heatwave brings an orange then red warning and water restrictions; a wildfire rumour is first false, then a small fire is confirmed, and a fake water-delivery link spreads.",
+   "incident_id": "vale-da-serra-heatwave",
+   "area": {
+    "lat": 39.92,
+    "lon": -7.55,
+    "radius_km": 8,
+    "label": "Vale da Serra (fictional)"
+   },
+   "steps": [
+    {
+     "n": 0,
+     "clock": "11:00",
+     "title": "Aviso laranja de calor",
+     "description": "Temperaturas de 40 graus; aviso laranja e restrições à rega.",
+     "expect": "Orange heat warning and first water restriction; rumour of a wildfire near the village.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 1,
+     "clock": "14:30",
+     "title": "Aviso vermelho e restrições mais duras",
+     "description": "Sobe para aviso vermelho com 43 graus; água só para uso essencial; boato de incêndio é desmentido.",
+     "expect": "Escalation to red; official update changes water numbers; fire rumour debunked; bots with scam water link.",
+     "changes": [
+      "official",
+      "social"
+     ]
+    },
+    {
+     "n": 2,
+     "clock": "17:40",
+     "title": "Incêndio confirmado na encosta sul",
+     "description": "Um foco de incêndio real é combatido perto de Ribeira; sem evacuação; um post diz que já refrescou e é seguro sair.",
+     "expect": "Fire reported by officials; reassurance post held back; news relays an unconfirmed claim of evacuation.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 3,
+     "clock": "21:15",
+     "title": "Incêndio dominado, calor a abrandar",
+     "description": "Incêndio dominado, aviso baixa para laranja, restrições de água mantêm-se.",
+     "expect": "De-escalation: fire contained, warning lowered, restrictions remain.",
+     "changes": [
+      "official"
+     ]
+    }
+   ],
+   "pages": [
+    {
+     "id": "official",
+     "source_id": "vale-da-serra-heatwave-official",
+     "name": "Câmara e Proteção Civil de Vale da Serra",
+     "kind": "official",
+     "url": "/sites/vale-da-serra-heatwave/official/"
+    },
+    {
+     "id": "news",
+     "source_id": "vale-da-serra-heatwave-news",
+     "name": "Jornal da Beira Serra",
+     "kind": "news",
+     "url": "/sites/vale-da-serra-heatwave/news/"
+    },
+    {
+     "id": "social",
+     "source_id": "vale-da-serra-heatwave-social",
+     "name": "Vale da Serra Comunidade",
+     "kind": "social",
+     "url": "/sites/vale-da-serra-heatwave/social/"
+    }
+   ],
+   "current_step": -1,
+   "autoplay": {
+    "running": false,
+    "interval_s": 60
+   },
+   "pipeline": {}
+  },
+  {
+   "id": "vallon-des-pins-wildfire",
+   "name": "Vallon-des-Pins forest fire",
+   "hazard": "fire",
+   "scale": "moderate",
+   "language": "fr",
+   "region": "Provence, France",
+   "summary": "A forest fire threatens two villages; a partial evacuation is confirmed, a fake 'all clear' and a scam donation link circulate, and the evacuation is extended before the fire is contained.",
+   "incident_id": "vallon-des-pins-wildfire",
+   "area": {
+    "lat": 43.78,
+    "lon": 6.32,
+    "radius_km": 6,
+    "label": "Vallon-des-Pins (fictional)"
+   },
+   "steps": [
+    {
+     "n": 0,
+     "clock": "13:15",
+     "title": "Départ de feu au-dessus du hameau",
+     "description": "Fumée visible, vigilance orange feux de forêt, aucune consigne d'évacuation.",
+     "expect": "Orange alert, unverified social reports that the village will be evacuated.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 1,
+     "clock": "15h10",
+     "title": "Évacuation partielle de Saint-Aubert",
+     "description": "Le feu atteint 140 hectares et le Hameau des Pins est évacué ; la rumeur d'hier se confirme en partie.",
+     "expect": "Rumour confirmed: partial evacuation ordered. Severity critical (evacuation).",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 2,
+     "clock": "17h30",
+     "title": "Fausse levée d'alerte et arnaque aux dons",
+     "description": "Des comptes récents annoncent la fin du danger et un lien de dons ; les secours démentent et étendent l'évacuation.",
+     "expect": "Bot posts with scam link, reassurance post held back, official update changes number and extends evacuation, debunk.",
+     "changes": [
+      "official",
+      "social",
+      "news"
+     ]
+    },
+    {
+     "n": 3,
+     "clock": "22h00",
+     "title": "Feu fixé, retour progressif",
+     "description": "Le feu est fixé dans la nuit ; fin de l'évacuation pour la Bastide, maintien pour les autres quartiers.",
+     "expect": "De-escalation: fire fixed, part of the evacuation lifted.",
+     "changes": [
+      "official",
+      "news"
+     ]
+    }
+   ],
+   "pages": [
+    {
+     "id": "official",
+     "source_id": "vallon-des-pins-wildfire-official",
+     "name": "Préfecture du Val-des-Pins et Secours du Vallon",
+     "kind": "official",
+     "url": "/sites/vallon-des-pins-wildfire/official/"
+    },
+    {
+     "id": "news",
+     "source_id": "vallon-des-pins-wildfire-news",
+     "name": "Le Journal du Vallon",
+     "kind": "news",
+     "url": "/sites/vallon-des-pins-wildfire/news/"
+    },
+    {
+     "id": "social",
+     "source_id": "vallon-des-pins-wildfire-social",
+     "name": "Vallon Infos Locales",
+     "kind": "social",
+     "url": "/sites/vallon-des-pins-wildfire/social/"
+    }
+   ],
+   "current_step": 0,
+   "autoplay": {
+    "running": false,
+    "interval_s": 60
+   },
+   "pipeline": {
+    "vallon-des-pins-wildfire-official": {
+     "source_id": "vallon-des-pins-wildfire-official",
+     "source_name": "Préfecture du Val-des-Pins et Secours du Vallon",
+     "incident_id": "vallon-des-pins-wildfire",
+     "stage": "done",
+     "elapsed_ms": 17100,
+     "detail": "baseline, 12 claims",
+     "at": "2026-11-14T10:12:00Z"
+    },
+    "vallon-des-pins-wildfire-news": {
+     "source_id": "vallon-des-pins-wildfire-news",
+     "source_name": "Le Journal du Vallon",
+     "incident_id": "vallon-des-pins-wildfire",
+     "stage": "failed",
+     "elapsed_ms": 61000,
+     "detail": "Context.dev timeout, will retry",
+     "at": "2026-11-14T10:12:00Z"
+    }
+   }
+  },
+  {
+   "id": "weerdbeek-beek-flood",
+   "name": "Weerdbeek brook flood",
+   "hazard": "flood",
+   "scale": "minor",
+   "language": "nl",
+   "region": "Gelderland, Netherlands",
+   "summary": "A brook overflows and closes a road and a footbridge; a collapse rumour and a scam sandbag link appear before the road reopens.",
+   "incident_id": "weerdbeek-beek-flood",
+   "area": {
+    "lat": 52.08,
+    "lon": 6.12,
+    "radius_km": 3,
+    "label": "Weerdbeek (fictional)"
+   },
+   "steps": [
+    {
+     "n": 0,
+     "clock": "09:20",
+     "title": "Beek treedt buiten haar oevers",
+     "description": "Gele waarschuwing voor hoog water; Veerweg en de Molenbrug (voetgangers) gaan dicht.",
+     "expect": "Advisory-level flood, two closures confirmed by the municipality; a collapse rumour about the footbridge appears on social media.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 1,
+     "clock": "11:40",
+     "title": "Piek lager dan verwacht, oplichtingsposts",
+     "description": "Update 2 corrigeert de piekverwachting en weerlegt het instortingsgerucht; bots verspreiden een nepzandzakkenlink.",
+     "expect": "Official correction of the peak figure; collapse rumour debunked; bot posts with scam link flagged.",
+     "changes": [
+      "official",
+      "social"
+     ]
+    },
+    {
+     "n": 2,
+     "clock": "16:30",
+     "title": "Veerweg weer open",
+     "description": "Het water zakt; Veerweg heropend, voetgangersbrug nog dicht tot inspectie; code geel ingetrokken.",
+     "expect": "De-escalation: road reopened, warning lifted, bridge remains closed until tomorrow.",
+     "changes": [
+      "official",
+      "news"
+     ]
+    }
+   ],
+   "pages": [
+    {
+     "id": "official",
+     "source_id": "weerdbeek-beek-flood-official",
+     "name": "Gemeente Weerdbeek Crisisinfo",
+     "kind": "official",
+     "url": "/sites/weerdbeek-beek-flood/official/"
+    },
+    {
+     "id": "news",
+     "source_id": "weerdbeek-beek-flood-news",
+     "name": "De Beekbode",
+     "kind": "news",
+     "url": "/sites/weerdbeek-beek-flood/news/"
+    },
+    {
+     "id": "social",
+     "source_id": "weerdbeek-beek-flood-social",
+     "name": "Weerdbeek Buurtplein",
+     "kind": "social",
+     "url": "/sites/weerdbeek-beek-flood/social/"
+    }
+   ],
+   "current_step": -1,
+   "autoplay": {
+    "running": false,
+    "interval_s": 60
+   },
+   "pipeline": {}
+  },
+  {
+   "id": "zalesice-warehouse-fire",
+   "name": "Zalesice warehouse fire",
+   "hazard": "fire",
+   "scale": "minor",
+   "language": "pl",
+   "region": "Łódź Voivodeship, Poland",
+   "summary": "A warehouse fire sends smoke over a village; the advisory radius grows, a toxic-cloud rumour is denied and a premature 'open the windows' post is risky.",
+   "incident_id": "zalesice-warehouse-fire",
+   "area": {
+    "lat": 51.62,
+    "lon": 19.88,
+    "radius_km": 3,
+    "label": "Zalesice Nowe (fictional)"
+   },
+   "steps": [
+    {
+     "n": 0,
+     "clock": "13:10",
+     "title": "Pożar magazynu, dym nad wsią",
+     "description": "Pożar hali magazynowej; wydano żółty komunikat o zamknięciu okien w promieniu 2 km.",
+     "expect": "Advisory-level fire; smoke guidance confirmed; an unverified rumour about toxic chemicals starts.",
+     "changes": [
+      "official",
+      "news",
+      "social"
+     ]
+    },
+    {
+     "n": 1,
+     "clock": "15:00",
+     "title": "Zasięg zalecenia zwiększony, dementi",
+     "description": "Wiatr zmienia kierunek; zalecenie rozszerzone do 3 km. Służby dementują plotkę o toksycznej chmurze. Pojawia się ryzykowny wpis 'dym zniknął'.",
+     "expect": "Official update changes the radius number; chemical rumour debunked; reassurance post to be held back; bot posts with scam link.",
+     "changes": [
+      "official",
+      "social"
+     ]
+    },
+    {
+     "n": 2,
+     "clock": "18:20",
+     "title": "Pożar opanowany",
+     "description": "Pożar opanowany, zalecenie zniesione, ul. Fabryczna wciąż zamknięta.",
+     "expect": "All-clear for smoke advisory; road still closed.",
+     "changes": [
+      "official",
+      "news"
+     ]
+    }
+   ],
+   "pages": [
+    {
+     "id": "official",
+     "source_id": "zalesice-warehouse-fire-official",
+     "name": "Straż i Ratownictwo Zalesice",
+     "kind": "official",
+     "url": "/sites/zalesice-warehouse-fire/official/"
+    },
+    {
+     "id": "news",
+     "source_id": "zalesice-warehouse-fire-news",
+     "name": "Kurier Zalesicki",
+     "kind": "news",
+     "url": "/sites/zalesice-warehouse-fire/news/"
+    },
+    {
+     "id": "social",
+     "source_id": "zalesice-warehouse-fire-social",
+     "name": "Zalesice Info",
+     "kind": "social",
+     "url": "/sites/zalesice-warehouse-fire/social/"
+    }
+   ],
+   "current_step": -1,
+   "autoplay": {
+    "running": false,
+    "interval_s": 60
+   },
+   "pipeline": {}
+  }
+ ],
+ "credits_spent": 210
+}
