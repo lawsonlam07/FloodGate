@@ -251,6 +251,45 @@ def item_severity(item: dict) -> int:
 SEVERITY_LABELS = {4: "critical", 3: "severe", 2: "warning", 1: "advisory"}
 
 
+_CLOCK = re.compile(r"\b(\d{1,2})[:.h](\d{2})\b")
+
+
+def stated_minutes(members: list[dict]) -> int:
+    """Clock time an official source gives for a statement ("raised to red at 12:45"), in minutes; -1 if none."""
+    for m in members:
+        if (m.get("source_kind") or m.get("kind")) != "official":
+            continue
+        hit = _CLOCK.search(m.get("time_stated") or "")
+        if hit:
+            return int(hit[1]) * 60 + int(hit[2])
+    return -1
+
+
+# A statement about the warning LEVEL (propositions are always English): a colour, or a change of level.
+_WARNING_LEVEL = re.compile(r"\b(red|orange|amber|yellow|green)\b|\b(raised|lowered|lifted|upgraded|downgraded|"
+                            r"withdrawn|cancell?ed|ended|stood down)\b|\b(warning|alert|threat) level\b", re.I)
+
+
+def is_warning_level(members: list[dict]) -> bool:
+    return any(_WARNING_LEVEL.search(m.get("proposition") or "") for m in members)
+
+
+def superseded_warnings(warnings: list[tuple[str, str, str, list[dict]]]) -> set[str]:
+    """Official warnings replace each other (orange -> red -> lowered -> lifted), but each stays "verified" because
+    it was true when issued. Given verified warning items as (id, hazard, first_seen, members), return the ids of all
+    but the newest per hazard. Newest = first seen latest; for statements captured together (an official page listing
+    earlier updates), the later clock time stated on the official page."""
+    by_hazard: dict[str, list] = {}
+    for w in warnings:
+        by_hazard.setdefault(w[1], []).append(w)
+    old = set()
+    for group in by_hazard.values():
+        if len(group) > 1:
+            newest = max(group, key=lambda w: (w[2] or "", stated_minutes(w[3])))
+            old |= {w[0] for w in group if w[0] != newest[0]}
+    return old
+
+
 def rings(severity: int, radius_km: float) -> list[dict]:
     """Concentric zones for the map, innermost first: the colour shifts from the incident's severity at the
     epicentre down to advisory at the edge. Ring i (0..n-1) has severity n-i and radius R*(i+1)/n."""

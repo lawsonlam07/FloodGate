@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import random
+import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -11,6 +12,8 @@ from pathlib import Path
 import requests
 
 BASE_URL = "https://api.context.dev/v1"
+# Context.dev fetches our pages through a public tunnel (or our server); too many at once and they time out.
+_SLOTS = threading.BoundedSemaphore(int(os.environ.get("CONTEXT_MAX_CONCURRENT", "4")))
 RETRYABLE = {429, 502, 503, 504}
 
 
@@ -62,7 +65,10 @@ class ContextClient:
     def post(self, step: str, endpoint: str, body: dict, target: str) -> tuple[dict | None, CallLog]:
         if self.budget is not None and self.credits_spent >= self.budget:
             raise BudgetExceeded(f"spent {self.credits_spent:g} credits, budget is {self.budget:g}")
+        with _SLOTS:                     # a burst (many scenarios stepping at once) queues instead of swamping the site
+            return self._post(step, endpoint, body, target)
 
+    def _post(self, step: str, endpoint: str, body: dict, target: str) -> tuple[dict | None, CallLog]:
         entry = CallLog(step=step, endpoint=endpoint, target=target)
         start = time.monotonic()
         resp = None

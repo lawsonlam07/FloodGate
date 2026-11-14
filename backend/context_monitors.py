@@ -7,11 +7,17 @@ attach Context.dev's verdict (title, summary, importance, confidence) to the upd
 
 This never blocks the fast path. Runs of one monitor never overlap (Context.dev skips extra calls as "superseded"),
 so calls are serialised per source and coalesced.
+
+Plan limit: an account allows a fixed number of monitors (CONTEXT_MONITOR_LIMIT, default 10), fewer than our official
+pages. When a new monitor is needed and the plan is full, we delete our own least recently used monitor first. If no
+slot can be freed (e.g. other apps use them), the check is "skipped" and that source rests for 10 minutes.
 """
 
 from __future__ import annotations
 
 import asyncio
+import os
+import threading
 import time
 from collections import defaultdict
 from typing import Callable
@@ -22,6 +28,9 @@ from .config import Source
 from .store import Store, now
 
 API = "https://api.context.dev/v1"
+MONITOR_LIMIT = int(os.environ.get("CONTEXT_MONITOR_LIMIT", "10"))
+LIMIT_COOLDOWN_S = 600
+_RUN_SLOTS = threading.BoundedSemaphore(2)
 INSTRUCTIONS = ("Report changes to emergency information: warnings, evacuation orders, closures, shelters, damage, "
                 "casualties, and corrections of false reports. Ignore changes to timestamps, update numbers, layout "
                 "and unrelated stories.")
@@ -34,8 +43,7 @@ class ContextMonitors:
         self.store = store
         self.locks: dict[str, asyncio.Lock] = defaultdict(asyncio.Lock)
         self.pending: dict[str, float] = {}
-        self.disabled: dict[str, str] = {}          # source_id -> reason (e.g. monitor limit reached)
-        self.limit_hit = False                      # plan's monitor allowance reached: create no new monitors
+        self.cooldown: dict[str, float] = {}        # source_id -> monotonic time until which we don't retry (plan full)
 
     # ---- HTTP -----------------------------------------------------------------------------------------------
     def _call(self, method: str, path: str, body: dict | None = None) -> dict:
@@ -60,30 +68,59 @@ class ContextMonitors:
         raise TimeoutError(f"monitor run {run_id} not finished after {timeout:.0f}s")
 
     # ---- monitor lifecycle -----------------------------------------------------------------------------------
+    def _delete(self, source_id: str) -> bool:
+        """Delete our monitor for a source. True if it is gone (deleted now, or already missing on Context.dev)."""
+        known = self.store.context_monitors.get(source_id)
+        if not known:
+            return True
+        try:
+            self._call("DELETE", f"/monitors/{known['id']}")
+        except Exception as exc:
+            if "404" not in str(exc):
+                return False
+        self.store.context_monitors.pop(source_id, None)
+        return True
+
+    def _evict_one(self, keep: str) -> bool:
+        """Free a plan slot by deleting our least recently used monitor (never `keep`)."""
+        ours = sorted((v.get("last_used") or v.get("created_at") or "", sid)
+                      for sid, v in list(self.store.context_monitors.items()) if sid != keep)
+        return any(self._delete(sid) for _, sid in ours[:3])     # try the 3 oldest; stop at the first that frees one
+
     def _ensure_monitor(self, src: Source) -> tuple[str, bool, int]:
         """Return (monitor_id, created_now, credits). Recreates the monitor if the page URL changed (tunnel rotation)."""
         url = src.public_url
         known = self.store.context_monitors.get(src.id)
         if known and known.get("url") == url:
+            known["last_used"] = now()
             return known["id"], False, 0
         if known:                                   # URL changed: the old monitor watches a dead address
-            try:
-                self._call("DELETE", f"/monitors/{known['id']}")
-            except Exception:
-                pass
-        mon = self._call("POST", "/monitors", {
+            self._delete(src.id)
+        if len(self.store.context_monitors) >= MONITOR_LIMIT:
+            self._evict_one(keep=src.id)
+        body = {
             "name": f"FloodGate · {src.name}"[:200],
             "target": {"type": "page", "url": url, "instructions": INSTRUCTIONS},
             "change_detection": {"type": "semantic"},
             "schedule": {"type": "interval", "frequency": 1, "unit": "days"},
-        })
+        }
+        try:
+            mon = self._call("POST", "/monitors", body)
+        except RuntimeError as exc:                 # plan full (our count was off, or other monitors on the account)
+            if "MONITOR_LIMIT_EXCEEDED" not in str(exc) or not self._evict_one(keep=src.id):
+                raise
+            mon = self._call("POST", "/monitors", body)
         credits = 0
         if mon.get("initial_run_id"):
             credits = self._wait_run(mon["id"], mon["initial_run_id"]).get("credits_charged") or 0
-        self.store.context_monitors[src.id] = {"id": mon["id"], "url": url, "created_at": now()}
+        self.store.context_monitors[src.id] = {"id": mon["id"], "url": url, "created_at": now(), "last_used": now()}
         return mon["id"], True, credits
 
     def _check_blocking(self, src: Source) -> dict:
+        with _RUN_SLOTS:                            # Context.dev fetches the page through our tunnel: keep it gentle
+            return self._check_blocking_inner(src)
+
+    def _check_blocking_inner(self, src: Source) -> dict:
         start = time.monotonic()
         verdict = {"source_id": src.id, "source_name": src.name, "incident_id": src.incident, "status": "failed",
                    "title": None, "summary": None, "importance": None, "confidence": None, "credits": 0}
@@ -112,9 +149,11 @@ class ContextMonitors:
                 verdict.update({k: chg.get(k) for k in ("title", "summary", "importance", "confidence")})
         except Exception as exc:
             verdict["summary"] = f"{type(exc).__name__}: {exc}"[:200]
-            if "MONITOR_LIMIT_EXCEEDED" in str(exc):
-                self.disabled[src.id] = "Context.dev monitor limit reached"
-                self.limit_hit = True               # reported once (this verdict); other new sources are skipped quietly
+            if "MONITOR_LIMIT_EXCEEDED" in str(exc):   # no slot could be freed: not a failure of the page, rest a while
+                self.cooldown[src.id] = time.monotonic() + LIMIT_COOLDOWN_S
+                verdict["status"] = "skipped"
+                verdict["summary"] = (f"Context.dev monitor limit ({MONITOR_LIMIT}) reached and no FloodGate monitor "
+                                      f"could be freed; next try in {LIMIT_COOLDOWN_S // 60} min")
         finally:
             verdict["latency_ms"] = round((time.monotonic() - start) * 1000)
             verdict["at"] = now()
@@ -127,16 +166,12 @@ class ContextMonitors:
                 self._call("DELETE", f"/monitors/{mid}")
             except Exception:
                 pass
-        self.limit_hit = False
-        self.disabled = {k: v for k, v in self.disabled.items() if "limit" not in v}
+        self.cooldown.clear()                       # slots were freed: sources that rested may try again
 
     # ---- async entry point -----------------------------------------------------------------------------------
     async def check(self, src: Source, t0: float, on_verdict: Callable[[Source, dict, float], None]) -> None:
         """Run-now on the source's monitor; serialised per source, extra requests coalesced into one follow-up run."""
-        if src.id in self.disabled:
-            return
-        if self.limit_hit and src.id not in self.store.context_monitors:
-            self.disabled[src.id] = "Context.dev monitor limit reached"
+        if self.cooldown.get(src.id, 0) > time.monotonic():
             return
         lock = self.locks[src.id]
         if lock.locked():
