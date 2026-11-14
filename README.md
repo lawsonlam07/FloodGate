@@ -1,7 +1,8 @@
 # FloodGate
 
-Live, verified situation board for emergencies (Junction 2026, Context.dev challenge). Social media is fast and wrong;
-officials are right and slow. FloodGate watches both and shows what is actually confirmed, with a source on every line.
+Live, verified situation board for emergencies (Junction 2026, Context.dev challenge). In an emergency, information
+floods in: social media is fast and often wrong, officials are right but slow. FloodGate is the gate between the two: it
+holds back the flood of rumours and lets through what official sources confirm, with a source on every line.
 
 ## Run it locally
 
@@ -18,7 +19,7 @@ cp .env.example .env            # add CONTEXT_DEV_API_KEY and GEMINI_API_KEY (ot
 - **Scenario control centre:** http://127.0.0.1:8000/admin.html: start, step, autoplay or reset the fictional
   disasters (13 across Europe, minor to catastrophic), switch on showcase mode, or pause all processing.
 - **Fictional sites:** http://127.0.0.1:8000/sites/ (pages exist while their scenario is started).
-- Starting a scenario costs roughly 15 Context.dev credits, a full storyline about 40. Real FMI weather warnings are free.
+- Starting a scenario costs roughly 15 Context.dev credits, a full storyline about 40. Real official warnings are free.
 - To start from scratch, stop the server and delete `data/`.
 
 ## Partner technology

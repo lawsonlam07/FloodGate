@@ -6,7 +6,7 @@
 <script>try { document.documentElement.dataset.theme = localStorage.getItem("fg-theme") === "light" ? "light" : "dark"; } catch (e) {}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>FloodGate</title>
-<meta name="description" content="Live, verified situation board for emergencies.">
+<meta name="description" content="In an emergency, information floods in. FloodGate holds back the rumours and lets through what official sources confirm, with a source on every line.">
 <!-- Fonts, icons, Leaflet and Tailwind are served by us (built by frontend/build.py): no CDN at page load. -->
 <link rel="stylesheet" href="vendor/fonts/fonts.css">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.min.css">
@@ -24,16 +24,18 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
 <body class="min-h-screen">
 
 
-<header class="sticky top-0 z-[500] bg-canvas/90 backdrop-blur border-b border-line">
+<header class="sticky top-0 z-[500] bg-canvas border-b border-line">
   <div class="max-w-[1400px] mx-auto px-4 lg:px-6 h-14 flex items-center justify-between gap-3">
     <a href="#" class="flex items-center gap-2 min-w-0">
       <span class="material-symbols-outlined icon-fill text-critical" style="font-size:24px">flood</span>
-      <span class="font-extrabold tracking-tight text-lg">FLOODGATE</span>
-      <span class="hidden sm:inline label truncate">· verified situation board</span>
+      <span class="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 min-w-0 leading-tight" title="In an emergency, information floods in. FloodGate holds back the rumours and lets through what official sources confirm.">
+        <span class="font-extrabold tracking-tight text-lg">FloodGate</span>
+        <span class="text-[12.5px] text-muted font-medium truncate">Holding back the flood of information</span>
+      </span>
     </a>
     <div class="flex items-center gap-2 shrink-0">
       <span id="live-dot" class="live-dot" aria-hidden="true"></span>
-      <span id="live-text" class="label">CONNECTING</span>
+      <span id="live-text" class="label max-[379px]:hidden">Connecting</span>
     </div>
   </div>
 </header>
@@ -52,7 +54,7 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
       <div class="lg:sticky lg:top-20">
         <div class="card overflow-hidden">
           <div class="flex items-center justify-between gap-2 px-3 py-2 border-b border-line">
-            <span class="label flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-critical pulse"></span>Affected areas</span>
+            <span class="label">Map</span>
             <select id="area-picker" aria-label="Choose an area" class="rounded border border-line bg-canvas px-2 py-1 text-sm text-ink max-w-[55%]"></select>
           </div>
           <div id="map" class="h-72 sm:h-96 lg:h-[min(calc(100vh-14rem),640px)] min-h-[18rem]"></div>
@@ -75,10 +77,7 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
     <!-- disaster list -->
     <section class="lg:col-span-5 mt-6 lg:mt-0" aria-labelledby="list-h">
       <div class="flex items-baseline justify-between mb-3">
-        <h2 id="list-h" class="text-base font-bold tracking-tight flex items-center gap-2">
-          <span class="material-symbols-outlined text-critical">warning</span>ACTIVE DISASTERS
-        </h2>
-        <span class="label text-faint">sorted by severity</span>
+        <h2 id="list-h" class="text-lg font-bold tracking-tight">Active incidents</h2>
       </div>
       <div id="list-note" class="-mt-1 mb-3 flex flex-wrap items-center justify-between gap-2 text-xs text-muted" aria-live="polite"></div>
       <div id="incidents" class="flex flex-col gap-3">
@@ -90,7 +89,7 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
   <!-- system / API activity -->
   <details id="system" class="card mt-8">
     <summary class="px-4 py-3 flex items-center justify-between gap-3">
-      <span class="label flex items-center gap-2"><span class="material-symbols-outlined text-authority">monitoring</span>System · monitors &amp; API activity</span>
+      <span class="label">System: monitors and API activity</span>
       <span class="flex items-center gap-2"><span id="sys-summary" class="label text-faint hidden sm:inline"></span><span class="material-symbols-outlined chev text-muted">expand_more</span></span>
     </summary>
     <div class="border-t border-line p-4 grid gap-6 lg:grid-cols-2">
@@ -107,8 +106,8 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
   <footer class="mt-6 flex items-center justify-between gap-3 text-[11px] mono text-faint">
     <span>FloodGate · every web source enters through Context.dev</span>
     <span class="flex items-center gap-4">
-      <a id="demo-link" href="demo.html" class="hover:text-muted flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">slideshow</span>Live demo view</a>
-      <a href="admin.html" target="_blank" rel="noopener" class="hover:text-muted flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">tune</span>Admin</a>
+      <a id="demo-link" href="demo.html" class="hover:text-muted">Live demo view</a>
+      <a href="admin.html" target="_blank" rel="noopener" class="hover:text-muted">Admin</a>
     </span>
   </footer>
 </main>

@@ -22,16 +22,16 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
 </head>
 <body class="min-h-screen">
 
-<header class="sticky top-0 z-[500] bg-canvas/90 backdrop-blur border-b border-line">
+<header class="sticky top-0 z-[500] bg-canvas border-b border-line">
   <div class="max-w-[760px] mx-auto px-4 h-14 flex items-center justify-between gap-3">
     <a id="back" href="index.html" class="flex items-center gap-1.5 text-sm text-muted hover:text-ink min-h-[44px]">
       <span class="material-symbols-outlined">arrow_back</span><span class="hidden min-[400px]:inline">All disasters</span>
     </a>
     <div class="flex items-center gap-2 min-w-0">
       <span class="material-symbols-outlined icon-fill text-critical" style="font-size:20px">flood</span>
-      <span class="font-extrabold tracking-tight hidden sm:inline">FLOODGATE</span>
+      <span class="font-extrabold tracking-tight hidden sm:inline">FloodGate</span>
       <span id="live-dot" class="live-dot ml-2" aria-hidden="true"></span>
-      <span id="live-text" class="label">CONNECTING</span>
+      <span id="live-text" class="label">Connecting</span>
     </div>
   </div>
 </header>
@@ -62,7 +62,7 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
 
 
   <!-- timeline controls: Key/All toggle + secondary filters -->
-  <section id="controls" class="sticky top-14 z-[400] -mx-4 px-4 py-2 mt-5 bg-canvas/95 backdrop-blur border-y border-line hidden" aria-label="Timeline view">
+  <section id="controls" class="sticky top-14 z-[400] -mx-4 px-4 py-2 mt-5 bg-canvas border-y border-line hidden" aria-label="Timeline view">
     <div class="flex items-center justify-between gap-2">
       <div class="inline-flex rounded border border-line overflow-hidden" role="group" aria-label="Which updates">
         <button type="button" id="mode-key" class="px-3 min-h-[36px] text-sm font-semibold">Key updates <span class="tnum text-muted" id="n-key"></span></button>

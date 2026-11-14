@@ -262,8 +262,14 @@ class Store:
             sources = [{"id": s.id, "name": s.name, "kind": s.kind, "url": s.view_url,
                         "captured_from": self.snapshots.get(s.id, {}).get("url")}
                        for s in SOURCES if s.incident == inc.id]
+        # the board shows the newest official instructions on each card ("What to do")
+        instructions = sorted((it for it in items if it.status == "verified" and it._most_common("category") == "instruction"
+                               and any(m.get("source_kind") == "official" and m["stance"] == "asserts" for m in it.group.members)),
+                              key=lambda it: it.first_seen, reverse=True)
+        what_to_do = [it.title() for it in instructions[:2]] if inc.kind != "official_warning" else []
         return {
             "id": inc.id, "kind": inc.kind, "name": inc.name, "summary": summary.strip(), "severity": severity,
+            "what_to_do": what_to_do,
             "severity_label": rules.SEVERITY_LABELS[severity], "status": "active" if inc.is_live() else "ended",
             "hazards": inc.hazards, "area": area, "valid": inc.valid, "source_label": inc.source_label,
             "counts": counts, "highlights": highlights, "sources": sources,

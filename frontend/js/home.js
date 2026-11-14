@@ -2,7 +2,7 @@
 if (window.self !== window.top) document.body.classList.add("framed");   // shown inside demo.html
 import * as api from "./api.js";
 import { createLive, animDelay, setPausedChip } from "./live.js";
-import { basemap, initTheme, esc, ago, icon, sevChip, sevColor, countChips, statusChip, lsGet, lsSet, setLive, startAgoTicker, KIND_ICON, toast, isWarning, untilText, validText, isEnded, warningColor, activityRows, updatedChecked, onResume } from "./ui.js";
+import { basemap, initTheme, SIMPLE, simpleChip, simpleCounts, esc, ago, icon, sevChip, sevColor, countChips, statusChip, lsGet, lsSet, setLive, startAgoTicker, KIND_ICON, toast, isWarning, untilText, validText, isEnded, warningColor, activityRows, updatedChecked, onResume } from "./ui.js";
 
 const state = { incidents: [], monitors: [], activity: [], creditsSpent: 0 };
 
@@ -22,14 +22,13 @@ const fx = new Map();                     // incident_id → {at, plus: {status:
 const fxAge = (id) => (fx.has(id) ? Date.now() - fx.get(id).at : Infinity);
 const lastItemChange = new Map();         // incident_id → when an item of it last changed status / appeared
 
+// Three words: confirmed / unconfirmed / false (the rules' five statuses folded), with "+n" right after a change.
 function countChipsFx(inc) {
   const age = fxAge(inc.id);
-  const plus = age < 4000 ? fx.get(inc.id).plus : {};
+  const c = simpleCounts(inc.counts || {});
+  const plus = simpleCounts(age < 4000 ? fx.get(inc.id).plus : {});
   const badge = (k) => (plus[k] > 0 ? `<span class="plus-badge" style="${animDelay(age)}">+${plus[k]}</span>` : "");
-  const order = ["verified", "corroborated", "unverified", "disputed", "contradicted"];
-  const parts = order.filter((s) => inc.counts?.[s]).map((s) => `<span class="inline-flex items-center">${statusChip(s, inc.counts[s])}${badge(s)}</span>`);
-  if (inc.counts?.held) parts.push(`<span class="inline-flex items-center"><span class="chip chip-held">Held <span class="tnum">${inc.counts.held}</span></span>${badge("held")}</span>`);
-  return parts.join(" ");
+  return Object.keys(SIMPLE).filter((k) => c[k]).map((k) => `<span class="inline-flex items-center">${simpleChip(k, c[k])}${badge(k)}</span>`).join(" ");
 }
 
 // ---------------------------------------------------------------- severity filter (map + list)
@@ -43,7 +42,7 @@ function renderSevFilter() {
   const count = (lvl) => state.incidents.filter((i) => Number(i.severity) === lvl).length;
   const hidden = state.incidents.length - visible().length;
   el.innerHTML = `
-    <span class="label flex items-center gap-1 mr-1">${icon("filter_alt", "text-[15px]")}Severity</span>
+    <span class="label mr-1">Severity</span>
     ${[4, 3, 2, 1].map((lvl) => `
       <button type="button" class="fchip chip ${sevOn.has(lvl) ? `chip-sev${lvl}` : "chip-tag"}" aria-pressed="${sevOn.has(lvl)}" data-sev="${lvl}">
         L${lvl} <span class="tnum opacity-80">${count(lvl)}</span></button>`).join("")}
@@ -68,27 +67,18 @@ function sortIncidents() {
 function incidentCard(inc) {
   const href = api.link(`incident.html?id=${encodeURIComponent(inc.id)}`);
   const highlights = (inc.highlights || []).slice(0, 3).map((h) => `
-    <li class="flex items-start gap-2 text-sm">
-      ${h.status === "contradicted" ? icon("block", "text-critical mt-0.5") : h.status === "verified" ? icon("verified", "text-ok mt-0.5") : icon("help", "text-triage mt-0.5")}
+    <li class="flex items-start gap-2 text-[15px]">
+      ${h.status === "contradicted" ? '<span class="mt-[9px] w-1.5 h-1.5 rounded-full shrink-0 bg-critical"></span>' : h.status === "verified" ? '<span class="mt-[9px] w-1.5 h-1.5 rounded-full shrink-0 bg-ok"></span>' : '<span class="mt-[9px] w-1.5 h-1.5 rounded-full shrink-0 bg-triage"></span>'}
       <span class="${h.status === "contradicted" ? "struck" : ""}">${esc(h.title)}</span>
     </li>`).join("");
   const age = fxAge(inc.id);
   const glow = age < 3200 ? `glow ${inc.counts?.contradicted ? "glow-false" : "glow-ok"}` : "";
   return `
   <a href="${href}" class="card card-hover accent-sev${esc(inc.severity)} block p-4 ${glow}" style="${glow ? animDelay(age) : ""}" data-incident="${esc(inc.id)}">
-    ${age < 60000 ? `<span class="chip updated-chip float-right ml-2" style="animation:fg-fade 60s linear forwards;${animDelay(age)}">${icon("bolt", "text-[12px]")}Updated just now</span>` : ""}
     <div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
       <div class="flex items-center gap-2 min-w-0">${sevChip(inc.severity, inc.severity_label)}
-        <span class="label text-faint truncate">${esc((inc.hazards || []).join(", ").replace(/_/g, " "))}</span></div>
-      ${updatedChecked(inc, "label text-faint shrink-0 text-right")}
-    </div>
-    <h3 class="mt-2 text-lg font-bold leading-snug">${esc(inc.name)}</h3>
-    <p class="mt-1 text-sm text-muted clamp-2">${esc(inc.summary)}</p>
-    <div class="mt-3 flex flex-wrap gap-1.5">${countChipsFx(inc)}</div>
-    ${highlights ? `<ul class="mt-3 flex flex-col gap-1.5 border-t border-line pt-3">${highlights}</ul>` : ""}
-    <div class="mt-3 flex items-center justify-between">
-      <span class="label text-faint flex items-center gap-1">${icon("location_on", "text-[14px]")}${esc(inc.area?.label || "")}</span>
-      <span class="label text-authority flex items-center gap-1">Open feed ${icon("arrow_forward", "text-[14px]")}</span>
+        <span class="label text-faint truncate">${esc(cap((inc.hazards || []).join(", ").replace(/_/g, " ")))}</span></div>
+      <span class="label text-faint shrink-0 text-right">${age < 60000 ? `<span class="updated-chip">Updated just now</span>` : `Updated ${ago(inc.updated_at)}`}</span>
     </div>
   </a>`;
 }
@@ -104,9 +94,9 @@ function warningRow(inc) {
     <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${warningColor(inc)}"></span>
     <span class="min-w-0 flex-1">
       <span class="block text-sm font-medium truncate">${esc(inc.name)}</span>
-      <span class="block mono text-[11px] text-faint truncate">${esc(inc.area?.label || "")}</span>
+      <span class="block mono text-xs text-faint truncate">${esc(inc.area?.label || "")}</span>
     </span>
-    <span class="mono text-[11px] text-muted shrink-0 text-right" title="${esc(inc.valid ? `${inc.valid.from} → ${inc.valid.to}` : "")}">${esc(validText(inc.valid))}</span>
+    <span class="mono text-xs text-muted shrink-0 text-right" title="${esc(inc.valid ? `${inc.valid.from} → ${inc.valid.to}` : "")}">${esc(validText(inc.valid))}</span>
   </a>`;
 }
 
@@ -148,9 +138,9 @@ function renderListNote(n, elsewhere, total, top) {
   const highest = top ? ` · highest ${sevChip(top.severity, top.severity_label)}` : "";
   el.innerHTML = focus.follow
     ? `<span>Showing <b class="text-ink tnum">${n}</b> in this area${highest}${elsewhere ? ` · <span class="tnum">${elsewhere}</span> more elsewhere · <button type="button" class="text-authority underline" data-follow="off">show all</button>` : ""}</span>
-       <button type="button" class="fchip chip chip-corroborated" aria-pressed="true" data-follow="off">${icon("my_location", "text-[13px]")}Follow map</button>`
+       <button type="button" class="fchip chip chip-corroborated" aria-pressed="true" data-follow="off">Follow map</button>`
     : `<span>Showing all <b class="text-ink tnum">${total}</b>${highest}</span>
-       <button type="button" class="fchip chip chip-tag" aria-pressed="false" data-follow="on">${icon("location_searching", "text-[13px]")}Follow map</button>`;
+       <button type="button" class="fchip chip chip-tag" aria-pressed="false" data-follow="on">Follow map</button>`;
   el.querySelectorAll("[data-follow]").forEach((b) => {
     b.onclick = () => { focus.follow = b.dataset.follow === "on"; lsSet(FOLLOW_KEY, focus.follow); renderIncidents(); };
   });
@@ -239,9 +229,10 @@ function drawRings(inc, labelDir) {
   // Calmer map: permanent text labels only for L3+ that don't collide (see planLabels); the rest on hover/tap.
   const off = Object.fromEntries(LABEL_DIRS)[labelDir];
   anchor.bindTooltip(label, labelDir
-    ? { permanent: true, direction: labelDir, className: "fg-tip", offset: off }
+    ? { permanent: true, interactive: true, direction: labelDir, className: "fg-tip", offset: off }
     : { direction: "top", className: "fg-tip", offset: [0, -6] });
   anchor.on("click", openIncident(inc));
+  anchor.on("tooltipopen", (e) => { const el = e.tooltip.getElement(); if (el) el.onclick = openIncident(inc); });   // the name label opens it too
   ringLayer.addLayer(anchor);
 }
 
@@ -251,7 +242,6 @@ function planLabels(list) {
   const placed = [];
   const plan = new Map();
   for (const inc of [...list].sort((a, b) => b.severity - a.severity)) {
-    if (inc.severity < 3) continue;
     const pt = map.latLngToContainerPoint([inc.area.lat, inc.area.lon]);
     const w = 14 + 7 * `L${inc.severity} · ${inc.name}`.length, h = 22;
     const tries = { top: [pt.x - w / 2, pt.y - 10 - h], bottom: [pt.x - w / 2, pt.y + 10], right: [pt.x + 12, pt.y - h / 2], left: [pt.x - 12 - w, pt.y - h / 2] };
@@ -435,15 +425,15 @@ function renderMonitors() {
         </div>
         <span class="chip ${m.mode === "incident" ? "chip-contradicted" : "chip-tag"}">${esc(m.mode)} · ${esc(m.interval_s)}s</span>
       </div>
-      <div class="mt-1 mono text-[11px] text-muted flex flex-wrap gap-x-3 gap-y-0.5">
+      <div class="mt-1 mono text-xs text-muted flex flex-wrap gap-x-3 gap-y-0.5">
         <span>${esc(m.type)}</span><span>checks ${esc(m.checks)}</span><span>changes ${esc(m.changes)}</span>
         <span>last check ${ago(m.last_check)}</span>${m.last_change ? `<span>last change ${ago(m.last_change)}</span>` : ""}
       </div>
       ${m.note ? `<div class="mt-1 text-xs text-muted">${esc(m.note)}</div>` : ""}
       ${m.last_error ? `<div class="mt-1 text-xs text-critical">${esc(m.last_error)}</div>` : ""}
       <div class="mt-1.5 flex items-center justify-between gap-2">
-        <a class="text-[11px] mono text-faint truncate hover:text-authority" href="${esc(m.url)}" target="_blank" rel="noopener">${esc(m.url)}</a>
-        <button type="button" class="btn !min-h-[28px] !text-[11px] shrink-0 admin-action" data-check="${esc(m.id)}">${icon("refresh", "text-[14px]")}Check now</button>
+        <a class="text-xs mono text-faint truncate hover:text-authority" href="${esc(m.url)}" target="_blank" rel="noopener">${esc(m.url)}</a>
+        <button type="button" class="btn !min-h-[28px] !text-xs shrink-0 admin-action" data-check="${esc(m.id)}">${icon("refresh", "text-[14px]")}Check now</button>
       </div>
     </div>`).join("") || `<div class="text-sm text-muted">No monitors.</div>`;
   el.querySelectorAll("[data-check]").forEach((b) => {
@@ -497,6 +487,8 @@ function live() {
     incident(inc) {
       if (isEnded(inc)) {                                   // expired / cancelled warning: remove from map + list
         state.incidents = state.incidents.filter((i) => i.id !== inc.id);
+        const latest = document.getElementById("latest");
+        if (latest.querySelector(`a[href*="id=${encodeURIComponent(inc.id)}"]`)) latest.innerHTML = "";
         renderIncidents(); renderMap(false);
         return;
       }

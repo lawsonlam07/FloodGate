@@ -24,11 +24,11 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
 </head>
 <body class="min-h-screen">
 
-<header class="sticky top-0 z-[500] bg-canvas/90 backdrop-blur border-b border-line">
+<header class="sticky top-0 z-[500] bg-canvas border-b border-line">
   <div class="max-w-[1500px] mx-auto px-4 lg:px-6 h-14 flex items-center justify-between gap-3">
     <div class="flex items-center gap-2 min-w-0">
       <span class="material-symbols-outlined icon-fill text-critical" style="font-size:22px">flood</span>
-      <span class="font-extrabold tracking-tight hidden sm:inline">FLOODGATE</span>
+      <span class="font-extrabold tracking-tight hidden sm:inline">FloodGate</span>
       <span class="chip chip-unverified">Admin</span>
       <span class="label text-faint truncate hidden md:inline">scenario control centre · demo tool</span>
     </div>
@@ -52,7 +52,7 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
       </div>
       <button type="button" id="pause-btn" class="btn !min-h-[36px] admin-action" aria-pressed="false"><span class="material-symbols-outlined text-[17px]">pause_circle</span><span class="hidden sm:inline">Pause processing</span></button>
       <span class="chip chip-corroborated hidden sm:inline-flex" title="Context.dev credits spent by this backend"><span class="material-symbols-outlined text-[13px]">toll</span><span id="credits-top" class="tnum">–</span> credits</span>
-      <span class="flex items-center gap-2"><span id="live-dot" class="live-dot" aria-hidden="true"></span><span id="live-text" class="label hidden sm:inline">CONNECTING</span></span>
+      <span class="flex items-center gap-2"><span id="live-dot" class="live-dot" aria-hidden="true"></span><span id="live-text" class="label hidden sm:inline">Connecting</span></span>
       <a id="board-link" href="index.html" target="_blank" rel="noopener" class="btn btn-critical !min-h-[36px]"><span class="material-symbols-outlined text-[16px]">open_in_new</span><span class="hidden sm:inline">Open main board</span></a>
     </div>
   </div>

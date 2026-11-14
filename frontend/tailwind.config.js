@@ -23,8 +23,8 @@ module.exports = {
         severe: "rgb(var(--c-severe) / <alpha-value>)",
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+        sans: ["Public Sans", "system-ui", "sans-serif"],   // the US government's public-service typeface
+        mono: ["Public Sans", "system-ui", "sans-serif"],   // one typeface; numbers use tabular figures
       },
       borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem" },
     },

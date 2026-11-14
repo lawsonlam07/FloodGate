@@ -137,9 +137,9 @@ const bell = {
         <li><a href="${esc(e.href || "#")}" class="flex items-start gap-2.5 px-3 py-2.5 hover:bg-card ${e.at > this.readAt ? "bg-authority/5" : ""}">
           <span class="mt-1.5 w-2 h-2 rounded-full shrink-0" style="background:${ACCENT_COLOR[e.accent] || ACCENT_COLOR.line}"></span>
           <span class="min-w-0 flex-1">
-            <span class="flex items-center justify-between gap-2"><span class="label truncate">${esc(e.name || "")}</span>${ago(e.at, "mono text-[10.5px] text-faint shrink-0")}</span>
+            <span class="flex items-center justify-between gap-2"><span class="label truncate">${esc(e.name || "")}</span>${ago(e.at, "mono text-[12px] text-faint shrink-0")}</span>
             <span class="block text-sm leading-snug">${esc(e.text)}</span>
-            ${e.sub ? `<span class="block mono text-[10.5px] text-faint truncate">${esc(e.sub)}</span>` : ""}
+            ${e.sub ? `<span class="block mono text-[12px] text-faint truncate">${esc(e.sub)}</span>` : ""}
           </span>
         </a></li>`).join("") || `<li class="px-3 py-6 text-sm text-muted text-center">No updates yet. Finished checks and Context.dev verdicts appear here.</li>`}
       </ol>`;
@@ -423,7 +423,7 @@ export function createLive(opts = {}) {
         <div class="min-w-0 flex-1">
           <div class="label truncate toast-label">${esc(incidentName(run.id))}</div>
           <div class="toast-title">${title}</div>
-          ${sub ? `<div class="mt-0.5 mono text-[11px] text-muted flex flex-wrap gap-x-1.5">${sub}</div>` : ""}
+          ${sub ? `<div class="mt-0.5 mono text-xs text-muted flex flex-wrap gap-x-1.5">${sub}</div>` : ""}
           ${lines ? `<div class="mt-2 flex flex-col gap-1">${lines}</div>` : ""}
           ${run.ctx ? `<div class="mt-2 pt-2 border-t border-line flex items-start gap-1.5 text-[12.5px] leading-snug ${run.ctx.amber ? "text-triage" : "text-authority"}">${icon("travel_explore", "text-[16px] mt-px")}<span>${esc(run.ctx.text)}</span></div>` : ""}
         </div>`;
@@ -447,7 +447,7 @@ export function createLive(opts = {}) {
         <a class="min-w-0 flex-1 block" href="${incidentHref(inc.id)}">
           <div class="label toast-label">New official warning · L${esc(inc.severity)}</div>
           <div class="toast-title">${esc(inc.name)}</div>
-          <div class="mono text-[11px] text-muted truncate">${esc(inc.area?.label || "")}</div>
+          <div class="mono text-xs text-muted truncate">${esc(inc.area?.label || "")}</div>
         </a>`);
     show(el);
     armDismiss(el);

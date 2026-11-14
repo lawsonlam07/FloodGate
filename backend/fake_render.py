@@ -72,6 +72,8 @@ NEWS_CSS = _BANNER_CSS + """
 h1{font-size:36px;line-height:1.15;margin:8px 0 12px}.standfirst{font-size:21px;color:#333;margin:0 0 14px}
 .meta{font:14px/1.5 system-ui,sans-serif;color:#666;border-top:1px solid #ddd;border-bottom:1px solid #ddd;padding:8px 0;margin-bottom:20px}
 blockquote{margin:16px 0;padding-left:16px;border-left:3px solid #c0151b;font-style:italic}
+.lead{margin:0 0 20px}.lead img{width:100%;height:auto;display:block;border-radius:3px}
+.lead figcaption{font:13px/1.4 system-ui,sans-serif;color:#666;margin-top:6px}
 aside h3{font:700 14px/1 system-ui,sans-serif;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #161616;padding-bottom:6px}
 aside ol{padding-left:20px;font-size:16px}aside li{margin:10px 0}
 .cookie{position:fixed;left:16px;right:16px;bottom:16px;max-width:640px;margin:0 auto;background:#161616;color:#fff;padding:14px 16px;border-radius:6px;font:14px/1.4 system-ui,sans-serif;display:flex;gap:12px;align-items:center;justify-content:space-between}
@@ -149,7 +151,7 @@ def render_news(spec: dict, page: dict) -> str:
 <h1>{e(page.get("headline", ""))}</h1>
 <p class="standfirst">{e(page.get("standfirst", ""))}</p>
 <div class="meta">{e(page.get("byline", ""))} · {e(page.get("published", ""))}{updated}</div>
-{paras}{quotes}
+{lead}{paras}{quotes}
 </article>
 <aside><h3>Most read</h3><ol>{most}</ol></aside></div>
 <footer>© 2026 {e(outlet)} (fictional)</footer>

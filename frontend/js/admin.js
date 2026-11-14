@@ -22,7 +22,7 @@ const HAZARD_ICON = {
   landslide: "landslide", hazmat: "science", power_outage: "power_off", heatwave: "thermostat", avalanche: "ac_unit",
   tsunami: "tsunami", dam_failure: "water_damage", other: "warning",
 };
-const LANG_FLAG = { en: "🇬🇧", de: "🇩🇪", fr: "🇫🇷", it: "🇮🇹", es: "🇪🇸", nl: "🇳🇱", pl: "🇵🇱", sv: "🇸🇪", pt: "🇵🇹", cs: "🇨🇿", el: "🇬🇷", fi: "🇫🇮" };
+const LANG_FLAG = {};                       // language codes are shown as plain text
 const STAGES = ["detected", "extracting", "extracted", "grouping", "grouped", "done"];
 const TERMINAL = new Set(["done", "failed", "skipped"]);
 const STAGE_LABEL = { detected: "change detected", extracting: "Context.dev extracting", extracted: "claims extracted",
@@ -279,7 +279,7 @@ function scenarioCard(sc) {
         ${icon(HAZARD_ICON[sc.hazard] || "warning", "text-[20px] mt-0.5")}
         <div class="min-w-0">
           <div class="font-semibold leading-snug">${esc(sc.name)}</div>
-          <div class="mono text-[11px] text-faint truncate">${esc(sc.region)} · ${langTag(sc)}</div>
+          <div class="mono text-xs text-faint truncate">${esc(sc.region)} · ${langTag(sc)}</div>
         </div>
       </div>
       <div class="flex flex-col items-end gap-1 shrink-0">${statusChip(sc)}${autoChip(sc)}</div>
@@ -394,14 +394,14 @@ function pipelineRows(sc) {
     <div class="rounded-lg border ${running ? "border-authority/60" : "border-line"} bg-canvas/40 p-3">
       <div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
         <div class="min-w-0 flex-1 basis-[11rem]">
-          <div class="font-semibold truncate">${esc(p.name)} <span class="chip chip-tag !text-[10px] !py-0 align-middle">${esc(p.kind)}</span></div>
-          <div class="mono text-[10.5px] text-faint truncate">${esc(p.source_id)}</div>
+          <div class="font-semibold truncate">${esc(p.name)} <span class="chip chip-tag !text-xs !py-0 align-middle">${esc(p.kind)}</span></div>
+          <div class="mono text-[12px] text-faint truncate">${esc(p.source_id)}</div>
         </div>
         <div class="flex items-center gap-2 shrink-0">${chip}
           <span class="mono tnum text-lg font-bold ${running ? "text-authority" : row.stage === "done" ? "text-ok" : "text-muted"}" data-sw="${esc(p.source_id)}">${row.stage ? fmtSecs(currentMs(row)) : "–"}</span></div>
       </div>
       ${stepper(row)}
-      <div class="mt-1.5 mono text-[11px] ${row.stage === "failed" ? "text-critical" : "text-muted"} min-h-[1.2em]">${row.stage ? esc(row.detail || STAGE_LABEL[row.stage]) : "waiting for a change…"}</div>
+      <div class="mt-1.5 mono text-xs ${row.stage === "failed" ? "text-critical" : "text-muted"} min-h-[1.2em]">${row.stage ? esc(row.detail || STAGE_LABEL[row.stage]) : "waiting for a change…"}</div>
     </div>`;
   }).join("");
 }
@@ -425,7 +425,7 @@ function renderSelected() {
         ${icon(HAZARD_ICON[sc.hazard] || "warning", "text-[26px] mt-0.5")}
         <div class="min-w-0">
           <h1 class="text-xl font-extrabold tracking-tight leading-tight">${esc(sc.name)}</h1>
-          <div class="mono text-[11px] text-faint">${esc(sc.region)} · ${langTag(sc)} · ${esc(sc.hazard.replace(/_/g, " "))} · ${esc(sc.area?.label || "")}</div>
+          <div class="mono text-xs text-faint">${esc(sc.region)} · ${langTag(sc)} · ${esc(sc.hazard.replace(/_/g, " "))} · ${esc(sc.area?.label || "")}</div>
         </div>
       </div>
       <div class="flex flex-wrap items-center gap-1.5">${scaleChip(sc)}${statusChip(sc)}${autoChip(sc)}</div>
@@ -539,7 +539,7 @@ function alertRow(a) {
   const href = a.incident_id ? api.link(`incident.html?id=${encodeURIComponent(a.incident_id)}`) + (a.item_id ? `#${encodeURIComponent(a.item_id)}` : "") : null;
   return `
   <${href ? `a href="${href}" target="_blank" rel="noopener"` : "div"} class="block rounded border border-line bg-canvas/40 px-2.5 py-2 hover:border-line2">
-    <div class="flex items-center justify-between gap-2"><span class="chip ${ALERT_CHIP[a.level] || "chip-tag"}">${esc(a.level)}</span>${ago(a.created_at, "mono text-[11px] text-faint")}</div>
+    <div class="flex items-center justify-between gap-2"><span class="chip ${ALERT_CHIP[a.level] || "chip-tag"}">${esc(a.level)}</span>${ago(a.created_at, "mono text-xs text-faint")}</div>
     <div class="mt-1 text-sm font-semibold leading-snug">${esc(a.title)}</div>
     ${a.body ? `<div class="text-xs text-muted">${esc(a.body)}</div>` : ""}
   </${href ? "a" : "div"}>`;
@@ -551,10 +551,10 @@ function checkRow(c) {
     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
       ${c.disagreement ? `<span class="chip chip-unverified">review</span>` : `<span class="chip ${CTX_CHIP[c.status] || "chip-tag"}">${esc(String(c.status).replace("_", " "))}</span>`}
       <span class="text-xs text-muted truncate">${esc(c.source_name || c.source_id)}</span>
-      <span class="ml-auto mono text-[10.5px] text-faint">${clock(c.at)}</span>
+      <span class="ml-auto mono text-[12px] text-faint">${clock(c.at)}</span>
     </div>
     ${c.title ? `<div class="mt-1 text-sm font-semibold leading-snug">${esc(c.title)}</div>` : ""}
-    <div class="mono text-[10.5px] text-faint">${c.importance ? `${esc(c.importance)} importance · ` : ""}${c.confidence != null ? `${Math.round(c.confidence * 100)}% conf · ` : ""}${c.latency_ms != null ? fmtSecs(c.latency_ms) : ""}</div>
+    <div class="mono text-[12px] text-faint">${c.importance ? `${esc(c.importance)} importance · ` : ""}${c.confidence != null ? `${Math.round(c.confidence * 100)}% conf · ` : ""}${c.latency_ms != null ? fmtSecs(c.latency_ms) : ""}</div>
     ${c.disagreement ? `<div class="mt-0.5 text-xs text-triage">Context.dev saw no meaningful change, but ${esc(c.pipeline_new_claims ?? "some")} new claims were extracted. Review.</div>` : ""}
   </div>`;
 }
@@ -635,7 +635,7 @@ function renderEmbed() {
       <div class="card p-3">
         <div class="flex items-center justify-between gap-2">
           <h2 class="font-bold flex items-center gap-2">${icon("route", "text-authority")}Behind the scenes</h2>
-          <span class="mono text-[11px] text-authority">${state.credits} credits</span>
+          <span class="mono text-xs text-authority">${state.credits} credits</span>
         </div>
         <div class="mt-1.5 flex flex-col gap-0.5 mono text-[11.5px] text-muted">
           ${control.showcase ? `<span class="flex items-center gap-1.5">${control.showcase.running ? `<span class="live-dot on"></span>` : icon("slideshow", "text-[14px]")}${esc(showcaseText())}</span>` : ""}
@@ -653,7 +653,7 @@ function renderEmbed() {
             </div>
             ${sc.pages.some((pg) => state.pipeline[pg.source_id]?.stage)
               ? `<div class="flex flex-col gap-1.5">${pipelineRows(sc)}</div>`
-              : `<div class="px-1 mono text-[11px] text-faint">waiting for the next step · ${esc(sc.steps[sc.current_step + 1]?.title || "")}</div>`}
+              : `<div class="px-1 mono text-xs text-faint">waiting for the next step · ${esc(sc.steps[sc.current_step + 1]?.title || "")}</div>`}
           </div>`).join("") || `<div class="p-2 text-sm text-muted">Nothing running at the moment.</div>`}
         </div>
       </div>
@@ -701,7 +701,7 @@ async function loadUsage() {
           <td class="py-1.5 text-right tnum text-muted">${s.calls ? (s.latSum / s.calls / 1000).toFixed(1) + " s" : "–"}</td>
         </tr>`).join("")}</tbody>
     </table>
-    <p class="mt-2 text-[11px] text-faint">Every API call is stored in Tiger Data; this table reads an hourly continuous aggregate.</p>`;
+    <p class="mt-2 text-xs text-faint">Every API call is stored in Tiger Data; this table reads an hourly continuous aggregate.</p>`;
 }
 const USAGE_SERVICES = new Set(["context.dev", "gemini", "anthropic", "elevenlabs", "pipeline"]);
 const SERVICE_CHIP_ADMIN = { "context.dev": "chip-corroborated", gemini: "chip-verified", anthropic: "chip-verified" };

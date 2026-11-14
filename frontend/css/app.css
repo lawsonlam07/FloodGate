@@ -25,15 +25,15 @@
   --fill-critical: #EF4444; --fill-severe: #F97316; --fill-triage: #F59E0B; --fill-authority: #38BDF8; --fill-ok: #10B981;
 }
 html, body { background: var(--canvas); color: var(--ink); }
-body { font-family: Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-.mono, .tnum { font-family: "JetBrains Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+body { font-family: "Public Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+.mono, .tnum { font-variant-numeric: tabular-nums; }   /* one typeface; numbers line up */
 .material-symbols-outlined { font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24; font-size: 18px; line-height: 1; vertical-align: middle; }
 .icon-fill { font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24; }
 
 /* ---------- chips (status / severity / tags) ---------- */
 .chip { display: inline-flex; align-items: center; gap: .3rem; padding: .15rem .45rem; border-radius: .25rem; border: 1px solid var(--line);
-  font: 600 10.5px/1.3 "JetBrains Mono", monospace; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; color: var(--muted); background: transparent; }
-.chip .dot { width: 6px; height: 6px; border-radius: 9999px; background: currentColor; }
+  font: 600 12.5px/1.35 "Public Sans", system-ui, sans-serif; white-space: nowrap; color: var(--muted); background: transparent; }
+.chip .dot { display: none; }
 .chip-verified     { color: var(--ok);        background: rgba(16,185,129,.12); border-color: rgba(16,185,129,.3); }
 .chip-corroborated { color: var(--authority); background: rgba(56,189,248,.12); border-color: rgba(56,189,248,.3); }
 .chip-unverified   { color: var(--triage);    background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.3); }
@@ -87,24 +87,24 @@ a.card:hover, .card-hover:hover { border-color: var(--line2); background: var(--
 .banner-icon-potential { color: var(--triage); } .banner-icon-critical { color: var(--critical); }
 .banner-icon-debunk { color: var(--critical); } .banner-icon-info { color: var(--authority); }
 @keyframes fg-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
-.pulse { animation: fg-pulse 1.4s ease-in-out infinite; }
+.pulse { animation: none; }
 
 /* ---------- live dot ---------- */
 .live-dot { width: 8px; height: 8px; border-radius: 9999px; background: var(--faint); display: inline-block; }
-.live-dot.on { background: var(--ok); box-shadow: 0 0 0 0 rgba(16,185,129,.6); animation: fg-ring 2s infinite; }
+.live-dot.on { background: var(--ok); }
 .live-dot.mock { background: var(--triage); }
 @keyframes fg-ring { 0% { box-shadow: 0 0 0 0 rgba(16,185,129,.55); } 70% { box-shadow: 0 0 0 7px rgba(16,185,129,0); } 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); } }
 
 /* ---------- leaflet dark tweaks ---------- */
-.leaflet-container { background: var(--map-bg); font-family: Inter, system-ui, sans-serif; }
+.leaflet-container { background: var(--map-bg); font-family: "Public Sans", system-ui, sans-serif; }
 .leaflet-control-attribution { background: var(--tip-bg) !important; color: var(--faint) !important; font-size: 10px; }
 .leaflet-control-attribution a { color: var(--muted) !important; }
 .leaflet-bar a { background: var(--elevated) !important; color: var(--ink) !important; border-color: var(--line) !important; }
 .fg-tip { background: var(--tip-bg) !important; border: 1px solid var(--line2) !important; color: var(--ink) !important; border-radius: .25rem !important;
-  font: 600 11px/1.2 "JetBrains Mono", monospace !important; letter-spacing: .03em; box-shadow: none !important; padding: 3px 6px !important; }
+  font: 600 12px/1.25 "Public Sans", system-ui, sans-serif !important; box-shadow: none !important; padding: 3px 6px !important; }
 .fg-tip::before { display: none !important; }
 @keyframes fg-area { 0%, 100% { stroke-opacity: 1; } 50% { stroke-opacity: .25; } }
-.fg-area-pulse { animation: fg-area 1.6s ease-in-out infinite; }
+.fg-area-pulse { animation: none; }
 
 /* ---------- misc ---------- */
 .clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -126,7 +126,7 @@ details[open] > summary .chev { transform: rotate(180deg); }
 .btn:disabled { opacity: .55; cursor: default; }
 .btn-on { border-color: var(--authority); background: rgba(56,189,248,.14); }
 .btn-critical { background: var(--critical); border-color: var(--critical); color: #fff; }
-.label { font: 600 11px/1.3 "JetBrains Mono", monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.label { font: 600 13px/1.35 "Public Sans", system-ui, sans-serif; color: var(--muted); }
 
 /* dark scrollbars everywhere (activity log, filter bar, page) */
 html { scrollbar-color: var(--scroll) var(--canvas); }
@@ -156,12 +156,12 @@ html { scrollbar-color: var(--scroll) var(--canvas); }
 
 /* glowing accent border on changed items / cards (3 pulses, then a calm static ring) */
 @keyframes fg-glow { 0%, 100% { box-shadow: 0 0 0 1px var(--glow, var(--authority)); } 50% { box-shadow: 0 0 0 1px var(--glow, var(--authority)), 0 0 18px 2px var(--glow, var(--authority)); } }
-.glow { --glow: var(--authority); animation: fg-glow 1s ease-in-out 3; box-shadow: 0 0 0 1px var(--glow); }
+.glow { --glow: var(--authority); box-shadow: 0 0 0 1px var(--glow); }
 .glow-ok { --glow: rgba(16,185,129,.85); } .glow-false { --glow: rgba(239,68,68,.9); } .glow-held { --glow: rgba(245,158,11,.9); }
 
 /* ribbons: "NEW", "Unverified → FALSE"; fade out over 60 s */
 .ribbon { display: inline-flex; align-items: center; gap: .25rem; padding: .1rem .4rem; border-radius: .25rem;
-  font: 700 10px/1.3 "JetBrains Mono", monospace; letter-spacing: .06em; text-transform: uppercase; color: #0B111A; background: var(--fill-authority);
+  font: 600 12.5px/1.3 "Public Sans", system-ui, sans-serif; color: #0B111A; background: var(--fill-authority);
   animation: fg-fade 60s linear forwards; }
 .ribbon-false { background: var(--fill-critical); color: #fff; } .ribbon-ok { background: var(--fill-ok); } .ribbon-held { background: var(--fill-triage); }
 @keyframes fg-fade { 0%, 85% { opacity: 1; } 100% { opacity: 0; } }
@@ -172,13 +172,13 @@ html { scrollbar-color: var(--scroll) var(--canvas); }
 .kf-dot { width: 7px; height: 7px; border-radius: 9999px; background: var(--authority); box-shadow: 0 0 0 3px rgba(56,189,248,.2); flex-shrink: 0; margin-top: 6px; }
 
 /* "+1" next to a count chip on home cards */
-.plus-badge { display: inline-block; margin-left: 2px; padding: 0 .25rem; border-radius: .25rem; background: var(--ink); color: var(--canvas);
-  font: 700 10px/1.4 "JetBrains Mono", monospace; animation: fg-fade 4s linear forwards; }
-.updated-chip { color: #0B111A; background: var(--fill-authority); border-color: var(--fill-authority); }
+.plus-badge { display: none !important; margin-left: 2px; padding: 0 .25rem; border-radius: .25rem; background: var(--ink); color: var(--canvas);
+  font: 700 10px/1.4 inherit; animation: fg-fade 4s linear forwards; }
+.updated-chip { color: var(--authority); background: transparent; border-color: transparent; padding-left: 0; padding-right: 0; }
 
 /* map: rings of a just-updated incident pulse brighter */
 @keyframes fg-ring-hot { 0%, 100% { stroke-width: 1px; } 50% { stroke-width: 4px; fill-opacity: .7; } }
-.fg-ring-hot { animation: fg-ring-hot .9s ease-in-out 5; }
+.fg-ring-hot { animation: none; }
 
 /* "↑ 3 new updates" pill */
 .new-pill { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 600; display: inline-flex; align-items: center; gap: .35rem;
@@ -211,7 +211,7 @@ html { scrollbar-color: var(--scroll) var(--canvas); }
 
 /* v0.7: small dot for verified incidents when their rings would be tiny; L4 gets a faint pulsing halo */
 @keyframes fg-halo { 0%, 100% { fill-opacity: .35; } 50% { fill-opacity: .06; } }
-.fg-dot-halo { animation: fg-halo 1.8s ease-in-out infinite; }
+.fg-dot-halo { animation: none; }
 @media (prefers-reduced-motion: reduce) { .fg-dot-halo { animation: none; } }
 
 /* ======================= v0.8: one toast slot + bell ======================= */
@@ -219,7 +219,7 @@ html { scrollbar-color: var(--scroll) var(--canvas); }
 .bell-btn { position: relative; width: 36px; height: 36px; display: grid; place-items: center; border-radius: .375rem; color: var(--muted); }
 .bell-btn:hover, .bell-btn[aria-expanded="true"] { background: var(--elevated); color: var(--ink); }
 .bell-badge { position: absolute; top: 2px; right: 1px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9999px; background: var(--critical);
-  color: #fff; font: 700 10px/17px "JetBrains Mono", monospace; text-align: center; box-shadow: 0 0 0 2px var(--canvas); }
+  color: #fff; font: 700 10px/17px inherit; text-align: center; box-shadow: 0 0 0 2px var(--canvas); }
 .bell-panel { position: fixed; z-index: 1300; top: 60px; right: 8px; left: 8px; max-height: min(70vh, 560px); display: flex; flex-direction: column;
   background: var(--elevated); border: 1px solid var(--line2); border-radius: .5rem; box-shadow: var(--shadow); overflow: hidden; }
 .bell-panel.hidden { display: none; }

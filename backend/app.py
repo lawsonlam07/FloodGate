@@ -13,16 +13,19 @@ import json
 import logging
 import mimetypes
 import os
+import re
+from html import escape as _h
+from urllib.parse import quote
 from contextlib import asynccontextmanager
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from .config import (ADMIN_TOKEN, CONTEXT_REPLAY_DIR, CREDIT_BUDGET, FEED_MONITORS, ROOT, SCENARIO_ERRORS, SITE_LOCAL_URL, SOURCES,
-                     site_public_url)
+from .config import (ADMIN_TOKEN, CONTEXT_REPLAY_DIR, CREDIT_BUDGET, FEED_MONITORS, PUBLIC_BASE_URL, ROOT, SCENARIO_ERRORS,
+                     SITE_LOCAL_URL, SOURCES, site_public_url)
 from .context_client import ContextClient, ReplayContextClient
 from .context_monitors import ContextMonitors
 from .monitors import CapFeedMonitor, Scheduler
@@ -125,6 +128,29 @@ class AdminGuard:
 
 
 app.add_middleware(AdminGuard)
+
+
+class FreshPages:
+    """Pages, scripts and styles change with every deploy: tell browsers to check for a newer copy each time (a cheap
+    304 when unchanged), so nobody ends up with old and new script files mixed. Fonts and images keep normal caching."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        path = scope.get("path", "") if scope["type"] == "http" else ""
+        if not (path == "/" or path.endswith((".html", ".js", ".css"))) or path.startswith(("/api/", "/sites/")):
+            return await self.app(scope, receive, send)
+
+        async def send_fresh(message):
+            if message["type"] == "http.response.start":
+                headers = [(k, v) for k, v in message.get("headers", []) if k.lower() != b"cache-control"]
+                message = {**message, "headers": headers + [(b"cache-control", b"no-cache")]}
+            await send(message)
+        await self.app(scope, receive, send_fresh)
+
+
+app.add_middleware(FreshPages)
 
 
 # ---- read API ------------------------------------------------------------------------------------------------
@@ -451,4 +477,73 @@ app.mount("/sites", StaticFiles(directory=ROOT / "fake_site", html=True), name="
 # ---- frontend (mounted last so /api wins) --------------------------------------------------------------------------
 FRONTEND = ROOT / "frontend"
 FRONTEND.mkdir(exist_ok=True)
+
+# Search engines and link previews (WhatsApp, Slack, X) don't run JavaScript, so the board and each incident page get
+# their title, description, preview tags and schema.org data from the server: that is how people find an incident
+# and see, before clicking, which official source it rests on.
+SITE_TITLE = "FloodGate"
+SITE_TAGLINE = "FloodGate: holding back the flood of information in an emergency"
+SITE_DESCRIPTION = ("In an emergency, information floods in: posts, rumours, news and official updates. FloodGate holds "
+                    "back the flood and lets through what official sources confirm, with a source on every line.")
+
+
+def _base_url(request: Request) -> str:
+    return PUBLIC_BASE_URL or str(request.base_url).rstrip("/")
+
+
+def _page_with_meta(page: str, title: str, description: str, url: str, jsonld: dict | None = None,
+                    share_title: str | None = None) -> HTMLResponse:
+    html = (FRONTEND / page).read_text()
+    html = re.sub(r"<title>.*?</title>\s*", "", html, count=1, flags=re.S)
+    html = re.sub(r'<meta name="description"[^>]*>\s*', "", html, count=1)
+    tags = (f"<title>{_h(title)}</title>\n"
+            f'<meta name="description" content="{_h(description)}">\n'
+            f'<link rel="canonical" href="{_h(url)}">\n'
+            '<meta property="og:type" content="website">\n<meta property="og:site_name" content="FloodGate">\n'
+            f'<meta property="og:title" content="{_h(share_title or title)}">\n<meta property="og:description" content="{_h(description)}">\n'
+            f'<meta property="og:url" content="{_h(url)}">\n<meta name="twitter:card" content="summary">\n')
+    if jsonld:
+        tags += f'<script type="application/ld+json">{json.dumps(jsonld, ensure_ascii=False).replace("</", "<\\/")}</script>\n'
+    return HTMLResponse(html.replace("</head>", tags + "</head>", 1))
+
+
+@app.get("/", include_in_schema=False)
+@app.get("/index.html", include_in_schema=False)
+def board_page(request: Request):
+    base = _base_url(request)
+    return _page_with_meta("index.html", SITE_TITLE, SITE_DESCRIPTION, f"{base}/", share_title=SITE_TAGLINE, jsonld=
+                           {"@context": "https://schema.org", "@type": "WebSite", "name": "FloodGate", "url": f"{base}/",
+                            "description": SITE_DESCRIPTION})
+
+
+@app.get("/incident.html", include_in_schema=False)
+def incident_page(request: Request, id: str = ""):
+    base = _base_url(request)
+    inc = store.incidents.get(id)
+    if inc is None:
+        return _page_with_meta("incident.html", "Incident · FloodGate", SITE_DESCRIPTION, f"{base}/incident.html")
+    v = store.incident_view(inc)
+    absolute = lambda u: f"{base}{u}" if (u or "").startswith("/") else (u or "")
+    sources = sorted(v.get("sources") or [], key=lambda s: s.get("kind") != "official")
+    officials = [s["name"] for s in sources if s.get("kind") == "official"]
+    title = f"{v['name']} · FloodGate"                                   # the tab: short
+    share_title = f"{v['name']}: verified updates" + (f" from {officials[0]}" if officials else "")   # previews / search
+    summary = v.get("summary") or ""
+    description = (summary if len(summary) <= 200 else summary[:197].rsplit(" ", 1)[0] + "…")
+    if sources:
+        description += " Sources: " + ", ".join(s["name"] for s in sources) + "."
+    url = f"{base}/incident.html?id={quote(inc.id)}"
+    area = v.get("area") or {}
+    jsonld = {
+        "@context": "https://schema.org", "@type": "SpecialAnnouncement", "name": v["name"], "text": summary,
+        "datePosted": v.get("created_at"), "dateModified": v.get("updated_at"), "url": url,
+        "spatialCoverage": {"@type": "Place", "name": area.get("label") or v["name"],
+                            **({"geo": {"@type": "GeoCoordinates", "latitude": area["lat"], "longitude": area["lon"]}}
+                               if area.get("lat") is not None and area.get("lon") is not None else {})},
+        "isBasedOn": [{"@type": "WebPage", "name": s["name"], "url": absolute(s.get("url"))} for s in sources],
+        "publisher": {"@type": "Organization", "name": "FloodGate", "url": f"{base}/"},
+    }
+    return _page_with_meta("incident.html", title, description, url, jsonld, share_title=share_title)
+
+
 app.mount("/", StaticFiles(directory=FRONTEND, html=True), name="frontend")

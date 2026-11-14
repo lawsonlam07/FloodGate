@@ -34,7 +34,7 @@ export function startAgoTicker() {
 export function updatedChecked(inc, cls = "") {
   const u = inc?.updated_at, c = inc?.checked_at;
   const showChecked = c && (!u || Date.parse(c) - Date.parse(u) > 30000);
-  return `<span class="${cls}">updated ${ago(u)}${showChecked ? ` · checked ${ago(c)}` : ""}</span>`;
+  return `<span class="${cls}">Updated ${ago(u)}${showChecked ? `, checked ${ago(c)}` : ""}</span>`;
 }
 
 export const icon = (name, cls = "") => `<span class="material-symbols-outlined ${cls}" aria-hidden="true">${esc(name)}</span>`;
@@ -48,10 +48,26 @@ export const STATUS = {
 };
 export const STATUS_ORDER = ["verified", "corroborated", "unverified", "disputed", "contradicted"];
 
-export const statusChip = (status, n = null) =>
-  `<span class="chip chip-${esc(status)}"><span class="dot"></span>${esc(STATUS[status]?.label || status)}${n === null ? "" : ` <span class="tnum">${n}</span>`}</span>`;
+// For the public the rules' five statuses fold into three words; the detail stays in the hover text.
+export const SIMPLE = {
+  confirmed:   { label: "Confirmed",   cls: "chip-verified" },
+  unconfirmed: { label: "Unconfirmed", cls: "chip-unverified" },
+  false:       { label: "False",       cls: "chip-contradicted" },
+};
+export const simpleOf = (status) => (status === "verified" ? "confirmed" : status === "contradicted" ? "false" : "unconfirmed");
+const STATUS_DETAIL = {
+  verified: "An official source states it", corroborated: "Several independent sources agree; no official confirmation yet",
+  unverified: "Only one source so far", disputed: "Sources disagree", contradicted: "An official source says it is false",
+};
+export const simpleCounts = (c = {}) => ({
+  confirmed: c.verified || 0, unconfirmed: (c.corroborated || 0) + (c.unverified || 0) + (c.disputed || 0), false: c.contradicted || 0,
+});
+export const simpleChip = (key, n = null, title = "") =>
+  `<span class="chip ${SIMPLE[key].cls}"${title ? ` title="${esc(title)}"` : ""}><span class="dot"></span>${SIMPLE[key].label}${n === null ? "" : ` <span class="tnum">${n}</span>`}</span>`;
 
-export const heldChip = () => `<span class="chip chip-held" title="Held back: unconfirmed reassurance">${icon("pan_tool", "text-[13px]")}Held</span>`;
+export const statusChip = (status, n = null) => simpleChip(simpleOf(status), n, STATUS_DETAIL[status] || "");
+
+export const heldChip = () => `<span class="chip chip-held" title="An unconfirmed reassurance: wait for an official source before acting on it">Don't act yet</span>`;
 
 export const SEVERITY = {
   4: { label: "Critical", color: "#EF4444" },
@@ -61,7 +77,7 @@ export const SEVERITY = {
 };
 export const sevColor = (s) => (SEVERITY[s] || SEVERITY[1]).color;
 export const sevChip = (s, label) =>
-  `<span class="chip chip-sev${esc(s)}">L${esc(s)} · ${esc(label || SEVERITY[s]?.label || "")}</span>`;
+  `<span class="chip chip-sev${esc(s)}">L${esc(s)} ${esc(SEVERITY[s]?.label || label || "")}</span>`;
 
 export const KIND_ICON = { official: "account_balance", news: "newspaper", social: "forum", other: "public" };
 export const STANCE = { asserts: "states", reports_unverified: "relays, unverified", denies: "says false" };
@@ -69,9 +85,8 @@ export const STANCE = { asserts: "states", reports_unverified: "relays, unverifi
 export const CATEGORY_LABEL = (c) => String(c || "").replace(/_/g, " ");
 
 export function countChips(counts = {}) {
-  const parts = STATUS_ORDER.filter((s) => counts[s]).map((s) => statusChip(s, counts[s]));
-  if (counts.held) parts.push(`<span class="chip chip-held">Held <span class="tnum">${counts.held}</span></span>`);
-  return parts.join(" ");
+  const c = simpleCounts(counts);
+  return Object.keys(SIMPLE).filter((k) => c[k]).map((k) => simpleChip(k, c[k])).join(" ");
 }
 
 // localStorage that never throws (private mode, blocked storage, previews).
@@ -90,7 +105,7 @@ export function setLive(state) {
   const txt = document.getElementById("live-text");
   if (!dot || !txt) return;
   dot.className = "live-dot" + (state === "live" ? " on" : state === "mock" ? " mock" : "");
-  txt.textContent = state === "live" ? "LIVE" : state === "mock" ? "MOCK DATA" : "RECONNECTING";
+  txt.textContent = state === "live" ? "Live" : state === "mock" ? "Mock data" : "Reconnecting";
 }
 
 export function toast(msg) {
@@ -136,9 +151,10 @@ export const isEnded = (inc) => inc?.status === "ended";
 
 // FMI's public warning colours, taken from the warning's own colour word; falls back to the severity colour.
 export const WARNING_COLORS = { yellow: "#FACC15", orange: "#F97316", red: "#EF4444" };
+// Official warnings are drawn on our one L1–L4 scale; their level already comes from the official colour
+// (red = L4, orange = L3, yellow = L1), so the map needs a single key.
 export function warningColor(inc) {
-  const m = String(inc?.name || "").match(/\b(yellow|orange|red)\b/i);
-  return m ? WARNING_COLORS[m[1].toLowerCase()] : sevColor(inc?.severity);
+  return sevColor(inc?.severity);
 }
 
 // ---- v0.3 shared components ----------------------------------------------------
@@ -157,7 +173,7 @@ const SERVICE_CHIP = { "context.dev": "chip-corroborated", anthropic: "chip-veri
 // API activity feed rows (home System panel + admin page).
 export function activityRows(list, limit = 60) {
   return list.slice(0, limit).map((a) => `
-    <div class="rounded border border-line bg-canvas/40 px-2 py-1.5 mono text-[11px] leading-snug">
+    <div class="rounded border border-line bg-canvas/40 px-2 py-1.5 mono text-xs leading-snug">
       <div class="flex items-center justify-between gap-2">
         <span class="flex items-center gap-1.5 min-w-0"><span class="chip ${SERVICE_CHIP[a.service] || "chip-tag"}">${esc(a.service)}</span>
           <span class="text-ink truncate">${esc(a.action)}</span></span>

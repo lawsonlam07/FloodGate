@@ -6,7 +6,7 @@ import * as api from "./api.js";
 import { createLive, ribbonText, animDelay, setPausedChip } from "./live.js";
 import { renderPhotos } from "./photos.js";
 import {
-  initTheme,
+  initTheme, SIMPLE, simpleOf,
   esc, ago, clock, icon, sevChip, countChips, statusChip, heldChip, STATUS, STATUS_ORDER, KIND_ICON, STANCE,
   CATEGORY_LABEL, lsGet, lsSet, setLive, startAgoTicker, toast, isWarning, rangeText, untilText, validText, isEnded, capturedText, updatedChecked, onResume,
 } from "./ui.js";
@@ -40,52 +40,61 @@ function renderHeader() {
   if (!inc) return;
   document.title = `${inc.name} · FloodGate`;
   if (isWarning(inc)) { $("inc-head").innerHTML = ""; return; }
-  const sources = (inc.sources || []).map((s) =>
-    `<a href="${esc(s.url)}" target="_blank" rel="noopener" class="chip chip-tag hover:text-ink" title="${esc(capturedText(s) || s.url)}">${icon(KIND_ICON[s.kind] || "public", "text-[14px]")}${esc(s.name)}</a>`).join(" ");
+  const RANK = { official: 0, news: 1, social: 2 };
+  const KIND_WORD = { official: "official", news: "news", social: "social media" };
+  const sources = [...(inc.sources || [])].sort((a, b) => (RANK[a.kind] ?? 3) - (RANK[b.kind] ?? 3)).map((s) =>
+    `<a href="${esc(s.url)}" target="_blank" rel="noopener" class="chip ${s.kind === "official" ? "chip-corroborated" : "chip-tag"} hover:text-ink max-w-full !whitespace-normal" title="${esc(capturedText(s) || s.url)}">${esc(s.name)} <span class="opacity-70 normal-case">· ${esc(KIND_WORD[s.kind] || s.kind)}</span></a>`).join(" ");
   $("inc-head").innerHTML = `
   <div class="card accent-sev${esc(inc.severity)} p-4">
     <div class="flex items-center justify-between gap-2 flex-wrap">
       <div class="flex items-center gap-2">${sevChip(inc.severity, inc.severity_label)}
-        <span class="label text-faint">${esc(inc.status)}</span></div>
+        </div>
       ${updatedChecked(inc, "label text-faint")}
     </div>
     <h1 class="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">${esc(inc.name)}</h1>
-    <p class="mt-2 text-sm sm:text-base text-muted">${esc(inc.summary)}</p>
-    <div class="mt-3 label text-faint flex items-center gap-1">${icon("location_on", "text-[14px]")}${esc(inc.area?.label || "")}
-      ${(inc.hazards || []).length ? ` · ${esc(inc.hazards.join(", ").replace(/_/g, " "))}` : ""}</div>
+    ${sources ? `<div class="mt-2 flex flex-wrap items-center gap-1.5"><span class="label text-faint mr-0.5">Sources</span>${sources}</div>` : ""}
+    <p class="mt-3 text-sm sm:text-base text-muted">${esc(inc.summary)}</p>
+    <div class="mt-3 label text-faint flex items-center gap-1">${esc(inc.area?.label || "")}
+      ${(inc.hazards || []).length ? ` · ${esc((([h]) => h[0].toUpperCase() + h.slice(1))([inc.hazards.join(", ").replace(/_/g, " ")]))}` : ""}</div>
     <div class="mt-3 flex flex-wrap gap-1.5">${countChips(inc.counts)}</div>
-    ${sources ? `<details class="mt-3 pt-3 border-t border-line"><summary class="label flex items-center justify-between">Watched sources · ${(inc.sources || []).length}<span class="material-symbols-outlined chev text-faint">expand_more</span></summary><div class="mt-2 flex flex-wrap gap-1.5">${sources}</div></details>` : ""}
   </div>`;
 }
 
 // ---------------------------------------------------------------- key facts
 
+// "What to do" leads, full width with a big heading; the rest sits below in three boxes.
 const KF_SECTIONS = [
   { key: "confirmed", title: "Confirmed", icon: "verified", cls: "text-ok", border: "border-ok/40" },
-  { key: "what_to_do", title: "What to do", icon: "campaign", cls: "text-authority", border: "border-authority/40", note: "official instructions only" },
   { key: "not_true", title: "Not true", icon: "block", cls: "text-critical", border: "border-critical/40" },
-  { key: "dont_act_yet", title: "Don't act on yet", icon: "pan_tool", cls: "text-triage", border: "border-triage/40", note: "unconfirmed reassurance" },
-  { key: "developing", title: "Developing", icon: "trending_up", cls: "text-triage", border: "border-triage/40", note: "not yet confirmed" },
+  { key: "unconfirmed", title: "Not confirmed yet", icon: "pan_tool", cls: "text-triage", border: "border-triage/40", note: "Don't act on these until an official source confirms." },
 ];
 
 function kfLine(section, f) {
   const href = `#${encodeURIComponent(f.item_id)}`;
   let body = `<span>${esc(f.title)}</span>`;
   if (section === "not_true") {
-    body = `<span><span class="struck">${esc(f.title)}</span>${f.debunked_by ? `<span class="block mono text-[11px] text-critical/90 mt-0.5">debunked by ${esc(f.debunked_by)}</span>` : ""}</span>`;
-  } else if (section === "developing") {
-    body = `<span>${esc(f.title)}<span class="ml-1.5 align-middle">${statusChip(f.status || "unverified")}</span>${f.origins ? `<span class="ml-1 mono text-[11px] text-faint">${esc(f.origins)} origins</span>` : ""}</span>`;
+    body = `<span><span class="struck">${esc(f.title)}</span>${f.debunked_by ? `<span class="block mono text-[12px] text-critical/90 mt-0.5">debunked by ${esc(f.debunked_by)}</span>` : ""}</span>`;
+  } else if (section === "unconfirmed") {
+    body = `<span>${esc(f.title)}${f.held ? `<span class="ml-1.5 align-middle">${heldChip()}</span>` : f.origins ? `<span class="ml-1.5 mono text-[12px] text-faint">${esc(f.origins)} sources</span>` : ""}</span>`;
   }
-  const bullet = section === "what_to_do" ? icon("arrow_right", "text-authority text-[18px] -ml-1") : `<span class="mt-[7px] w-1.5 h-1.5 rounded-full bg-current opacity-70 shrink-0"></span>`;
+  const big = section === "what_to_do";
+  const bullet = `<span class="mt-[9px] w-1.5 h-1.5 rounded-full ${big ? "bg-authority" : "bg-current opacity-70"} shrink-0"></span>`;
   const fresh = kfFresh.has(`${section}:${f.item_id}`) ? Date.now() - kfFresh.get(`${section}:${f.item_id}`) : Infinity;
   const flash = fresh < 2500 ? `kf-fresh" style="${animDelay(fresh)}` : "";
   const dot = fresh < 60000 ? `<span class="kf-dot ml-auto" title="new or changed"></span>` : "";
-  return `<li><a href="${href}" data-goto="${esc(f.item_id)}" class="flex items-start gap-2 py-1.5 px-1 -mx-1 rounded text-sm leading-snug text-ink hover:bg-elevated ${flash}">${bullet}${body}${dot}</a></li>`;
+  const text = big ? "text-base font-medium leading-snug py-1" : "text-[15px] leading-snug py-1.5";
+  return `<li><a href="${href}" data-goto="${esc(f.item_id)}" class="flex items-start gap-2 px-1 -mx-1 rounded text-ink hover:bg-elevated ${text} ${flash}">${bullet}${body}${dot}</a></li>`;
+}
+
+// Held-back reassurances and developing reports are one group for readers: not confirmed yet.
+function keyFactGroups() {
+  const kf = state.keyFacts || {};
+  return { ...kf, unconfirmed: [...(kf.dont_act_yet || []).map((f) => ({ ...f, held: true })), ...(kf.developing || [])] };
 }
 
 function trackKeyFacts() {
-  const kf = state.keyFacts || {};
-  for (const s of KF_SECTIONS) {
+  const kf = keyFactGroups();
+  for (const s of [{ key: "what_to_do" }, ...KF_SECTIONS]) {
     const now = new Set((kf[s.key] || []).map((f) => f.item_id));
     const before = kfKnown.get(s.key) || new Set();
     for (const id of now) {
@@ -100,26 +109,41 @@ function trackKeyFacts() {
 
 function renderKeyFacts() {
   trackKeyFacts();
-  const kf = state.keyFacts;
+  const kf = state.keyFacts ? keyFactGroups() : null;
   const el = $("key-facts");
+  const todo = kf?.what_to_do || [];
   const sections = kf ? KF_SECTIONS.filter((s) => (kf[s.key] || []).length) : [];
-  if (!sections.length) { el.classList.add("hidden"); el.innerHTML = ""; return; }
+  if (!state.keyFacts) { el.classList.add("hidden"); el.innerHTML = ""; return; }
   el.classList.remove("hidden");
+  const officials = [...new Set((state.items || []).flatMap((it) => it.sources || []).filter((x) => x.kind === "official").map((x) => x.name))];
+  const officialLinks = (state.incident?.sources || []).filter((x) => x.kind === "official")
+    .map((x) => `<a href="${esc(x.url)}" target="_blank" rel="noopener" class="text-authority underline">${esc(x.name)}</a>`).join(", ");
   el.innerHTML = `
-  <div class="card p-4">
+  ${!todo.length ? `
+  <div class="card border-authority/60 p-4">
+    <h2 id="kf-h" class="text-xl font-bold tracking-tight text-authority flex items-center gap-2">What to do</h2>
+    <p class="mt-1.5 text-base">No official instructions right now.${officialLinks ? ` Check ${officialLinks} directly for updates.` : ""}</p>
+  </div>` : `
+  <div class="card border-authority/60 p-4">
+    <h2 id="kf-h" class="text-xl font-bold tracking-tight text-authority flex items-center gap-2">What to do</h2>
+    <p class="mt-1 text-sm text-muted">Official instructions${officials.length ? ` from ${esc(officials.join(", "))}` : ""}. Tap one to see the original wording.</p>
+    <ul class="mt-2 flex flex-col">${todo.map((f) => kfLine("what_to_do", f)).join("")}</ul>
+  </div>`}
+  ${sections.length ? `
+  <div class="card p-4 mt-4">
     <div class="flex items-baseline justify-between gap-2">
-      <h2 id="kf-h" class="text-base font-bold tracking-tight flex items-center gap-2 whitespace-nowrap">${icon("summarize", "text-authority")}Key facts</h2>
-      <span class="label text-faint text-right">by verification rules<span class="hidden sm:inline"> · tap to see evidence</span></span>
+      <h2 class="text-lg font-bold tracking-tight flex items-center gap-2 whitespace-nowrap">Key facts</h2>
+      
     </div>
-    <div class="mt-2 grid gap-3 sm:grid-cols-2">
+    <div class="mt-2 grid gap-3 ${sections.length > 1 ? "sm:grid-cols-2" : ""}">
       ${sections.map((s) => `
-      <div class="rounded border ${s.border} bg-canvas/40 p-3 ${s.key === "confirmed" || s.key === "what_to_do" ? "" : ""}">
-        <div class="label ${s.cls} flex items-center gap-1.5 whitespace-nowrap">${icon(s.icon, "text-[16px]")}${esc(s.title)} <span class="tnum opacity-80">${kf[s.key].length}</span></div>
-        ${s.note ? `<div class="mono text-[10.5px] text-faint mt-0.5">${esc(s.note)}</div>` : ""}
+      <div class="rounded border ${s.border} bg-canvas/40 p-3 ${s.key === "confirmed" && sections.length === 3 ? "sm:row-span-2" : ""}">
+        <div class="label ${s.cls} flex items-center gap-1.5 whitespace-nowrap">${esc(s.title)} <span class="tnum opacity-80">${kf[s.key].length}</span></div>
+        ${s.note ? `<div class="text-[12px] text-faint mt-0.5">${esc(s.note)}</div>` : ""}
         <ul class="mt-1.5 ${s.cls}">${kf[s.key].map((f) => kfLine(s.key, f)).join("")}</ul>
       </div>`).join("")}
     </div>
-  </div>`;
+  </div>` : ""}`;
   el.querySelectorAll("[data-goto]").forEach((a) => {
     a.onclick = (e) => { e.preventDefault(); goTo(a.dataset.goto); history.replaceState(null, "", `#${encodeURIComponent(a.dataset.goto)}`); };
   });
@@ -154,17 +178,17 @@ function renderContextChecks() {
   el.innerHTML = `
   <details class="card" ${ctxOpen ? "open" : ""}>
     <summary class="px-4 py-3 flex items-center justify-between gap-2">
-      <span class="label flex items-center gap-2">${icon("travel_explore", "text-authority text-[17px]")}Context.dev checks <span class="chip chip-tag tnum">${list.length}</span></span>
+      <span class="label flex items-center gap-2">Context.dev checks <span class="chip chip-tag tnum">${list.length}</span></span>
       <span class="flex items-center gap-2 min-w-0"><span class="hidden sm:inline-flex">${chip(latest)}</span>${ago(latest.at, "label text-faint")}${icon("expand_more", "chev text-muted")}</span>
     </summary>
     <ol class="border-t border-line divide-y divide-line">
       ${list.map((c) => `
       <li class="px-4 py-2.5">
         <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span class="mono text-[11px] text-faint">${clock(c.at)}</span>
+          <span class="mono text-xs text-faint">${clock(c.at)}</span>
           ${chip(c)}
           <span class="text-xs text-muted">${esc(c.source_name || c.source_id)}</span>
-          <span class="ml-auto mono text-[10.5px] text-faint">${c.importance ? `${esc(c.importance)} importance · ` : ""}${c.confidence != null ? `${Math.round(c.confidence * 100)}% conf · ` : ""}${c.latency_ms != null ? `${(c.latency_ms / 1000).toFixed(1)} s` : ""}</span>
+          <span class="ml-auto mono text-[12px] text-faint">${c.importance ? `${esc(c.importance)} importance · ` : ""}${c.confidence != null ? `${Math.round(c.confidence * 100)}% conf · ` : ""}${c.latency_ms != null ? `${(c.latency_ms / 1000).toFixed(1)} s` : ""}</span>
         </div>
         ${c.title ? `<div class="mt-1 text-sm font-semibold leading-snug">${esc(c.title)}</div>` : ""}
         ${c.summary ? `<div class="text-xs text-muted">${esc(c.summary)}</div>` : ""}
@@ -216,7 +240,7 @@ function renderBulletin() {
   el.innerHTML = `
   <div class="card p-4">
     <div class="flex flex-wrap items-center justify-between gap-2">
-      <h2 class="text-base font-bold tracking-tight flex items-center gap-2">${icon("radio", "text-authority")}Spoken bulletin</h2>
+      <h2 class="text-base font-bold tracking-tight flex items-center gap-2">Spoken bulletin</h2>
       ${langs.length > 1 ? `<div class="inline-flex rounded border border-line overflow-hidden" role="group" aria-label="Bulletin language">
         ${langs.map((l, i) => `<button type="button" data-lang="${esc(l)}" aria-pressed="${l === d.lang}"
           class="px-2.5 min-h-[32px] text-xs font-semibold ${i ? "border-l border-line" : ""} ${l === d.lang ? "bg-elevated text-ink" : "text-muted hover:text-ink"}">${esc(LANG_NAME[l] || l)}</button>`).join("")}
@@ -312,8 +336,8 @@ function historyChart(points) {
     <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="w-full h-[120px] block" role="img" aria-label="Claims by status over time; now ${esc(label)}">
       <line x1="0" y1="${H - 0.5}" x2="${W}" y2="${H - 0.5}" stroke="var(--line)"></line>${areas}
     </svg>
-    <div class="mt-1 flex justify-between mono text-[10.5px] text-faint"><span>${clock(points[0].t)}</span><span>max ${max} claims</span><span>${clock(last.t)}</span></div>
-    <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted">
+    <div class="mt-1 flex justify-between mono text-[12px] text-faint"><span>${clock(points[0].t)}</span><span>max ${max} claims</span><span>${clock(last.t)}</span></div>
+    <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
       ${LAYERS.map(([k, color, opacity, name]) => `<span class="flex items-center gap-1"><span class="inline-block w-2.5 h-2.5 rounded-sm" style="background:${color};opacity:${opacity}"></span>${name} <span class="tnum">${val(last, k)}</span></span>`).join("")}
     </div>`;
 }
@@ -323,7 +347,7 @@ function historyRows(rows, verb) {
   return `<ul class="mt-1 divide-y divide-line">${rows.slice(0, 6).map((r) => `
     <li class="py-1.5 flex items-baseline gap-2 text-sm">
       <a href="#${esc(r.item_id)}" class="flex-1 min-w-0 hover:underline">${esc(r.title)}</a>
-      <span class="mono text-[11px] text-muted whitespace-nowrap">${verb} after ${dur(r.after_s)}</span>
+      <span class="mono text-xs text-muted whitespace-nowrap">${verb} after ${dur(r.after_s)}</span>
     </li>`).join("")}</ul>`;
 }
 
@@ -337,14 +361,14 @@ function renderHistory() {
     <div class="rounded border border-line bg-canvas/40 px-3 py-2">
       <div class="label text-faint">${label}</div>
       <div class="mt-0.5 text-lg font-bold tnum">${value}</div>
-      <div class="text-[11px] text-muted">${sub}</div>
+      <div class="text-xs text-muted">${sub}</div>
     </div>`;
   const quick = s.debunked ? `${s.debunked} debunked · median ${dur(s.median_debunk_s)}`
     : s.updates ? `update → board ${dur(Math.round((s.p50_update_ms || 0) / 1000))}` : "";
   el.innerHTML = `
   <details class="card" ${hist.open ? "open" : ""}>
     <summary class="px-4 py-3 flex items-center justify-between gap-2">
-      <span class="label flex items-center gap-2">${icon("monitoring", "text-authority text-[17px]")}Over time <span class="chip chip-tag">Tiger Data</span></span>
+      <span class="label flex items-center gap-2">Over time <span class="chip chip-tag">Tiger Data</span></span>
       <span class="flex items-center gap-2 min-w-0"><span class="label text-faint truncate">${esc(quick)}</span>${icon("expand_more", "chev text-muted")}</span>
     </summary>
     <div class="border-t border-line px-4 py-3">
@@ -357,7 +381,7 @@ function renderHistory() {
       ${historyChart(d.timeline)}
       ${d.debunked?.length ? `<h3 class="label mt-4">Debunked by officials</h3>${historyRows(d.debunked, "debunked")}` : ""}
       ${d.confirmed?.length ? `<h3 class="label mt-4">Reported first, confirmed later</h3>${historyRows(d.confirmed, "confirmed")}` : ""}
-      <p class="mt-3 text-[11px] text-faint">Times run from the first report on the board. Every change is kept as a time series in Tiger Data (Postgres + TimescaleDB).</p>
+      <p class="mt-3 text-xs text-faint">Times run from the first report on the board. Every change is kept as a time series in Tiger Data (Postgres + TimescaleDB).</p>
     </div>
   </details>`;
   el.querySelector("details").addEventListener("toggle", (e) => { hist.open = e.target.open; });
@@ -375,19 +399,19 @@ function renderWarning() {
   el.innerHTML = `
   <article class="card accent-sev${esc(inc.severity)} p-4 sm:p-5">
     <div class="flex items-center justify-between gap-2 flex-wrap">
-      <div class="flex items-center gap-2 flex-wrap">${sevChip(inc.severity, inc.severity_label)}<span class="chip chip-corroborated">${icon("account_balance", "text-[13px]")}Official warning</span>
+      <div class="flex items-center gap-2 flex-wrap">${sevChip(inc.severity, inc.severity_label)}<span class="chip chip-corroborated">Official warning</span>
         ${isEnded(inc) ? `<span class="chip chip-tag">ended</span>` : ""}</div>
       <span class="label text-faint">issued ${ago(inc.created_at)}</span>
     </div>
     <h1 class="mt-3 text-xl sm:text-2xl font-extrabold tracking-tight leading-snug">${esc(inc.name)}</h1>
     <dl class="mt-4 grid gap-3 sm:grid-cols-2">
       <div class="rounded border border-line bg-canvas/40 p-3">
-        <dt class="label flex items-center gap-1">${icon("schedule", "text-[15px]")}Valid</dt>
+        <dt class="label flex items-center gap-1">Valid</dt>
         <dd class="mt-1 mono text-sm">${esc(rangeText(inc.valid))}</dd>
-        <dd class="mt-0.5 mono text-[11px] ${isEnded(inc) ? "text-critical" : "text-faint"}">${esc(isEnded(inc) ? "this warning has ended" : validText(inc.valid))}</dd>
+        <dd class="mt-0.5 mono text-xs ${isEnded(inc) ? "text-critical" : "text-faint"}">${esc(isEnded(inc) ? "this warning has ended" : validText(inc.valid))}</dd>
       </div>
       <div class="rounded border border-line bg-canvas/40 p-3">
-        <dt class="label flex items-center gap-1">${icon("location_on", "text-[15px]")}Area</dt>
+        <dt class="label flex items-center gap-1">Area</dt>
         <dd class="mt-1 text-sm">${esc(inc.area?.label || "")}</dd>
       </div>
     </dl>
@@ -396,9 +420,9 @@ function renderWarning() {
       <blockquote class="rounded border-l-[3px] border-authority bg-authority/5 px-3 py-2.5 text-base leading-relaxed">${esc(text)}</blockquote>
     </div>
     <div class="mt-4 pt-3 border-t border-line flex flex-wrap items-center justify-between gap-2">
-      <span class="text-sm text-muted flex items-center gap-1.5">${icon("account_balance", "text-muted")}${esc(inc.source_label || src?.name || "Official source")}</span>
+      <span class="text-sm text-muted">${src?.name && src.name !== inc.source_label ? `<b class="text-ink font-semibold">${esc(src.name)}</b><span class="block text-xs text-faint">${esc(inc.source_label || "")}</span>` : esc(inc.source_label || src?.name || "Official source")}</span>
       ${src?.url ? `<a href="${esc(src.url)}" target="_blank" rel="noopener" class="btn">${icon("open_in_new", "text-[16px]")}Open official source</a>` : ""}
-      ${capturedText(src) ? `<span class="basis-full mono text-[10.5px] text-faint" title="${esc(src.captured_from)}">${esc(capturedText(src))}</span>` : ""}
+      ${capturedText(src) ? `<span class="basis-full mono text-[12px] text-faint" title="${esc(src.captured_from)}">${esc(capturedText(src))}</span>` : ""}
     </div>
   </article>`;
 }
@@ -429,7 +453,8 @@ function allTags() {
   const category = new Set(state.tags.category || []);
   const place = new Set(state.tags.place || []);
   for (const it of state.items) { status.add(it.status); if (it.category) category.add(it.category); }
-  return { status: STATUS_ORDER.filter((s) => status.has(s)), held: state.items.some((i) => i.held), category: [...category], place: [...place] };
+  const simple = new Set([...status].map(simpleOf));
+  return { status: Object.keys(SIMPLE).filter((k) => simple.has(k)), held: state.items.some((i) => i.held), category: [...category], place: [...place] };
 }
 
 function chipButton(group, value, label, cls, count) {
@@ -448,13 +473,13 @@ function renderFilters() {
   const active = filter.status.size + filter.category.size + filter.place.size;
   const parts = [
     `<button type="button" class="fchip chip chip-tag" aria-pressed="${!active}" data-all="1">Clear</button>`,
-    ...t.status.map((s) => chipButton("status", s, `<span class="dot"></span>${esc(STATUS[s]?.label || s)}`, `chip-${s}`, count((i) => i.status === s))),
+    ...t.status.map((k) => chipButton("status", k, `<span class="dot"></span>${esc(SIMPLE[k].label)}`, SIMPLE[k].cls, count((i) => simpleOf(i.status) === k))),
   ];
-  if (t.held) parts.push(chipButton("status", "held", "Held", "chip-held", count((i) => i.held)));
+  if (t.held) parts.push(chipButton("status", "held", "Don't act yet", "chip-held", count((i) => i.held)));
   if (t.category.length) parts.push(`<span class="basis-full h-0"></span>`);
   parts.push(...t.category.map((c) => chipButton("category", c, esc(CATEGORY_LABEL(c)), "chip-tag", count((i) => i.category === c))));
   if (t.place.length) parts.push(`<span class="basis-full h-0"></span>`);
-  parts.push(...t.place.map((p) => chipButton("place", p, `${icon("location_on", "text-[13px]")}${esc(p)}`, "chip-tag", count((i) => i.place === p))));
+  parts.push(...t.place.map((p) => chipButton("place", p, `${esc(p)}`, "chip-tag", count((i) => i.place === p))));
   const el = $("filters");
   el.innerHTML = parts.join("");
   el.querySelectorAll("[data-group]").forEach((b) => {
@@ -474,7 +499,7 @@ function renderFilters() {
 
 // OR within a tag group, AND across groups.
 function passes(it) {
-  if (filter.status.size && !(filter.status.has(it.status) || (filter.status.has("held") && it.held))) return false;
+  if (filter.status.size && !(filter.status.has(simpleOf(it.status)) || (filter.status.has("held") && it.held))) return false;
   if (filter.category.size && !filter.category.has(it.category)) return false;
   if (filter.place.size && !filter.place.has(it.place)) return false;
   return true;
@@ -497,17 +522,17 @@ function sourceRow(s) {
         <span class="min-w-0 flex-1">
           <span class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
             <span class="font-semibold text-ink">${esc(s.name)}</span>
-            <span class="chip chip-tag !text-[10px] !py-0">${esc(s.kind)}</span>
+            <span class="chip chip-tag !text-xs !py-0">${esc(s.kind)}</span>
             <span class="${s.stance === "denies" ? "text-critical" : s.stance === "asserts" ? "text-muted" : "text-triage"}">${esc(STANCE[s.stance] || s.stance)}</span>
             ${who} ${att}
           </span>
-          ${social && s.author_signals ? `<span class="block mono text-[10.5px] text-faint mt-0.5">${esc(s.author_signals)}</span>` : ""}
+          ${social && s.author_signals ? `<span class="block mono text-[12px] text-faint mt-0.5">${esc(s.author_signals)}</span>` : ""}
         </span>
         <span class="material-symbols-outlined chev text-faint text-[16px]">expand_more</span>
       </summary>
       <div class="ml-6 mb-1.5 pl-2 border-l-2 border-line">
         <q class="block italic text-muted">${esc(s.evidence_quote)}</q>
-        <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 mono text-[10.5px] text-faint">
+        <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 mono text-[12px] text-faint">
           <span>seen ${clock(s.seen_at)}</span>
           <a href="${esc(s.url)}" target="_blank" rel="noopener" class="text-authority hover:underline flex items-center gap-0.5">open source ${icon("open_in_new", "text-[12px]")}</a>
           ${capturedText(s) ? `<span title="${esc(s.captured_from)}">${esc(capturedText(s))}</span>` : ""}
@@ -522,7 +547,7 @@ function itemBody(it) {
   const c = it.community || { still_true: 0, not_true: 0, reports: 0 };
   const log = (it.log || []).map((e) => `
     <li class="flex gap-2 py-1">
-      <span class="mono text-[11px] text-faint shrink-0 w-[60px]">${clock(e.at)}</span>
+      <span class="mono text-xs text-faint shrink-0 w-[60px]">${clock(e.at)}</span>
       ${icon(LOG_ICON[e.kind] || "fiber_manual_record", "text-[15px] text-muted shrink-0")}
       <span class="text-xs text-muted">${esc(e.text)}</span>
     </li>`).join("");
@@ -538,25 +563,25 @@ function itemBody(it) {
         </div>
       </div>
     </div>
-    ${it.status === "contradicted" ? `<div class="mt-1 label text-critical flex items-center gap-1">${icon("block", "text-[14px]")}Not true according to an official source</div>` : ""}
-    ${it.held ? `<div class="mt-2 rounded border border-triage/40 bg-triage/10 px-2.5 py-2 text-sm text-triage flex items-start gap-2">${icon("pan_tool", "text-[16px] mt-0.5")}<span><b>Held back: unconfirmed reassurance.</b> Wait for an official source before acting on this.</span></div>` : ""}
+    ${it.status === "contradicted" ? `<div class="mt-1 label text-critical flex items-center gap-1">Not true according to an official source</div>` : ""}
+    ${it.held ? `<div class="mt-2 rounded border border-triage/40 bg-triage/10 px-2.5 py-2 text-sm text-triage flex items-start gap-2"><span><b>Held back: unconfirmed reassurance.</b> Wait for an official source before acting on this.</span></div>` : ""}
 
     <details class="mt-3 rounded border border-line bg-canvas/40">
       <summary class="px-2.5 py-2 flex items-center justify-between">
-        <span class="label flex items-center gap-1.5">${icon("fact_check", "text-[15px]")}Verification log · ${(it.log || []).length}</span>
+        <span class="label flex items-center gap-1.5">Verification log · ${(it.log || []).length}</span>
         <span class="material-symbols-outlined chev text-faint">expand_more</span>
       </summary>
       <ol class="px-2.5 pb-2 border-t border-line">${log}</ol>
     </details>
 
     <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
-      <span class="text-sm text-muted flex items-center gap-1.5">${icon("where_to_vote", "text-authority")}Is this still true?</span>
+      <span class="text-sm text-muted flex items-center gap-1.5">Is this still true?</span>
       <div class="flex items-center gap-2" data-vote-row="${esc(it.id)}">
         <button type="button" class="btn ${voted === true ? "btn-on" : ""}" data-vote="yes" ${voted !== undefined ? "disabled" : ""} aria-label="Yes, still true">${icon("thumb_up", "text-[16px]")}Yes <span class="tnum text-muted">${esc(c.still_true)}</span></button>
         <button type="button" class="btn ${voted === false ? "btn-on" : ""}" data-vote="no" ${voted !== undefined ? "disabled" : ""} aria-label="No, not true">${icon("thumb_down", "text-[16px]")}No <span class="tnum text-muted">${esc(c.not_true)}</span></button>
       </div>
     </div>
-    <div class="mt-1 mono text-[10.5px] text-faint">community signals only; they never change the status${c.reports ? ` · ${esc(c.reports)} report${c.reports > 1 ? "s" : ""}` : ""}</div>
+    <div class="mt-1 mono text-[12px] text-faint">community signals only; they never change the status${c.reports ? ` · ${esc(c.reports)} report${c.reports > 1 ? "s" : ""}` : ""}</div>
 
     <footer class="mt-3 pt-3 border-t border-line">
       <div class="label mb-1">Sources · ${(it.sources || []).length}${it.origins ? ` <span class="text-faint normal-case tracking-normal">(${esc(it.origins.asserting)} asserting origin${it.origins.asserting === 1 ? "" : "s"}, ${esc(it.origins.denying)} denying)</span>` : ""}</div>
@@ -575,13 +600,13 @@ function itemCard(it) {
   const ribbon = age < 60000 ? `<span class="ribbon ${RIBBON_CLASS[ch.kind] || ""}" style="${animDelay(age)}">${esc(ribbonText(ch))}</span>` : "";
   return `
   <li id="${esc(it.id)}" class="relative pl-10 scroll-mt-32" data-item="${esc(it.id)}">
-    <span class="tl-node ${esc(it.status)}" style="top:10px">${icon(STATUS[it.status]?.icon || "help", "text-[15px]")}</span>
+    <span class="tl-node ${esc(it.status)}" style="top:10px"></span>
     <article class="card accent-${esc(it.status)} ${glow}" style="${age < 3200 ? animDelay(age) : ""}">
       <button type="button" class="w-full text-left px-3.5 py-3 sm:px-4 flex items-start gap-2" data-toggle="${esc(it.id)}" aria-expanded="${open}">
         <span class="min-w-0 flex-1">
           <span class="flex flex-wrap items-center gap-1.5">
             ${ribbon}${statusChip(it.status)} ${it.held ? heldChip() : ""}${it.superseded ? `<span class="chip chip-tag" title="A newer official warning replaced this one">superseded</span>` : ""}
-            <span class="mono text-[11px] text-faint">${ago(it.updated_at)} · ${clock(it.updated_at)}</span>
+            <span class="mono text-xs text-faint">${ago(it.updated_at)} · ${clock(it.updated_at)}</span>
           </span>
           <span class="mt-1.5 block font-semibold leading-snug ${contradicted ? "struck" : ""}">${contradicted ? `<span class="sr-only">False: </span>` : ""}${esc(it.title)}</span>
           ${open ? "" : `<span class="mt-0.5 block text-sm text-muted truncate">${esc(it.summary)}</span>`}
