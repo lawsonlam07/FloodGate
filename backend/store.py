@@ -13,7 +13,7 @@ from collections import deque
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
-from . import rules
+from . import images, rules
 from .config import INCIDENT_TEMPLATES, OFFICIAL_NAMES, SOURCES, SOURCES_BY_ID, STATE_FILE
 from .grouping import Group
 
@@ -290,7 +290,21 @@ class Store:
         }
         checks = [c for c in self.context_checks if c.get("incident_id") == incident_id][:10]
         return {"incident": self.incident_view(inc), "key_facts": self.key_facts(items), "tags": tags, "items": views,
-                "context_checks": checks}
+                "context_checks": checks, "images": self.source_images(inc, items)}
+
+    def source_images(self, inc: Incident, items: list[Item]) -> list[dict]:
+        """Photos on the incident's source pages as last captured (backend/images.py): context, never proof."""
+        out = []
+        for s in SOURCES:
+            if s.incident != inc.id:
+                continue
+            snap = self.snapshots.get(s.id) or {}
+            for im in snap.get("images") or []:
+                out.append({"url": im.get("local") or im["url"], "alt": im.get("alt") or "", "source_id": s.id,
+                            "source_name": s.name, "kind": s.kind, "source_url": s.view_url,
+                            "seen_at": snap.get("processed_at"), "label": f"posted by {s.name}, unverified",
+                            "item_ids": images.items_for(im, s.id, items) if s.kind == "social" else []})
+        return out
 
     @staticmethod
     def key_facts(items: list[Item]) -> dict:

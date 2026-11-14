@@ -9,8 +9,18 @@ from __future__ import annotations
 
 import html
 import re
+from pathlib import Path
+
+from .images import image_file
 
 e = html.escape
+SCENARIO_ROOT = Path(__file__).resolve().parent.parent / "scenario"
+
+
+def _photo(spec: dict, kind: str, text: str) -> str | None:
+    """Relative URL of the scenario's generated illustration for this text (served at /sites/<id>/images/), if made."""
+    name = image_file(kind, text)
+    return f"../images/{name}" if (SCENARIO_ROOT / spec["id"] / "images" / name).exists() else None
 
 _BASE = """<!doctype html>
 <html lang="{lang}">
@@ -78,6 +88,7 @@ SOCIAL_CSS = _BANNER_CSS + """
 .who{display:flex;flex-wrap:wrap;gap:6px;align-items:baseline}.who .name{font-weight:700}.who .handle,.who .time{color:#536471}
 .acct{color:#536471;font-size:13px;margin:2px 0 8px}.text{white-space:pre-wrap;margin:0 0 8px}.text a{color:#1463d6}
 .media{background:#d6dde4;color:#3d4a57;border-radius:8px;padding:28px;text-align:center;font-size:13px;margin-bottom:8px}
+.photo{width:100%;height:auto;display:block;border-radius:10px;margin-bottom:8px}
 .stats{color:#536471;font-size:13px;display:flex;gap:18px}
 """
 
@@ -128,6 +139,9 @@ def render_news(spec: dict, page: dict) -> str:
     quotes = "".join(f'<blockquote>"{e(q.get("text", ""))}" — {e(q.get("by", ""))}</blockquote>' for q in page.get("quotes", []))
     most = "".join(f'<li><a href="#">{e(m)}</a></li>' for m in page.get("most_read", []))
     updated = f' · Updated {e(page["updated"])}' if page.get("updated") else ""
+    src = _photo(spec, "news", page.get("headline", ""))
+    lead = (f'<figure class="lead"><img src="{src}" alt="{e(page.get("headline", ""))}" width="1200" height="675">'
+            f"<figcaption>AI illustration · fictional</figcaption></figure>") if src else ""
     body = f"""<header class="masthead"><div class="name">{e(outlet)}</div>
 <nav aria-label="Sections"><a href="#">News</a><a href="#">Local</a><a href="#">Sport</a><a href="#">Culture</a><a href="#">Opinion</a></nav></header>
 <div class="page"><article>
@@ -162,7 +176,9 @@ def render_social(spec: dict, page: dict) -> str:
     for p in page.get("posts", []):
         joined = str(p.get("joined", ""))
         joined = joined if joined.lower().startswith("joined") else f"Joined {joined}"
-        media = f'<div class="media">[{e(str(p["media"]))}]</div>' if p.get("media") else ""
+        photo = _photo(spec, "photo", str(p["media"])) if p.get("media") else None
+        media = (f'<img class="photo" src="{photo}" alt="{e(str(p["media"]))}" width="1200" height="675">' if photo
+                 else f'<div class="media">[{e(str(p["media"]))}]</div>' if p.get("media") else "")
         posts.append(f"""<article class="post">
 <div class="who"><span class="name">{e(p.get("name", ""))}</span><span class="handle">@{e(str(p.get("handle", "")).lstrip("@"))}</span><span class="time">· {e(str(p.get("time", "")))}</span></div>
 <div class="acct">{e(joined)} · {e(str(p.get("followers", 0)))} followers</div>

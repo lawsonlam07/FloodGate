@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 from . import fmi, grouping, rules
 from .config import (CONTEXT_MONITOR_KINDS, CONTEXT_MONITORS, CONTEXT_REPLAY_DIR, CREDIT_BUDGET, FAST_UPDATES,
                      SOURCES_BY_ID, Source, site_public_url)
+from . import images
 from .extraction import extract_source, extract_update, ground, normalize
 from .monitors import Monitor
 from .grouping import Group
@@ -370,7 +371,8 @@ class Pipeline:
         def record_snapshots(new_counts: dict | None = None):
             for cap in caps:
                 store.snapshots[cap.src.id] = {"hash": cap.content_hash, "markdown": cap.markdown, "n": cap.n,
-                                               "processed_at": seen_at, "url": cap.src.public_url}
+                                               "processed_at": seen_at, "url": cap.src.public_url,
+                                               "images": images.extract(cap.markdown, cap.src.public_url, site_public_url())}
                 self.last_update[cap.src.id] = (cap.t0, (new_counts or {}).get(cap.src.id, len(cap.claims)))
 
         # Only open an incident once a source asserts or relays something concrete (a calm page, or an official

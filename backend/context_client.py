@@ -132,6 +132,8 @@ class ContextClient:
             "formats": {"markdown": markdown, "json": json_schema is not None, "screenshot": screenshot},
             "timeoutOpts": {"milliseconds": 60_000, "behavior": "return-partial"},
         }
+        if markdown:                    # keep images in place (![alt](url)): photos from the sources, see images.py
+            body["markdownParams"] = {"includeImages": True}
         if max_age_ms is not None:      # None = use Context.dev's default cache (3 days)
             body["maxAgeMs"] = max_age_ms
         if json_schema is not None:

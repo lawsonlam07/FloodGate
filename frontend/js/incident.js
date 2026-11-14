@@ -4,6 +4,7 @@
 //  - official_warning: a simple warning view (headline, severity, validity, area, official text, source).
 import * as api from "./api.js";
 import { createLive, ribbonText, animDelay, setPausedChip } from "./live.js";
+import { renderPhotos } from "./photos.js";
 import {
   initTheme,
   esc, ago, clock, icon, sevChip, countChips, statusChip, heldChip, STATUS, STATUS_ORDER, KIND_ICON, STANCE,
@@ -765,6 +766,7 @@ async function fetchDetail() {
   state.tags = d.tags || state.tags;
   state.keyFacts = d.key_facts || null;
   state.contextChecks = d.context_checks || [];
+  renderPhotos(d);                                         // photos from the sources (photos.js)
 }
 
 async function load() {

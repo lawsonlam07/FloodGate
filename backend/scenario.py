@@ -343,7 +343,21 @@ hackathon demo. A scenario's pages exist only while it is started (from the Floo
         os.replace(tmp, SITE_DIR / "index.html")
 
     # ---- stepping ---------------------------------------------------------------------------------------------------
+    @staticmethod
+    def _sync_images(sid: str) -> None:
+        """The scenario's photos (scenario/<id>/images, made by scenario/generate_images.py) next to its pages."""
+        src = ROOT / "scenario" / sid / "images"
+        if not src.is_dir():
+            return
+        dst = SITE_DIR / sid / "images"
+        dst.mkdir(parents=True, exist_ok=True)
+        for f in src.glob("*.jpg"):
+            out = dst / f.name
+            if not out.exists() or out.stat().st_size != f.stat().st_size:
+                shutil.copyfile(f, out)
+
     def _write(self, d: ScenarioDef, page_id: str, marker: str) -> None:
+        self._sync_images(d.id)
         target = SITE_DIR / d.page_by_id[page_id]["target"]
         target.parent.mkdir(parents=True, exist_ok=True)
         tmp = target.with_name(f".{target.name}.tmp")

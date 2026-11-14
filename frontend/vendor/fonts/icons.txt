@@ -66,6 +66,8 @@ pan_tool
 password
 pause
 pause_circle
+pending
+photo_library
 place
 play_arrow
 play_circle
