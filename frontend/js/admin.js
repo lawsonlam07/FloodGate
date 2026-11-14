@@ -39,7 +39,7 @@ const liveFx = createLive({
 
 // ---------------------------------------------------------------- pause processing (v0.8)
 const EMBED = new URLSearchParams(location.search).get("embed") === "1";
-const control = { paused: false, since: null, reason: null, showcase: null, auth_required: false, credit_budget_daily: null, credits_today: null };
+const control = { paused: false, since: null, reason: null, showcase: null, auth_required: false, credit_budget_daily: null, credits_today: null, viewers: null };
 const readOnly = () => EMBED || (control.auth_required && !api.getToken());
 
 function applyAuth(msg = "") {
@@ -50,25 +50,37 @@ function applyAuth(msg = "") {
     ? `${icon("visibility", "text-[14px]")}read-only`
     : control.auth_required ? `${icon("key", "text-[14px]")}admin (token)` : `${icon("lock_open", "text-[14px]")}local admin, no token needed`;
 }
-$("token-form").addEventListener("submit", (e) => {
+$("token-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const t = $("token-input").value.trim();
   if (!t) return;
-  api.setToken(t);
+  let ok;
+  try { ok = await api.checkToken(t); }              // the server decides; nothing unlocks on a guess
+  catch (err) { applyAuth(err.message); return; }
   $("token-input").value = "";
+  if (!ok) { applyAuth("Token rejected."); return; }
+  api.setToken(t);
   applyAuth();
   renderAll();
-  toast("Token saved. Actions unlocked (the server checks it on the first action).");
+  toast("Admin unlocked.");
 });
+// A token saved earlier may be outdated (e.g. changed on the server): check it once on load.
+async function recheckSavedToken() {
+  const t = api.getToken();
+  if (!t || EMBED || !control.auth_required) return;
+  try {
+    if (!(await api.checkToken(t))) { api.setToken(""); applyAuth("Your saved token is no longer valid."); renderAll(); }
+  } catch { /* offline: leave as is; actions will tell */ }
+}
 window.addEventListener("fg-auth-rejected", () => { applyAuth("Token rejected."); renderAll(); });
 
 function applyControl(c) {
   Object.assign(control, { paused: !!c.paused, since: c.since || null, reason: c.reason || null,
-    showcase: c.showcase || null, auth_required: !!c.auth_required,
+    showcase: c.showcase || null, auth_required: !!c.auth_required, viewers: c.viewers ?? null,
     credit_budget_daily: c.credit_budget_daily ?? null, credits_today: c.credits_today ?? null });
   const t = control.since ? new Date(control.since).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : null;
   $("paused-banner").classList.toggle("hidden", !control.paused);
-  $("paused-text").innerHTML = `<b>Paused${t ? ` since ${t}` : ""}${control.reason ? ` (${esc(control.reason)})` : ""}</b>: no Context.dev or Claude calls; page monitors stopped. Edits made now are picked up on resume.`;
+  $("paused-text").innerHTML = `<b>Paused${t ? ` since ${t}` : ""}${control.reason ? ` (${esc(control.reason)})` : ""}</b>: no Context.dev or LLM calls; page monitors stopped. Edits made now are picked up on resume.`;
   renderStatus();
   applyAuth($("ro-msg").textContent);
   if (EMBED) renderEmbed();
@@ -78,13 +90,16 @@ function applyControl(c) {
   btn.innerHTML = control.paused
     ? `${icon("play_circle", "text-[17px]")}<span class="hidden sm:inline">Resume</span>`
     : `${icon("pause_circle", "text-[17px]")}<span class="hidden sm:inline">Pause processing</span>`;
-  btn.title = control.paused ? "Resume processing" : "Pause processing: stop spending Context.dev and Claude credits";
+  btn.title = control.paused ? "Resume processing" : "Pause processing: stop spending Context.dev and LLM credits";
   document.querySelectorAll(".paused-hint").forEach((el) => el.classList.toggle("hidden", !control.paused));
 }
 function showcaseText() {
   const sc = control.showcase;
   if (!sc) return "";
-  return sc.running ? `Showcase running · ${sc.max_concurrent} at a time · step every ${sc.interval_s} s` : "Showcase off";
+  if (!sc.running) return "Showcase off";
+  const idle = sc.only_when_watched !== false && control.viewers === 0;
+  return `Showcase ${idle ? "waiting for viewers" : "running"} · ${sc.max_concurrent} at a time · step every ${sc.interval_s} s`
+    + (control.viewers != null ? ` · ${control.viewers} watching` : "");
 }
 function budgetText() {
   if (control.credits_today == null) return "";
@@ -101,14 +116,16 @@ function renderStatus() {
   if (sc) {
     if (document.activeElement?.closest("#showcase-pop") == null) {
       $("sc-max").value = sc.max_concurrent; $("sc-interval").value = sc.interval_s; $("sc-hold").value = sc.hold_s;
+      $("sc-watched").checked = sc.only_when_watched !== false;
     }
     $("sc-toggle").textContent = sc.running ? "Stop showcase" : "Start showcase";
   }
 }
 const showcaseSettings = () => ({
   max_concurrent: Math.min(8, Math.max(1, Number($("sc-max").value) || 3)),
-  interval_s: Math.max(15, Number($("sc-interval").value) || 75),
-  hold_s: Math.max(0, Number($("sc-hold").value) || 180),
+  interval_s: Math.max(30, Number($("sc-interval").value) || 45),
+  hold_s: Math.max(30, Number($("sc-hold").value) || 120),
+  only_when_watched: $("sc-watched").checked,
 });
 $("showcase-btn").onclick = (e) => {
   e.stopPropagation();
@@ -125,7 +142,7 @@ async function sendShowcase(body, msg) {
 $("sc-save").onclick = () => sendShowcase(showcaseSettings(), "Showcase settings saved");
 $("sc-toggle").onclick = () => {
   const running = !control.showcase?.running;
-  if (running && !confirm(`Start the showcase?\nThe server will run ${showcaseSettings().max_concurrent} scenarios at a time by itself, spending Context.dev credits until paused or the daily budget is reached.`)) return;
+  if (running && !confirm(`Start the showcase?\nThe server will run ${showcaseSettings().max_concurrent} scenarios at a time by itself, spending Context.dev credits until paused or the daily budget is reached${$("sc-watched").checked ? " (only while someone has a page open)" : ""}.`)) return;
   sendShowcase({ running, ...showcaseSettings() }, running ? "Showcase started" : "Showcase stopped");
 };
 
@@ -655,11 +672,48 @@ function renderEmbed() {
   });
 }
 
+// ---------------------------------------------------------------- usage per hour (v0.10, Tiger Data continuous aggregate)
+
+async function loadUsage() {
+  let d;
+  try { d = await api.getUsage(24); } catch { d = null; }
+  const card = $("usage-card");
+  if (!d || !d.available || !d.rows?.length) { card.classList.add("hidden"); return; }
+  card.classList.remove("hidden");
+  const hours = [...new Set(d.rows.map((r) => r.bucket))].sort();
+  const services = {};
+  for (const r of d.rows) {
+    if (!USAGE_SERVICES.has(r.service)) continue;            // scenario / control / monitor rows are not API calls
+    const s = services[r.service] ||= { calls: 0, credits: 0, failures: 0, latSum: 0, perHour: {} };
+    s.calls += r.calls; s.credits += r.credits || 0; s.failures += r.failures; s.latSum += (r.avg_latency_ms || 0) * r.calls;
+    s.perHour[r.bucket] = r.calls;
+  }
+  const order = Object.entries(services).sort((a, b) => b[1].calls - a[1].calls);
+  const bars = (s) => { const max = Math.max(1, ...Object.values(s.perHour)); return `<span class="inline-flex items-end gap-px h-5" aria-hidden="true">${hours.map((h) =>
+    `<span class="w-1.5 rounded-sm bg-authority" style="height:${Math.max(1, Math.round(((s.perHour[h] || 0) / max) * 20))}px;opacity:${s.perHour[h] ? 0.85 : 0.15}"></span>`).join("")}</span>`; };
+  $("usage").innerHTML = `
+    <table class="w-full text-xs">
+      <thead><tr class="label text-faint text-left"><th class="font-normal pb-1">Service</th><th class="font-normal pb-1 hidden sm:table-cell">Calls per hour</th>
+        <th class="font-normal pb-1 text-right">Calls</th><th class="font-normal pb-1 text-right">Credits</th><th class="font-normal pb-1 text-right">Avg</th></tr></thead>
+      <tbody>${order.map(([name, s]) => `
+        <tr class="border-t border-line">
+          <td class="py-1.5"><span class="chip ${SERVICE_CHIP_ADMIN[name] || "chip-tag"}">${esc(name)}</span>${s.failures ? ` <span class="text-critical tnum">${s.failures} failed</span>` : ""}</td>
+          <td class="py-1.5 hidden sm:table-cell">${bars(s)}</td>
+          <td class="py-1.5 text-right tnum">${s.calls}</td>
+          <td class="py-1.5 text-right tnum">${s.credits ? Math.round(s.credits) : "–"}</td>
+          <td class="py-1.5 text-right tnum text-muted">${s.calls ? (s.latSum / s.calls / 1000).toFixed(1) + " s" : "–"}</td>
+        </tr>`).join("")}</tbody>
+    </table>
+    <p class="mt-2 text-[11px] text-faint">Every API call is stored in Tiger Data; this table reads an hourly continuous aggregate.</p>`;
+}
+const USAGE_SERVICES = new Set(["context.dev", "gemini", "anthropic", "elevenlabs", "pipeline"]);
+const SERVICE_CHIP_ADMIN = { "context.dev": "chip-corroborated", gemini: "chip-verified", anthropic: "chip-verified" };
+
 // ---------------------------------------------------------------- load + live
 
 async function load() {
   const [sc, act, al] = await Promise.allSettled([api.getScenarios(), api.getActivity(60), api.getAlerts()]);
-  api.getControl().then(applyControl).catch(() => {});        // older backends: no pause endpoint
+  api.getControl().then((c) => { applyControl(c); recheckSavedToken(); }).catch(() => {});   // older backends: no pause endpoint
   if (sc.status === "fulfilled") {
     sc.value.scenarios.forEach(upsertScenario);
     state.credits = sc.value.credits_spent ?? 0;
@@ -675,7 +729,9 @@ async function load() {
   renderAll();
   renderMap(true);
   loadSelectedDetail();
+  if (!EMBED) loadUsage();
 }
+if (!EMBED) setInterval(loadUsage, 60000);
 
 function live() {
   api.subscribe({

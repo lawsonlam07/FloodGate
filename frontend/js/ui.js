@@ -152,7 +152,7 @@ export function capturedText(src) {
   return `captured by Context.dev from ${hostOf(cf)}`;
 }
 
-const SERVICE_CHIP = { "context.dev": "chip-corroborated", anthropic: "chip-verified", monitor: "chip-tag" };
+const SERVICE_CHIP = { "context.dev": "chip-corroborated", anthropic: "chip-verified", gemini: "chip-verified", elevenlabs: "chip-tag", monitor: "chip-tag" };
 
 // API activity feed rows (home System panel + admin page).
 export function activityRows(list, limit = 60) {

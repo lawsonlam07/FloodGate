@@ -41,6 +41,15 @@ export async function get(path) {
 
 // ---- admin token (v0.9): every POST /api/admin/... carries X-Admin-Token ------------
 const TOKEN_KEY = "fg-admin-token";
+// Ask the server whether a token is right, without saving it. true / false; throws on network errors.
+export async function checkToken(token) {
+  if (MOCK) return token !== "bad";
+  const r = await fetch("/api/admin/auth", { method: "POST", headers: { "X-Admin-Token": token, Accept: "application/json" } });
+  if (r.status === 401) return false;
+  if (r.status === 429) throw new Error("Too many wrong tokens. Try again in a few minutes.");
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return true;
+}
 export function getToken() { try { return localStorage.getItem(TOKEN_KEY) || ""; } catch { return ""; } }
 export function setToken(t) { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch { /* ignore */ } }
 // Dev aid for screenshots: ?mock=1&token=… pre-sets a token (mock mode only, never for the real server).
@@ -84,6 +93,62 @@ export async function vote(item, stillTrue) {
 export async function report(item, reason, note) {
   if (MOCK) return { community: { ...item.community, reports: item.community.reports + 1 } };
   return post(`/api/items/${encodeURIComponent(item.id)}/report`, { reason, note: note || null });
+}
+
+// ---- spoken bulletin (ElevenLabs) + history (Tiger Data), v0.10 ----------------
+const incPath = (id, rest) => `/api/incidents/${encodeURIComponent(id)}/${rest}`;
+
+export async function getBulletin(id, lang = "en") {
+  if (MOCK) return mockBulletin(lang);
+  return get(incPath(id, `bulletin?lang=${encodeURIComponent(lang)}`));
+}
+
+// Voices the current script (cached server-side per script). Errors carry the server's reason (budget, paused…).
+export async function voiceBulletin(id, lang = "en") {
+  if (MOCK) { await new Promise((r) => setTimeout(r, 900)); return { audio: null, cached: false, mock: true }; }
+  const r = await fetch(incPath(id, `bulletin/audio?lang=${encodeURIComponent(lang)}`), { method: "POST", headers: { Accept: "application/json" } });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.detail || `HTTP ${r.status}`);
+  return body;
+}
+
+export async function getHistory(id) {
+  if (MOCK) return mockHistory();
+  return get(incPath(id, "history"));
+}
+
+export async function getUsage(hours = 24) {
+  if (MOCK) {
+    const now = Date.now(), rows = [];
+    for (let h = 11; h >= 0; h--) for (const [service, calls, credits, lat] of [["context.dev", 14, 30, 6200], ["gemini", 22, 0, 3100], ["elevenlabs", 2, 0, 2400], ["pipeline", 9, 0, 11800]])
+      rows.push({ bucket: new Date(now - h * 3600e3).toISOString(), service, calls: Math.max(0, calls - (h % 4) * 3), credits: credits ? credits - (h % 3) * 5 : 0, avg_latency_ms: lat, failures: h === 5 && service === "gemini" ? 1 : 0 });
+    return { available: true, hours, rows };
+  }
+  return get(`/api/history/usage?hours=${hours}`);
+}
+
+function mockBulletin(lang) {
+  const local = lang !== "en";
+  const lines = local
+    ? [["intro", "Fiktive Übung. Dies ist kein echter Notfall."], ["intro", "FloodGate-Lagemeldung für Halvik."], ["heading", "Von den Behörden bestätigt:"], ["fact", "Die Harbour Bridge ist gesperrt."], ["outro", "Die Quellen zu jeder Zeile stehen im FloodGate-Lagebild."]]
+    : [["intro", "Fictional exercise. This is not a real emergency."], ["intro", "FloodGate situation update for Halvik."], ["heading", "Confirmed by official sources:"], ["fact", "Harbour Bridge is closed to all traffic."], ["heading", "Not true, according to officials:"], ["fact", "Reports that Harbour Bridge has collapsed are false."], ["outro", "Sources for every line are on the FloodGate board."]];
+  return { lang, id: `mock-${lang}`, lines: lines.map(([kind, text]) => ({ kind, text })), text: lines.map((l) => l[1]).join("\n"),
+           chars: 300, verbatim: lang === "de", languages: ["en", "de"], audio: null, can_voice: true };
+}
+
+function mockHistory() {
+  const t0 = Date.now() - 20 * 60000;
+  const timeline = Array.from({ length: 21 }, (_, i) => ({
+    t: new Date(t0 + i * 60000).toISOString(), verified: Math.min(8, Math.floor(i / 2)), corroborated: i > 6 ? 2 : 0,
+    unverified: Math.max(2, 9 - Math.floor(i / 3)), disputed: i > 10 && i < 15 ? 1 : 0, contradicted: i > 12 ? 3 : 0, held: i > 12 ? 1 : 0, severity: i > 8 ? 4 : 3,
+  }));
+  return {
+    available: true, bucket: "1 minute", timeline,
+    confirmed: [{ item_id: "x1", title: "Saltmarsh south of Ferry Street is being evacuated.", first_kind: "social", after_s: 312, status: "verified" }],
+    debunked: [{ item_id: "x2", title: "Harbour Bridge has collapsed.", first_kind: "social", after_s: 178, status: "contradicted" },
+               { item_id: "x3", title: "All of Halvik will be evacuated tonight.", first_kind: "social", after_s: 641, status: "contradicted" }],
+    stats: { items: 31, confirmed: 1, median_confirm_s: 312, debunked: 2, median_debunk_s: 641, updates: 14, p50_update_ms: 11800, p90_update_ms: 19400 },
+  };
 }
 
 // ---- scenario admin (v0.3) ---------------------------------------------------
@@ -162,24 +227,38 @@ export function subscribe(handlers, onStatus = () => {}) {
     else simulate(handlers);
     return () => {};
   }
-  let es;
-  try {
-    es = new EventSource("/api/stream");
-  } catch {
-    onStatus("offline");
-    return () => {};
-  }
-  es.onopen = () => onStatus("live");
-  es.onerror = () => onStatus("offline"); // EventSource reconnects by itself
-  for (const type of EVENT_TYPES) {
-    es.addEventListener(type, (ev) => {
-      let data;
-      try { data = JSON.parse(ev.data); } catch { return; }
-      try { handlers[type]?.(data); } catch (err) { console.error(`handler for ${type} failed`, err); }
-    });
-  }
-  return () => es.close();
+  // A tab hidden for over a minute closes its stream: it stops counting as a viewer (the server's showcase only runs
+  // while someone watches) and phones save battery. Back in view it reconnects; pages refetch their data on resume.
+  let es = null, hideTimer = null, stopped = false;
+  const open = () => {
+    try {
+      es = new EventSource("/api/stream");
+    } catch {
+      onStatus("offline");
+      return;
+    }
+    es.onopen = () => onStatus("live");
+    es.onerror = () => onStatus("offline"); // EventSource reconnects by itself
+    for (const type of EVENT_TYPES) {
+      es.addEventListener(type, (ev) => {
+        let data;
+        try { data = JSON.parse(ev.data); } catch { return; }
+        try { handlers[type]?.(data); } catch (err) { console.error(`handler for ${type} failed`, err); }
+      });
+    }
+  };
+  const close = () => { es?.close(); es = null; };
+  const onVisibility = () => {
+    clearTimeout(hideTimer);
+    if (document.hidden) hideTimer = setTimeout(close, HIDDEN_CLOSE_MS);
+    else if (!es && !stopped) open();
+  };
+  document.addEventListener("visibilitychange", onVisibility);
+  open();
+  onVisibility();
+  return () => { stopped = true; clearTimeout(hideTimer); document.removeEventListener("visibilitychange", onVisibility); close(); };
 }
+const HIDDEN_CLOSE_MS = 60000;
 
 // Mock mode: exercise the live paths with one alert, one activity row and one item update.
 // Scripted update for home/incident mock mode: two Halvik sources run through the pipeline over ~8 s, then a burst

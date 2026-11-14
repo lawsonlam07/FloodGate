@@ -173,6 +173,194 @@ function renderContextChecks() {
   el.querySelector("details").addEventListener("toggle", (e) => { ctxOpen = e.target.open; });
 }
 
+// ---------------------------------------------------------------- spoken bulletin (v0.10, ElevenLabs)
+// The script is built by rules on the server from the key facts (no AI wording). Audio is generated only when someone
+// presses Listen, and cached per script, so each state of the board is voiced at most once per language.
+
+const LANG_NAME = { en: "English", de: "Deutsch", fr: "Français", nl: "Nederlands", pl: "Polski", sv: "Svenska",
+  cs: "Čeština", pt: "Português", it: "Italiano", es: "Español", el: "Ελληνικά" };
+const bul = { lang: null, data: null, busy: false, error: null, open: false, playingId: null };
+const audio = new Audio();
+audio.preload = "none";
+for (const ev of ["play", "pause", "ended"]) audio.addEventListener(ev, () => renderBulletin());
+
+async function loadBulletin() {
+  try {
+    bul.data = await api.getBulletin(incidentId, bul.lang || "en");
+    bul.lang = bul.data.lang;
+  } catch (err) {
+    console.warn("bulletin unavailable", err);
+    bul.data = null;
+  }
+  renderBulletin();
+}
+
+function bulletinNote(d) {
+  if (isWarning(state.incident)) return "The official warning text, voiced by ElevenLabs.";
+  return d.verbatim ? "The officials' own sentences, read word for word. Voiced by ElevenLabs."
+                    : "The board's lines above, put together by rules (no AI wording). Voiced by ElevenLabs.";
+}
+
+function renderBulletin() {
+  const el = $("bulletin");
+  const d = bul.data;
+  if (!d || !d.lines?.length) { el.classList.add("hidden"); return; }
+  el.classList.remove("hidden");
+  const langs = d.languages || ["en"];
+  const playing = !audio.paused && bul.playingId != null;
+  const stale = playing && bul.playingId !== d.id;
+  const btn = bul.busy ? [icon("progress_activity", "animate-spin"), "Voicing…"]
+    : playing ? [icon("pause"), "Pause"] : [icon("play_arrow"), "Listen"];
+  el.innerHTML = `
+  <div class="card p-4">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <h2 class="text-base font-bold tracking-tight flex items-center gap-2">${icon("radio", "text-authority")}Spoken bulletin</h2>
+      ${langs.length > 1 ? `<div class="inline-flex rounded border border-line overflow-hidden" role="group" aria-label="Bulletin language">
+        ${langs.map((l, i) => `<button type="button" data-lang="${esc(l)}" aria-pressed="${l === d.lang}"
+          class="px-2.5 min-h-[32px] text-xs font-semibold ${i ? "border-l border-line" : ""} ${l === d.lang ? "bg-elevated text-ink" : "text-muted hover:text-ink"}">${esc(LANG_NAME[l] || l)}</button>`).join("")}
+      </div>` : ""}
+    </div>
+    <div class="mt-3 flex items-center gap-3">
+      <button type="button" id="bul-play" class="btn shrink-0" ${bul.busy || (!d.can_voice && !d.audio && !playing) ? "disabled" : ""}>${btn.join("")}</button>
+      <span class="text-xs text-muted leading-snug">${esc(bulletinNote(d))}</span>
+    </div>
+    ${stale ? `<p class="mt-2 text-xs text-triage">The board changed while this was playing. Press again for the new bulletin.</p>` : ""}
+    ${bul.error ? `<p class="mt-2 text-xs text-critical">${esc(bul.error)}</p>` : ""}
+    <details class="mt-3" ${bul.open ? "open" : ""}>
+      <summary class="label cursor-pointer flex items-center gap-1">${icon("expand_more", "chev text-muted")}Transcript · ${esc(d.chars)} characters</summary>
+      <div class="mt-2 text-sm leading-relaxed" lang="${esc(d.lang)}">
+        ${d.lines.map((l) => l.kind === "heading" ? `<div class="mt-2 font-semibold">${esc(l.text)}</div>`
+          : `<div class="${l.kind === "fact" ? "pl-3 border-l border-line" : "text-muted"}">${esc(l.text)}</div>`).join("")}
+      </div>
+    </details>
+  </div>`;
+}
+
+async function playBulletin() {
+  const d = bul.data;
+  if (!d) return;
+  if (!audio.paused && bul.playingId === d.id) { audio.pause(); return; }
+  if (bul.playingId === d.id && audio.src) { audio.play(); return; }   // resume the same bulletin
+  bul.busy = true; bul.error = null; renderBulletin();
+  try {
+    const r = d.audio ? { audio: d.audio } : await api.voiceBulletin(incidentId, d.lang);
+    if (!r.audio) throw new Error("Mock mode: audio comes from the real backend only.");
+    d.audio = r.audio;
+    bul.playingId = d.id;
+    audio.src = r.audio;
+    await audio.play();
+  } catch (err) {
+    bul.error = `Could not play the bulletin: ${err.message}`;
+  } finally {
+    bul.busy = false;
+    renderBulletin();
+  }
+}
+
+$("bulletin").addEventListener("click", (e) => {
+  const lang = e.target.closest("[data-lang]")?.dataset.lang;
+  if (lang && lang !== bul.lang) { bul.lang = lang; bul.error = null; loadBulletin(); return; }
+  if (e.target.closest("#bul-play")) playBulletin();
+});
+$("bulletin").addEventListener("toggle", (e) => { if (e.target.tagName === "DETAILS") bul.open = e.target.open; }, true);
+
+// ---------------------------------------------------------------- over time (v0.10, history in Tiger Data)
+
+const hist = { data: null, open: false, at: 0 };
+const LAYERS = [
+  ["verified", "var(--ok)", 0.85, "Verified"], ["corroborated", "var(--authority)", 0.8, "Corroborated"],
+  ["unverified", "var(--triage)", 0.55, "Unverified"], ["disputed", "var(--triage)", 0.3, "Disputed"],
+  ["contradicted", "var(--critical)", 0.8, "Contradicted"],
+];
+
+async function loadHistory(force = false) {
+  if (api.MOCK && hist.data) return;
+  if (!force && Date.now() - hist.at < 10000) return;      // at most every 10 s while the board is busy
+  hist.at = Date.now();
+  try { hist.data = await api.getHistory(incidentId); } catch { hist.data = null; }
+  renderHistory();
+}
+
+function dur(s) {
+  if (s == null) return "–";
+  if (s < 60) return `${s} s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return s % 60 && m < 10 ? `${m} min ${s % 60} s` : `${m} min`;
+  return `${Math.floor(m / 60)} h ${m % 60} min`;
+}
+
+function historyChart(points) {
+  const W = 600, H = 120;
+  const pts = points.length === 1 ? [points[0], points[0]] : points;
+  const val = (p, k) => Number(p[k]) || 0;
+  const max = Math.max(1, ...pts.map((p) => LAYERS.reduce((sum, [k]) => sum + val(p, k), 0)));
+  const x = (i) => (i / (pts.length - 1)) * W;
+  const y = (v) => H - (v / max) * (H - 4);
+  const base = pts.map(() => 0);
+  const areas = LAYERS.map(([k, color, opacity]) => {
+    const top = pts.map((p, i) => base[i] + val(p, k));
+    const d = `M${pts.map((_, i) => `${x(i).toFixed(1)},${y(top[i]).toFixed(1)}`).join("L")}`
+      + `L${pts.map((_, i) => `${x(pts.length - 1 - i).toFixed(1)},${y(base[pts.length - 1 - i]).toFixed(1)}`).join("L")}Z`;
+    top.forEach((v, i) => { base[i] = v; });
+    return `<path d="${d}" fill="${color}" fill-opacity="${opacity}"></path>`;
+  }).join("");
+  const last = points[points.length - 1];
+  const label = LAYERS.map(([k, , , name]) => `${val(last, k)} ${name.toLowerCase()}`).join(", ");
+  return `
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="w-full h-[120px] block" role="img" aria-label="Claims by status over time; now ${esc(label)}">
+      <line x1="0" y1="${H - 0.5}" x2="${W}" y2="${H - 0.5}" stroke="var(--line)"></line>${areas}
+    </svg>
+    <div class="mt-1 flex justify-between mono text-[10.5px] text-faint"><span>${clock(points[0].t)}</span><span>max ${max} claims</span><span>${clock(last.t)}</span></div>
+    <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted">
+      ${LAYERS.map(([k, color, opacity, name]) => `<span class="flex items-center gap-1"><span class="inline-block w-2.5 h-2.5 rounded-sm" style="background:${color};opacity:${opacity}"></span>${name} <span class="tnum">${val(last, k)}</span></span>`).join("")}
+    </div>`;
+}
+
+function historyRows(rows, verb) {
+  if (!rows.length) return "";
+  return `<ul class="mt-1 divide-y divide-line">${rows.slice(0, 6).map((r) => `
+    <li class="py-1.5 flex items-baseline gap-2 text-sm">
+      <a href="#${esc(r.item_id)}" class="flex-1 min-w-0 hover:underline">${esc(r.title)}</a>
+      <span class="mono text-[11px] text-muted whitespace-nowrap">${verb} after ${dur(r.after_s)}</span>
+    </li>`).join("")}</ul>`;
+}
+
+function renderHistory() {
+  const el = $("history");
+  const d = hist.data;
+  if (!d || !d.available || isWarning(state.incident) || !d.timeline?.length) { el.classList.add("hidden"); return; }
+  el.classList.remove("hidden");
+  const s = d.stats || {};
+  const tile = (label, value, sub) => `
+    <div class="rounded border border-line bg-canvas/40 px-3 py-2">
+      <div class="label text-faint">${label}</div>
+      <div class="mt-0.5 text-lg font-bold tnum">${value}</div>
+      <div class="text-[11px] text-muted">${sub}</div>
+    </div>`;
+  const quick = s.debunked ? `${s.debunked} debunked · median ${dur(s.median_debunk_s)}`
+    : s.updates ? `update → board ${dur(Math.round((s.p50_update_ms || 0) / 1000))}` : "";
+  el.innerHTML = `
+  <details class="card" ${hist.open ? "open" : ""}>
+    <summary class="px-4 py-3 flex items-center justify-between gap-2">
+      <span class="label flex items-center gap-2">${icon("monitoring", "text-authority text-[17px]")}Over time <span class="chip chip-tag">Tiger Data</span></span>
+      <span class="flex items-center gap-2 min-w-0"><span class="label text-faint truncate">${esc(quick)}</span>${icon("expand_more", "chev text-muted")}</span>
+    </summary>
+    <div class="border-t border-line px-4 py-3">
+      <div class="grid grid-cols-1 min-[480px]:grid-cols-3 gap-2">
+        ${tile("Rumour → debunked", dur(s.median_debunk_s), `median of ${s.debunked || 0}`)}
+        ${tile("Report → confirmed", dur(s.median_confirm_s), `median of ${s.confirmed || 0}`)}
+        ${tile("Page change → board", s.p50_update_ms != null ? dur(Math.round(s.p50_update_ms / 1000)) : "–", `median of ${s.updates || 0} updates`)}
+      </div>
+      <h3 class="label mt-4 mb-1">Claims by status · per ${esc(d.bucket || "minute")}</h3>
+      ${historyChart(d.timeline)}
+      ${d.debunked?.length ? `<h3 class="label mt-4">Debunked by officials</h3>${historyRows(d.debunked, "debunked")}` : ""}
+      ${d.confirmed?.length ? `<h3 class="label mt-4">Reported first, confirmed later</h3>${historyRows(d.confirmed, "confirmed")}` : ""}
+      <p class="mt-3 text-[11px] text-faint">Times run from the first report on the board. Every change is kept as a time series in Tiger Data (Postgres + TimescaleDB).</p>
+    </div>
+  </details>`;
+  el.querySelector("details").addEventListener("toggle", (e) => { hist.open = e.target.open; });
+}
+
 // ---------------------------------------------------------------- official warning view
 
 function renderWarning() {
@@ -390,7 +578,7 @@ function itemCard(it) {
       <button type="button" class="w-full text-left px-3.5 py-3 sm:px-4 flex items-start gap-2" data-toggle="${esc(it.id)}" aria-expanded="${open}">
         <span class="min-w-0 flex-1">
           <span class="flex flex-wrap items-center gap-1.5">
-            ${ribbon}${statusChip(it.status)} ${it.held ? heldChip() : ""}
+            ${ribbon}${statusChip(it.status)} ${it.held ? heldChip() : ""}${it.superseded ? `<span class="chip chip-tag" title="A newer official warning replaced this one">superseded</span>` : ""}
             <span class="mono text-[11px] text-faint">${ago(it.updated_at)} · ${clock(it.updated_at)}</span>
           </span>
           <span class="mt-1.5 block font-semibold leading-snug ${contradicted ? "struck" : ""}">${contradicted ? `<span class="sr-only">False: </span>` : ""}${esc(it.title)}</span>
@@ -555,7 +743,7 @@ $("report-form").addEventListener("submit", async (e) => {
 function renderAll() {
   renderHeader();
   if (isWarning(state.incident)) {
-    for (const id of ["key-facts", "ctx-checks", "controls", "timeline-wrap"]) $(id).classList.add("hidden");
+    for (const id of ["key-facts", "ctx-checks", "history", "controls", "timeline-wrap"]) $(id).classList.add("hidden");
     renderWarning();
     return;
   }
@@ -564,6 +752,7 @@ function renderAll() {
   $("timeline-wrap").classList.remove("hidden");
   renderKeyFacts();
   renderContextChecks();
+  renderHistory();
   renderFilters();
   renderTimeline();
 }
@@ -592,6 +781,8 @@ async function load() {
   api.getHealth().then((h) => setPausedChip(!!h.paused, h.paused_since)).catch(() => {});
   setMode(hasImportance() && keyCount() > 0 ? "key" : "all", false);
   renderAll();
+  loadBulletin();
+  loadHistory(true);
   if (location.hash) goTo(decodeURIComponent(location.hash.slice(1)));
 }
 
@@ -601,7 +792,11 @@ function scheduleRefresh() {
   if (api.MOCK) return;
   clearTimeout(refreshTimer);
   refreshTimer = setTimeout(async () => {
-    try { await fetchDetail(); renderHeader(); if (!isWarning(state.incident)) { renderKeyFacts(); renderFilters(); keepPosition(renderTimeline); } }
+    try {
+      await fetchDetail(); renderHeader();
+      if (!isWarning(state.incident)) { renderKeyFacts(); renderFilters(); keepPosition(renderTimeline); }
+      loadBulletin(); loadHistory();
+    }
     catch (err) { console.warn("refresh failed", err); }
   }, 1200);
 }
@@ -646,4 +841,5 @@ onResume(async () => {
   renderHeader();
   if (isWarning(state.incident)) renderWarning();
   else { renderKeyFacts(); renderContextChecks(); renderFilters(); keepPosition(renderTimeline); }
+  loadBulletin(); loadHistory(true);
 });

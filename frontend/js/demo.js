@@ -28,7 +28,9 @@ $("how-close").onclick = close;
 $("how-modal").addEventListener("click", (e) => { if (e.target.id === "how-modal") close(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
 if (new URLSearchParams(location.search).get("how") === "1") open();   // screenshot aid
-api.getHealth().then((h) => { if (h.grouping_model) $("how-model").textContent = h.grouping_model; }).catch(() => {});
+api.getHealth().then((h) => {
+  if (h.grouping_model) $("how-model").textContent = h.llm_provider === "gemini" ? `Google Gemini, ${h.grouping_model}` : h.grouping_model;
+}).catch(() => {});
 
 // LIVE dot for the demo frame itself (the iframes have their own connections).
 api.subscribe({}, setLive);

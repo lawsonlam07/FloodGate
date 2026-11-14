@@ -5,12 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>FloodGate live demo</title>
 <meta name="description" content="Live demo: the verified situation board next to what the system is doing behind the scenes.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="js/tw-config.js"></script>
+<!-- Fonts, icons, Leaflet and Tailwind are served by us (built by frontend/build.py): no CDN at page load. -->
+<link rel="stylesheet" href="vendor/fonts/fonts.css">
 <link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/tailwind.css">
 <style>
   html, body { height: 100%; }
   body { display: flex; flex-direction: column; overflow: hidden; }
@@ -59,6 +57,7 @@
       <li class="flex gap-2.5"><span class="mono text-authority font-bold">3</span><span>An <b>LLM</b> (<span id="how-model">grouping model</span>) groups claims that say the same thing across sources. It never decides what is true.</span></li>
       <li class="flex gap-2.5"><span class="mono text-authority font-bold">4</span><span><b>Transparent rules</b> set each claim's status: verified only by an official source, corroborated by independent origins, false when an official denies it, risky reassurances held back.</span></li>
       <li class="flex gap-2.5"><span class="mono text-authority font-bold">5</span><span>The <b>board</b> updates live. Context.dev's own semantic monitors run in parallel as a second opinion on every official page change.</span></li>
+      <li class="flex gap-2.5"><span class="mono text-authority font-bold">6</span><span>Every change is kept as a time series in <b>Tiger Data</b> (how long a rumour stood before officials debunked it), and the key facts can be heard as a <b>spoken bulletin</b> voiced by ElevenLabs, in English and the local language.</span></li>
     </ol>
     <p class="mt-4 text-xs text-muted">The scenario towns, agencies and posts are fictional; the yellow/orange/red weather warnings are real FMI data.</p>
   </div>

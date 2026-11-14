@@ -1,4 +1,5 @@
 // Home page: alert banner, map of affected areas, disasters ranked by severity, system panel.
+if (window.self !== window.top) document.body.classList.add("framed");   // shown inside demo.html
 import * as api from "./api.js";
 import { createLive, animDelay, setPausedChip } from "./live.js";
 import { esc, ago, icon, sevChip, sevColor, countChips, statusChip, lsGet, lsSet, setLive, startAgoTicker, KIND_ICON, toast, isWarning, untilText, validText, isEnded, warningColor, activityRows, updatedChecked, onResume } from "./ui.js";
@@ -76,7 +77,7 @@ function incidentCard(inc) {
   return `
   <a href="${href}" class="card card-hover accent-sev${esc(inc.severity)} block p-4 ${glow}" style="${glow ? animDelay(age) : ""}" data-incident="${esc(inc.id)}">
     ${age < 60000 ? `<span class="chip updated-chip float-right ml-2" style="animation:fg-fade 60s linear forwards;${animDelay(age)}">${icon("bolt", "text-[12px]")}Updated just now</span>` : ""}
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
       <div class="flex items-center gap-2 min-w-0">${sevChip(inc.severity, inc.severity_label)}
         <span class="label text-faint truncate">${esc((inc.hazards || []).join(", ").replace(/_/g, " "))}</span></div>
       ${updatedChecked(inc, "label text-faint shrink-0 text-right")}
@@ -262,6 +263,7 @@ function drawRings(inc, labelDir) {
 
 // Greedy label placement: most severe first; try top/bottom/right/left; skip a label that would overlap one already placed.
 function planLabels(list) {
+  const size = map.getSize();
   const placed = [];
   const plan = new Map();
   for (const inc of [...list].sort((a, b) => b.severity - a.severity)) {
@@ -271,6 +273,7 @@ function planLabels(list) {
     const tries = { top: [pt.x - w / 2, pt.y - 10 - h], bottom: [pt.x - w / 2, pt.y + 10], right: [pt.x + 12, pt.y - h / 2], left: [pt.x - 12 - w, pt.y - h / 2] };
     for (const [dir, [x, y]] of Object.entries(tries)) {
       const box = [x, y, x + w, y + h];
+      if (box[0] < 2 || box[1] < 2 || box[2] > size.x - 2 || box[3] > size.y - 34) continue;  // inside the map, clear of the credits line (2 lines on phones)
       if (!placed.some((b) => !(box[2] < b[0] || box[0] > b[2] || box[3] < b[1] || box[1] > b[3]))) {
         placed.push(box); plan.set(inc.id, dir); break;
       }
@@ -436,8 +439,8 @@ function renderBanner() {
           <span class="label banner-icon-${esc(alert.level)} ${meta.pulse ? "pulse" : ""}">${esc(meta.tag)}</span>
           ${ago(alert.created_at, "label text-faint")}
         </div>
-        <div class="mt-0.5 text-base sm:text-lg font-bold leading-snug">${esc(alert.title)}</div>
-        ${alert.body ? `<div class="text-sm text-muted">${esc(alert.body)}</div>` : ""}
+        <div class="mt-0.5 text-base sm:text-lg font-bold leading-snug line-clamp-3 sm:line-clamp-none">${esc(alert.title)}</div>
+        ${alert.body ? `<div class="text-sm text-muted line-clamp-2 sm:line-clamp-none">${esc(alert.body)}</div>` : ""}
         ${href ? `<div class="mt-1 label text-authority flex items-center gap-1">Open incident ${icon("arrow_forward", "text-[14px]")}</div>` : ""}
       </${href ? "a" : "div"}>
       <button type="button" id="banner-dismiss" class="btn !min-h-[32px] !px-2 shrink-0" aria-label="Dismiss alert">${icon("close")}</button>

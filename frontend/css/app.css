@@ -217,3 +217,7 @@ body.read-only .admin-action, body.embed .admin-action { display: none !importan
 body.embed header, body.embed > div.border-b, body.embed main, body.embed #fg-bell-panel { display: none !important; }
 body.embed #embed { display: block !important; }
 body.embed { background: var(--canvas); }
+
+/* ======================= phones: one set of pages, adapted by width ======================= */
+/* The board inside demo.html: the demo has its own header, so drop the board's on phones. */
+@media (max-width: 639px) { body.framed > header { display: none; } }

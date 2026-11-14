@@ -1,5 +1,7 @@
-// Tailwind Play CDN config: DESIGN.md "Crisis Tactical Utilitarian" tokens.
-tailwind.config = {
+// Tailwind theme: DESIGN.md "Crisis Tactical Utilitarian" tokens. Built ahead of time by frontend/build.py
+// into css/tailwind.css (no CDN, no in-browser compiler); run.sh and deploy.sh rebuild it automatically.
+module.exports = {
+  content: ["./*.html", "./js/**/*.js"],
   darkMode: "class",
   theme: {
     extend: {

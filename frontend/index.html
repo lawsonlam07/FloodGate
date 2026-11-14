@@ -5,10 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>FloodGate</title>
 <meta name="description" content="Live, verified situation board for emergencies.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<!-- Fonts, icons, Leaflet and Tailwind are served by us (built by frontend/build.py): no CDN at page load. -->
+<link rel="stylesheet" href="vendor/fonts/fonts.css">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.min.css">
 <script>
 // Dev aid: in ?mock=1 / ?debug=1 show script errors on the page (no console in headless screenshots).
 if (/[?&](mock|debug)=1/.test(location.search)) {
@@ -17,9 +16,8 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
   window.addEventListener("unhandledrejection", (e) => show(String(e.reason && e.reason.stack || e.reason)));
 }
 </script>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="js/tw-config.js"></script>
 <link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/tailwind.css">
 </head>
 <body class="min-h-screen">
 
@@ -125,7 +123,7 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
   </footer>
 </main>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="vendor/leaflet/leaflet.min.js"></script>
 <script type="module" src="js/home.js"></script>
 </body>
 </html>

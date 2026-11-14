@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Incident feed · FloodGate</title>
 <meta name="description" content="Verified claim timeline for one incident.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+<!-- Fonts, icons, Leaflet and Tailwind are served by us (built by frontend/build.py): no CDN at page load. -->
+<link rel="stylesheet" href="vendor/fonts/fonts.css">
 <script>
 // Dev aid: in ?mock=1 / ?debug=1 show script errors on the page (no console in headless screenshots).
 if (/[?&](mock|debug)=1/.test(location.search)) {
@@ -16,9 +15,8 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
   window.addEventListener("unhandledrejection", (e) => show(String(e.reason && e.reason.stack || e.reason)));
 }
 </script>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="js/tw-config.js"></script>
 <link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/tailwind.css">
 </head>
 <body class="min-h-screen">
 
@@ -45,8 +43,14 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
   <!-- key facts (verified boards) -->
   <section id="key-facts" class="mt-4 hidden" aria-labelledby="kf-h"></section>
 
+  <!-- v0.10: spoken bulletin of the key facts (rule-built script, voiced by ElevenLabs) -->
+  <section id="bulletin" class="mt-4 hidden" aria-label="Spoken bulletin"></section>
+
   <!-- v0.5: Context.dev semantic-monitor verdicts (collapsed) -->
   <section id="ctx-checks" class="mt-4 hidden"></section>
+
+  <!-- v0.10: the incident over time (history kept in Tiger Data), collapsed -->
+  <section id="history" class="mt-4 hidden"></section>
 
   <!-- official warning view -->
   <section id="warning-view" class="mt-4 hidden"></section>
