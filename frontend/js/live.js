@@ -164,7 +164,9 @@ export function createLive(opts = {}) {
   const o = {
     getIncident: () => null,                      // id → incident summary (for name/kind), if the page knows it
     inFocus: () => true,                          // id → may this incident show a toast? (else: bell only)
-    toasts: true,                                 // false = bell only (admin)
+    toasts: false,                                // pop-up cards (off: the board shows one brief "latest" line instead)
+    bell: false,                                  // the bell with an update history (off: missed updates just go)
+    onUpdate: null,                               // ({name, headline, more, accent, href, at}) for each meaningful update
     graceMs: api.SIM_FAST ? 0 : 2000,             // keep collecting items this long after the last source is done
     autoDismissMs: 8000,
     ...opts,
@@ -175,7 +177,7 @@ export function createLive(opts = {}) {
   const runs = new Map();                         // incident_id → active run
   let hiddenCount = 0;
   let baseTitle = document.title;
-  bell.mount();
+  if (o.bell) bell.mount();
 
   // ------------------------------------------------------------ seeding + classification
   function seed(items, incidentId) {
@@ -217,6 +219,16 @@ export function createLive(opts = {}) {
   const incidentName = (id) => o.getIncident(id)?.name || String(id || "").replace(/-/g, " ").replace(/^\w/, (c) => c.toUpperCase());
   const incidentHref = (id, itemId) => api.link(`incident.html?id=${encodeURIComponent(id)}`) + (itemId ? `#${encodeURIComponent(itemId)}` : "");
   const canToast = (id) => o.toasts && !bell.quiet && !!o.inFocus(id);
+  const note = (entry) => { if (o.bell) bell.add(entry); };     // the bell, when a page has one
+  // One brief line per update: the most important change, in plain words. "No change" and failures are not news.
+  const HEADLINE = { false: "Shown false", verified: "Confirmed", held: "Held back, don't act yet", changed: "Updated",
+                     new: "New report", withdrew: "Withdrawn by its source" };
+  function announce(run, r) {
+    if (!o.onUpdate || r.failed || !r.top.length) return;
+    const top = r.top[0];
+    o.onUpdate({ incident_id: run.id, name: incidentName(run.id), headline: `${HEADLINE[top.kind] || "Updated"}: ${top.title}`,
+                 more: run.changes.size - 1, accent: r.accent, href: incidentHref(run.id, top.item_id), at: isoNow() });
+  }
 
   function getRun(id, create = true) {
     let run = runs.get(id);
@@ -255,10 +267,12 @@ export function createLive(opts = {}) {
     const isNew = !seenIncidents.has(inc.id);
     seenIncidents.add(inc.id);
     if (isNew && inc.kind === "official_warning" && inc.severity >= 3 && inc.status !== "ended") {
-      bell.add({ incident_id: inc.id, name: `New official warning · L${inc.severity}`, text: inc.name, sub: inc.area?.label || "",
+      note({ incident_id: inc.id, name: `New official warning · L${inc.severity}`, text: inc.name, sub: inc.area?.label || "",
         accent: inc.severity >= 4 ? "critical" : "severe", href: incidentHref(inc.id) });
       if (canToast(inc.id)) warningToast(inc);
-      bumpTitle(1);
+      o.onUpdate?.({ incident_id: inc.id, name: inc.name, headline: "New official warning", more: 0,
+                     accent: inc.severity >= 4 ? "critical" : "severe", href: incidentHref(inc.id), at: isoNow() });
+      if (o.bell) bumpTitle(1);
     }
     return isNew;
   }
@@ -279,7 +293,7 @@ export function createLive(opts = {}) {
     if (!ev.incident_id || isWarningId(ev.incident_id)) return;
     const line = ctxLine(ev);
     if (!line) return;
-    bell.add({ incident_id: ev.incident_id, name: incidentName(ev.incident_id), text: line.text, sub: ev.source_name || ev.source_id,
+    note({ incident_id: ev.incident_id, name: incidentName(ev.incident_id), text: line.text, sub: ev.source_name || ev.source_id,
       accent: line.amber ? "triage" : "authority", href: incidentHref(ev.incident_id) });
     const run = runs.get(ev.incident_id);
     if (run?.toast?.isConnected) {                   // add the second opinion to the toast that is still on screen
@@ -312,11 +326,12 @@ export function createLive(opts = {}) {
   function finish(run) {
     run.finished = true;
     const r = resultOf(run);
-    bell.add({ incident_id: run.id, name: incidentName(run.id), text: r.plain, sub: r.names, accent: r.accent,
+    note({ incident_id: run.id, name: incidentName(run.id), text: r.plain, sub: r.names, accent: r.accent,
       href: incidentHref(run.id, r.topItem) });
+    announce(run, r);
     render(run);
     const n = run.changes.size;
-    if (n) bumpTitle(n);
+    if (n && o.bell) bumpTitle(n);
     if (run.toast?.isConnected) armDismiss(run.toast);
   }
 

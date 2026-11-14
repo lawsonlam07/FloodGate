@@ -3,7 +3,7 @@
 // alerts and Context.dev verdicts. Live via SSE (scenario, pipeline, activity, alert, context_check).
 import * as api from "./api.js";
 import { createLive } from "./live.js";
-import { esc, ago, clock, icon, lsGet, lsSet, setLive, startAgoTicker, toast, activityRows, onResume } from "./ui.js";
+import { basemap, initTheme, esc, ago, clock, icon, lsGet, lsSet, setLive, startAgoTicker, toast, activityRows, onResume } from "./ui.js";
 
 const $ = (id) => document.getElementById(id);
 const SEL_KEY = "fg-admin-selected";
@@ -333,10 +333,7 @@ let map, layer;
 function initMap() {
   if (typeof L === "undefined") return;
   map = L.map("sc-map", { zoomControl: true, attributionControl: true }).setView([50, 10], 4);
-  const esri = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas";
-  L.tileLayer(`${esri}/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`, {
-    maxZoom: 16, attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a>, &copy; OpenStreetMap contributors',
-  }).addTo(map);
+  basemap(map, { labels: false });
   layer = L.featureGroup().addTo(map);
 }
 
@@ -763,6 +760,7 @@ function live() {
 
 if (EMBED) document.body.classList.add("embed");
 else initMap();
+initTheme();
 applyAuth();
 startAgoTicker();
 load().finally(live);

@@ -17,7 +17,7 @@ check_circle
 close
 compare_arrows
 construction
-crisis_alert
+dark_mode
 description
 details
 done
@@ -25,7 +25,6 @@ done_all
 dynamic_feed
 earthquake
 edit_document
-emergency_home
 error
 expand_more
 fact_check
@@ -39,11 +38,12 @@ forum
 group
 help
 history
-info
 key
 label
 landslide
 language
+light
+light_mode
 lightbulb
 local_fire_department
 location_on
@@ -78,10 +78,8 @@ radio
 radio_button_checked
 refresh
 remove_circle
-report
 restart_alt
 route
-satellite_alt
 schedule
 science
 search
@@ -89,6 +87,7 @@ skip_next
 slideshow
 start
 step
+storage
 storm
 summarize
 swap_vert

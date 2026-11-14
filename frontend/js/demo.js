@@ -1,6 +1,6 @@
 // Demo page: board (left) + compact read-only "behind the scenes" (right); tabs on mobile.
 import * as api from "./api.js";
-import { setLive, onResume } from "./ui.js";
+import { initTheme, setLive, onResume } from "./ui.js";
 
 const $ = (id) => document.getElementById(id);
 // In mock mode, pass the simulation switches through to both frames.
@@ -35,3 +35,4 @@ api.getHealth().then((h) => {
 // LIVE dot for the demo frame itself (the iframes have their own connections).
 api.subscribe({}, setLive);
 onResume(() => { $("f-board").contentWindow?.location.reload(); $("f-behind").contentWindow?.location.reload(); });
+initTheme();

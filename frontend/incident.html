@@ -2,6 +2,8 @@
 <html lang="en" class="dark">
 <head>
 <meta charset="utf-8">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script>try { document.documentElement.dataset.theme = localStorage.getItem("fg-theme") === "light" ? "light" : "dark"; } catch (e) {}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Incident feed · FloodGate</title>
 <meta name="description" content="Verified claim timeline for one incident.">
@@ -40,6 +42,9 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
     <div class="card p-4 text-muted text-sm">Loading incident…</div>
   </section>
 
+  <!-- official warning view -->
+  <section id="warning-view" class="mt-4 hidden"></section>
+
   <!-- key facts (verified boards) -->
   <section id="key-facts" class="mt-4 hidden" aria-labelledby="kf-h"></section>
 
@@ -52,8 +57,6 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
   <!-- v0.10: the incident over time (history kept in Tiger Data), collapsed -->
   <section id="history" class="mt-4 hidden"></section>
 
-  <!-- official warning view -->
-  <section id="warning-view" class="mt-4 hidden"></section>
 
   <!-- timeline controls: Key/All toggle + secondary filters -->
   <section id="controls" class="sticky top-14 z-[400] -mx-4 px-4 py-2 mt-5 bg-canvas/95 backdrop-blur border-y border-line hidden" aria-label="Timeline view">

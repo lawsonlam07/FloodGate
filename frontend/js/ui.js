@@ -186,3 +186,57 @@ export function onResume(refetch, staleMs = 60000) {
     hiddenAt = 0;
   });
 }
+
+// ---- light / dark theme ---------------------------------------------------------------------------------------
+// The page's <head> applies the saved theme before anything is drawn (no flash); this adds the toggle button next to
+// the live indicator and keeps other open pages (e.g. the demo's frames) in step through the storage event.
+const THEME_KEY = "fg-theme";
+export const currentTheme = () => (document.documentElement.dataset.theme === "light" ? "light" : "dark");
+
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  window.dispatchEvent(new CustomEvent("fg-theme", { detail: t }));
+}
+
+export function setTheme(t) {
+  try { localStorage.setItem(THEME_KEY, t); } catch { /* private mode: this page only */ }
+  applyTheme(t);
+}
+
+export function initTheme() {
+  window.addEventListener("storage", (e) => { if (e.key === THEME_KEY) applyTheme(e.newValue === "light" ? "light" : "dark"); });
+  const dot = document.getElementById("live-dot");
+  if (!dot || document.getElementById("theme-btn")) return;
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.id = "theme-btn";
+  btn.className = "theme-btn";
+  const paint = () => {
+    const light = currentTheme() === "light";
+    btn.innerHTML = icon(light ? "dark_mode" : "light_mode", "text-[20px]");
+    btn.title = light ? "Switch to dark mode" : "Switch to light mode";
+    btn.setAttribute("aria-label", btn.title);
+  };
+  btn.onclick = () => setTheme(currentTheme() === "light" ? "dark" : "light");
+  dot.parentElement.insertBefore(btn, dot);
+  paint();
+  window.addEventListener("fg-theme", paint);
+}
+
+// Keyless Esri basemaps in the page's theme; `basemap(map)` adds them and swaps them when the theme changes.
+export function basemap(map, { labels = true } = {}) {
+  const esri = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas";
+  const url = (part) => `${esri}/World_${currentTheme() === "light" ? "Light" : "Dark"}_Gray_${part}/MapServer/tile/{z}/{y}/{x}`;
+  const base = L.tileLayer(url("Base"), {
+    maxZoom: 16,
+    attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a> &mdash; Esri, HERE, Garmin, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  }).addTo(map);
+  let ref = null;
+  if (labels) {
+    map.createPane("labels");                               // place names above the areas, never catching clicks
+    map.getPane("labels").style.zIndex = 450;
+    map.getPane("labels").style.pointerEvents = "none";
+    ref = L.tileLayer(url("Reference"), { maxZoom: 16, pane: "labels", opacity: 0.85 }).addTo(map);
+  }
+  window.addEventListener("fg-theme", () => { base.setUrl(url("Base")); ref?.setUrl(url("Reference")); });
+}

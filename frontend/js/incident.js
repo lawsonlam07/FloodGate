@@ -5,6 +5,7 @@
 import * as api from "./api.js";
 import { createLive, ribbonText, animDelay, setPausedChip } from "./live.js";
 import {
+  initTheme,
   esc, ago, clock, icon, sevChip, countChips, statusChip, heldChip, STATUS, STATUS_ORDER, KIND_ICON, STANCE,
   CATEGORY_LABEL, lsGet, lsSet, setLive, startAgoTicker, toast, isWarning, rangeText, untilText, validText, isEnded, capturedText, updatedChecked, onResume,
 } from "./ui.js";
@@ -834,6 +835,7 @@ function live() {
 }
 
 window.addEventListener("hashchange", () => { if (location.hash) goTo(decodeURIComponent(location.hash.slice(1))); });
+initTheme();
 startAgoTicker();
 load().finally(live);
 onResume(async () => {

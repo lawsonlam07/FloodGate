@@ -1,4 +1,5 @@
-// Tailwind theme: DESIGN.md "Crisis Tactical Utilitarian" tokens. Built ahead of time by frontend/build.py
+// Tailwind theme: DESIGN.md "Crisis Tactical Utilitarian" tokens, as CSS variables (css/app.css): dark by default,
+// light with data-theme="light". Built ahead of time by frontend/build.py
 // into css/tailwind.css (no CDN, no in-browser compiler); run.sh and deploy.sh rebuild it automatically.
 module.exports = {
   content: ["./*.html", "./js/**/*.js"],
@@ -6,20 +7,20 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        canvas: "#0B111A",      // layer 0
-        card: "#131D2A",        // layer 1
-        elevated: "#1C2838",    // layer 2
-        line: "#26354A",        // 1px borders
-        line2: "#33465E",
-        ink: "#F8FAFC",         // primary text
-        muted: "#94A3B8",       // secondary text
-        faint: "#64748B",
-        critical: "#EF4444",    // life safety
-        authority: "#38BDF8",   // official / wire
-        ok: "#10B981",          // verified
-        triage: "#F59E0B",      // investigating / unverified
-        debunk: "#991B1B",      // false
-        severe: "#F97316",
+        canvas: "rgb(var(--c-canvas) / <alpha-value>)",      // layer 0
+        card: "rgb(var(--c-card) / <alpha-value>)",        // layer 1
+        elevated: "rgb(var(--c-elevated) / <alpha-value>)",    // layer 2
+        line: "rgb(var(--c-line) / <alpha-value>)",        // 1px borders
+        line2: "rgb(var(--c-line2) / <alpha-value>)",
+        ink: "rgb(var(--c-ink) / <alpha-value>)",         // primary text
+        muted: "rgb(var(--c-muted) / <alpha-value>)",       // secondary text
+        faint: "rgb(var(--c-faint) / <alpha-value>)",
+        critical: "rgb(var(--c-critical) / <alpha-value>)",    // life safety
+        authority: "rgb(var(--c-authority) / <alpha-value>)",   // official / wire
+        ok: "rgb(var(--c-ok) / <alpha-value>)",          // verified
+        triage: "rgb(var(--c-triage) / <alpha-value>)",      // investigating / unverified
+        debunk: "rgb(var(--c-debunk) / <alpha-value>)",      // false
+        severe: "rgb(var(--c-severe) / <alpha-value>)",
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],

@@ -2,10 +2,9 @@
 if (window.self !== window.top) document.body.classList.add("framed");   // shown inside demo.html
 import * as api from "./api.js";
 import { createLive, animDelay, setPausedChip } from "./live.js";
-import { esc, ago, icon, sevChip, sevColor, countChips, statusChip, lsGet, lsSet, setLive, startAgoTicker, KIND_ICON, toast, isWarning, untilText, validText, isEnded, warningColor, activityRows, updatedChecked, onResume } from "./ui.js";
+import { basemap, initTheme, esc, ago, icon, sevChip, sevColor, countChips, statusChip, lsGet, lsSet, setLive, startAgoTicker, KIND_ICON, toast, isWarning, untilText, validText, isEnded, warningColor, activityRows, updatedChecked, onResume } from "./ui.js";
 
-const state = { incidents: [], alerts: [], monitors: [], activity: [], creditsSpent: 0 };
-const DISMISSED_KEY = "fg-dismissed-alerts";
+const state = { incidents: [], monitors: [], activity: [], creditsSpent: 0 };
 
 // ---------------------------------------------------------------- live update feedback
 // Toasts only for incidents in focus: passing the severity filter and (with "Follow map" on) inside the map view.
@@ -17,6 +16,7 @@ const liveFx = createLive({
     if (!sevOn.has(Number(inc.severity))) return false;
     return !focus.follow || inMapView(inc);
   },
+  onUpdate: showLatest,                                  // one brief line at the top instead of pop-ups
 });
 const fx = new Map();                     // incident_id → {at, plus: {status: +n}} for card pulse / "+1" / hot rings
 const fxAge = (id) => (fx.has(id) ? Date.now() - fx.get(id).at : Infinity);
@@ -116,7 +116,7 @@ function renderIncidents() {
   const all = visible();
   const shown = shownList();
   const elsewhere = all.length - shown.length;
-  renderListNote(shown.length, elsewhere, all.length);
+  renderListNote(shown.length, elsewhere, all.length, [...shown].sort((a, b) => b.severity - a.severity)[0]);
   const full = shown.filter(isFullCard);
   const compact = shown.filter((i) => !isFullCard(i))
     .sort((a, b) => (b.severity - a.severity) || (a.valid?.to || "").localeCompare(b.valid?.to || ""));
@@ -140,27 +140,16 @@ function renderIncidents() {
   document.getElementById("warn-group")?.addEventListener("toggle", (e) => lsSet(WARN_OPEN_KEY, e.target.open));
   el.querySelector("[data-see-all]")?.addEventListener("click", () => renderMap(true));
 
-  // The summary describes the focused area when the list follows the map.
-  const scope = focus.follow ? shown : state.incidents;
-  const inView = focus.follow ? " in view" : "";
-  const boards = scope.filter((i) => !isWarning(i)).length;
-  const warns = scope.length - boards;
-  const top = [...scope].sort((a, b) => b.severity - a.severity)[0];
-  const contradicted = scope.reduce((s, i) => s + (i.counts?.contradicted || 0), 0);
-  document.getElementById("strip-top").textContent = state.incidents.length
-    ? `${boards} active disaster${boards === 1 ? "" : "s"}${inView} · ${warns} official warning${warns === 1 ? "" : "s"}${top ? ` · highest L${top.severity}` : ""}`
-    : "No active disasters";
-  document.getElementById("strip-bottom").textContent = state.incidents.length
-    ? `${contradicted} rumour${contradicted === 1 ? "" : "s"} contradicted by official sources${inView}` : "Monitors are watching official sources";
 }
 
-function renderListNote(n, elsewhere, total) {
+function renderListNote(n, elsewhere, total, top) {
   const el = document.getElementById("list-note");
   if (!el) return;
+  const highest = top ? ` · highest ${sevChip(top.severity, top.severity_label)}` : "";
   el.innerHTML = focus.follow
-    ? `<span>Showing <b class="text-ink tnum">${n}</b> in this area${elsewhere ? ` · <span class="tnum">${elsewhere}</span> more elsewhere · <button type="button" class="text-authority underline" data-follow="off">show all</button>` : ""}</span>
+    ? `<span>Showing <b class="text-ink tnum">${n}</b> in this area${highest}${elsewhere ? ` · <span class="tnum">${elsewhere}</span> more elsewhere · <button type="button" class="text-authority underline" data-follow="off">show all</button>` : ""}</span>
        <button type="button" class="fchip chip chip-corroborated" aria-pressed="true" data-follow="off">${icon("my_location", "text-[13px]")}Follow map</button>`
-    : `<span>Showing all <b class="text-ink tnum">${total}</b></span>
+    : `<span>Showing all <b class="text-ink tnum">${total}</b>${highest}</span>
        <button type="button" class="fchip chip chip-tag" aria-pressed="false" data-follow="on">${icon("location_searching", "text-[13px]")}Follow map</button>`;
   el.querySelectorAll("[data-follow]").forEach((b) => {
     b.onclick = () => { focus.follow = b.dataset.follow === "on"; lsSet(FOLLOW_KEY, focus.follow); renderIncidents(); };
@@ -177,17 +166,12 @@ function initMap() {
     document.getElementById("map").innerHTML = `<div class="p-4 text-sm text-muted">Map library failed to load.</div>`;
     return;
   }
-  map = L.map("map", { zoomControl: true, attributionControl: true, worldCopyJump: true });
-  // Esri World Dark Gray Canvas: keyless dark basemap (CARTO dark tiles now return an "API key required" placeholder).
-  const esri = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas";
-  L.tileLayer(`${esri}/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`, {
-    maxZoom: 16,
-    attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a> &mdash; Esri, HERE, Garmin, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  }).addTo(map);
-  map.createPane("labels");                               // place names above the areas, never catching clicks
-  map.getPane("labels").style.zIndex = 450;
-  map.getPane("labels").style.pointerEvents = "none";
-  L.tileLayer(`${esri}/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, { maxZoom: 16, pane: "labels", opacity: 0.85 }).addTo(map);
+  // The map must never trap the page: the mouse wheel scrolls the page (zoom with + / − or a double click), and on
+  // touch screens one finger scrolls the page while two fingers pinch-zoom the map. Tapping an area opens it.
+  const touch = L.Browser.mobile || matchMedia("(pointer: coarse)").matches;
+  map = L.map("map", { zoomControl: true, attributionControl: true, worldCopyJump: true, scrollWheelZoom: false, dragging: !touch });
+  document.getElementById("map-note").textContent = touch ? "pinch to zoom · tap an area to open it" : "drag to move · tap an area to open it";
+  basemap(map);                                           // Esri gray canvas in the page's theme (dark or light)
   map.createPane("warnings");                             // official warning polygons sit under the rings
   map.getPane("warnings").style.zIndex = 390;
   warnLayer = L.featureGroup().addTo(map);
@@ -393,63 +377,49 @@ const shownList = () => (focus.follow && map ? visible().filter(inMapView) : vis
 function renderAreaPicker() {
   const el = document.getElementById("area-picker");
   if (!el) return;
-  el.innerHTML = Object.entries(AREAS).map(([k, a]) =>
-    `<button type="button" class="fchip chip ${focus.area === k ? "chip-corroborated" : "chip-tag"}" aria-pressed="${focus.area === k}" data-area="${k}">${esc(a.label)}</button>`).join("")
-    + `<button type="button" class="fchip chip ${focus.area === "near" ? "chip-corroborated" : "chip-tag"}" aria-pressed="${focus.area === "near"}" data-area="near">${icon("my_location", "text-[13px]")}Near me</button>`;
-  el.querySelectorAll("[data-area]").forEach((b) => {
-    b.onclick = () => {
-      const k = b.dataset.area;
-      if (k !== "near") return fitTo(AREAS[k].b, k);
-      if (!navigator.geolocation) return toast("Location is not available in this browser");
-      toast("Finding your location…");
-      navigator.geolocation.getCurrentPosition(
-        (pos) => fitTo(L.latLng(pos.coords.latitude, pos.coords.longitude).toBounds(300000), "near", 10),   // ~150 km around you
-        (err) => toast(err.code === 1 ? "Location permission denied: pick an area instead" : "Couldn't get your location"),
-        { timeout: 10000, maximumAge: 600000 });
-    };
-  });
+  const opts = Object.entries(AREAS).map(([k, a]) => [k, a.label]).concat([["near", "Near me"]]);
+  if (focus.area === "custom") opts.unshift(["custom", "This view"]);
+  el.innerHTML = opts.map(([k, label]) => `<option value="${k}" ${focus.area === k ? "selected" : ""}>${esc(label)}</option>`).join("");
+  el.onchange = () => {
+    const k = el.value;
+    if (k === "custom") return;
+    if (k !== "near") return fitTo(AREAS[k].b, k);
+    if (!navigator.geolocation) return toast("Location is not available in this browser");
+    toast("Finding your location…");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => fitTo(L.latLng(pos.coords.latitude, pos.coords.longitude).toBounds(300000), "near", 10),   // ~150 km around you
+      (err) => { toast(err.code === 1 ? "Location permission denied: pick an area instead" : "Couldn't get your location"); renderAreaPicker(); },
+      { timeout: 10000, maximumAge: 600000 });
+  };
 }
 
-// ---------------------------------------------------------------- banner
+// ---------------------------------------------------------------- latest update (one line at the top)
+// Replaces the pop-ups: the newest meaningful update, replaced by the next one. Missed ones simply go.
 
-const BANNER = {
-  potential: { icon: "radar", tag: "Verifying…", pulse: true },
-  critical: { icon: "emergency_home", tag: "Verified alert", pulse: false },
-  debunk: { icon: "report", tag: "False", pulse: false },
-  info: { icon: "info", tag: "Info", pulse: false },
-};
+const ACCENT = { critical: "#EF4444", ok: "#10B981", authority: "#38BDF8", triage: "#F59E0B", severe: "#F97316", line: "#64748B" };
 
-function renderBanner() {
-  const dismissed = new Set(lsGet(DISMISSED_KEY, []));
-  const alert = [...state.alerts]
-    .sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""))
-    .find((a) => !dismissed.has(a.id));
-  const el = document.getElementById("banner");
-  if (!alert) { el.innerHTML = ""; return; }
-  const meta = BANNER[alert.level] || BANNER.info;
-  const href = alert.incident_id
-    ? api.link(`incident.html?id=${encodeURIComponent(alert.incident_id)}`) + (alert.item_id ? `#${encodeURIComponent(alert.item_id)}` : "")
-    : null;
-  el.innerHTML = `
-  <div class="banner banner-${esc(alert.level)}" role="alert">
-    <div class="max-w-[1400px] mx-auto px-4 lg:px-6 py-3 flex items-start gap-3">
-      <span class="material-symbols-outlined icon-fill banner-icon-${esc(alert.level)} ${meta.pulse ? "pulse" : ""}" style="font-size:30px">${meta.icon}</span>
-      <${href ? `a href="${href}"` : "div"} class="flex-1 min-w-0 block">
-        <div class="flex items-center gap-2 flex-wrap">
-          <span class="label banner-icon-${esc(alert.level)} ${meta.pulse ? "pulse" : ""}">${esc(meta.tag)}</span>
-          ${ago(alert.created_at, "label text-faint")}
-        </div>
-        <div class="mt-0.5 text-base sm:text-lg font-bold leading-snug line-clamp-3 sm:line-clamp-none">${esc(alert.title)}</div>
-        ${alert.body ? `<div class="text-sm text-muted line-clamp-2 sm:line-clamp-none">${esc(alert.body)}</div>` : ""}
-        ${href ? `<div class="mt-1 label text-authority flex items-center gap-1">Open incident ${icon("arrow_forward", "text-[14px]")}</div>` : ""}
-      </${href ? "a" : "div"}>
-      <button type="button" id="banner-dismiss" class="btn !min-h-[32px] !px-2 shrink-0" aria-label="Dismiss alert">${icon("close")}</button>
-    </div>
-  </div>`;
-  document.getElementById("banner-dismiss").onclick = () => {
-    lsSet(DISMISSED_KEY, [...dismissed, alert.id].slice(-200));
-    renderBanner();
-  };
+function showLatest(u) {
+  document.getElementById("latest").innerHTML = `
+    <a href="${esc(u.href)}" class="card flex items-center gap-2.5 px-3 py-2 hover:border-line2">
+      <span class="w-2 h-2 rounded-full shrink-0" style="background:${ACCENT[u.accent] || ACCENT.line}"></span>
+      <span class="label shrink-0">Latest</span>
+      <span class="min-w-0 text-sm leading-snug line-clamp-2 sm:line-clamp-1"><b>${esc(u.name)}</b>
+        <span class="text-muted">· ${esc(u.headline)}${u.more > 0 ? ` (+${u.more} more)` : ""}</span></span>
+      ${ago(u.at, "label text-faint shrink-0 ml-auto hidden sm:inline")}
+    </a>`;
+}
+
+// On arrival, the newest alert stands in until the first live update.
+const ALERT_KIND = { critical: ["Confirmed", "critical"], debunk: ["Shown false", "critical"], potential: ["Being checked", "triage"], info: ["Update", "authority"] };
+
+function showNewestAlert(alerts) {
+  const a = [...alerts].sort((x, y) => (y.created_at || "").localeCompare(x.created_at || ""))[0];
+  if (!a || document.getElementById("latest").innerHTML.trim()) return;
+  const [word, accent] = ALERT_KIND[a.level] || ALERT_KIND.info;
+  const inc = state.incidents.find((i) => i.id === a.incident_id);
+  const title = String(a.title || "").replace(/^(verified|verifying…?|false|info|not true):\s*/i, "");
+  showLatest({ name: inc?.name || "Update", headline: `${word}: ${title}`, more: 0, accent, at: a.created_at,
+               href: a.incident_id ? api.link(`incident.html?id=${encodeURIComponent(a.incident_id)}`) : "#" });
 }
 
 // ---------------------------------------------------------------- system panel
@@ -508,12 +478,11 @@ async function load() {
   api.getControl().then(applyAuthControl).catch(() => {});   // read-only visitors: no "Check now"
   if (inc.status === "fulfilled") state.incidents = (inc.value.incidents || []).filter((i) => !isEnded(i));
   else document.getElementById("incidents").innerHTML = `<div class="card p-4 text-critical text-sm">Could not load incidents: ${esc(inc.reason?.message)}</div>`;
-  if (al.status === "fulfilled") state.alerts = al.value.alerts || [];
+  if (al.status === "fulfilled") setTimeout(() => showNewestAlert(al.value.alerts || []), 0);
   if (mon.status === "fulfilled") state.monitors = mon.value.monitors || [];
   if (act.status === "fulfilled") { state.activity = act.value.activity || []; state.creditsSpent = act.value.credits_spent || 0; }
   if (inc.status === "fulfilled") { liveFx.seedIncidents(state.incidents); renderIncidents(); }
   renderMap(false);                                       // keep the user's area; "see all" fits to the data
-  renderBanner();
   renderMonitors();
   renderActivity();
 }
@@ -553,7 +522,6 @@ function live() {
     context_check: (ev) => liveFx.onContextCheck(ev),
     control: (c) => { setPausedChip(!!c.paused, c.since); applyAuthControl(c); },
     item: (it) => { if (liveFx.onItem(it)) lastItemChange.set(it.incident_id, Date.now()); },
-    alert(al) { upsert(state.alerts, al); renderBanner(); },
     activity(row) {
       state.activity.unshift(row);
       state.activity = state.activity.slice(0, 200);
@@ -567,6 +535,7 @@ function live() {
 document.querySelectorAll('a[href="admin.html"]').forEach((a) => { a.href = api.link("admin.html"); });
 document.getElementById("demo-link")?.setAttribute("href", api.link("demo.html"));
 if (location.hash === "#system" || new URLSearchParams(location.search).get("system") === "1") document.getElementById("system").open = true;
+initTheme();
 initMap();
 startAgoTicker();
 load().finally(live);
