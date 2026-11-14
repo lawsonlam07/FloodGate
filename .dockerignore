@@ -1,0 +1,8 @@
+.venv
+.git
+data
+out
+.env
+*.zip
+__pycache__
+poc
