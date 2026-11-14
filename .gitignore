@@ -6,3 +6,5 @@ data/
 # fictional sites are generated at runtime from scenario/
 fake_site/*
 !fake_site/.gitkeep
+# downloaded build tools (frontend/build.py)
+.cache/

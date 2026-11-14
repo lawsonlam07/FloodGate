@@ -1,0 +1,57 @@
+# FloodGate on one server: the app (API, monitors, frontend, fictional sites) behind an HTTPS proxy.
+#   docker compose up -d --build        (DOMAIN and the API keys come from .env next to this file)
+#
+# Proxy: if the server already runs Traefik (e.g. Hostinger's VPS templates: docker provider, entrypoint
+# "websecure", resolver "letsencrypt"), the labels below are all it needs. Otherwise start the bundled Caddy too:
+# COMPOSE_PROFILES=caddy in .env (deploy.sh decides this on the first deploy).
+services:
+  floodgate:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PUBLIC_BASE_URL: https://${DOMAIN:?set DOMAIN in .env}
+    volumes:
+      - floodgate-data:/app/data
+    expose:
+      - "8000"
+    labels:
+      - traefik.enable=true
+      # DOMAIN is the main address; DOMAIN_ALT (optional) keeps an older address working too
+      - traefik.http.routers.floodgate.rule=Host(`${DOMAIN}`) || Host(`${DOMAIN_ALT:-${DOMAIN}}`)
+      - traefik.http.routers.floodgate.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.floodgate.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}
+      - traefik.http.routers.floodgate.service=floodgate
+      - traefik.http.services.floodgate.loadbalancer.server.port=8000
+      # gzip/brotli for HTML, JS and JSON ...
+      - traefik.http.middlewares.floodgate-compress.compress=true
+      - traefik.http.routers.floodgate.middlewares=floodgate-compress
+      # ... but never for the live updates: Traefik's compression buffers Server-Sent Events (seen: no events at all
+      # for browsers, which always send Accept-Encoding), so /api/stream gets its own uncompressed route.
+      - traefik.http.routers.floodgate-stream.rule=(Host(`${DOMAIN}`) || Host(`${DOMAIN_ALT:-${DOMAIN}}`)) && Path(`/api/stream`)
+      - traefik.http.routers.floodgate-stream.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.floodgate-stream.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}
+      - traefik.http.routers.floodgate-stream.service=floodgate
+      - traefik.http.routers.floodgate-stream.priority=1000
+
+  caddy:
+    image: caddy:2
+    profiles: ["caddy"]
+    restart: unless-stopped
+    depends_on:
+      - floodgate
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  floodgate-data:
+  caddy-data:
+  caddy-config:

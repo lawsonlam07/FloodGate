@@ -1,0 +1,7 @@
+# HTTPS for the domain (Let's Encrypt, automatic) in front of FloodGate.
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy floodgate:8000 {
+		flush_interval -1 # Server-Sent Events (/api/stream): pass every event through immediately
+	}
+}

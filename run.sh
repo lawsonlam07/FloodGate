@@ -6,6 +6,8 @@ set -euo pipefail
 # Ctrl-C: open live-update connections get 2 s, then the server saves its state and exits.
 cd "$(dirname "$0")"
 if command -v uv >/dev/null 2>&1; then
+  # Frontend assets (Tailwind CSS, Leaflet, fonts): served by us, no CDNs. Fast when nothing changed.
+  uv run frontend/build.py || echo "frontend build failed; serving the last built assets" >&2
   exec uv run uvicorn backend.app:app --host 127.0.0.1 --port "${PORT:-8000}" --timeout-graceful-shutdown 2
 else
   echo "uv not found; falling back to .venv (install uv: sudo pacman -S uv)" >&2
