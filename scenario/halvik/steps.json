@@ -1,0 +1,100 @@
+{
+  "scenario": "halvik",
+  "pages": [
+    {
+      "id": "rescue",
+      "name": "Halvik Rescue Services",
+      "source_id": "halvik-rescue",
+      "target": "rescue/index.html",
+      "url": "/sites/rescue/"
+    },
+    {
+      "id": "herald",
+      "name": "The Halvik Herald",
+      "source_id": "halvik-herald",
+      "target": "herald/storm-surge-live.html",
+      "url": "/sites/herald/storm-surge-live.html"
+    },
+    {
+      "id": "board",
+      "name": "Halvik Board",
+      "source_id": "halvik-board",
+      "target": "board/index.html",
+      "url": "/sites/board/"
+    }
+  ],
+  "steps": [
+    {
+      "n": 0,
+      "clock": "10:30",
+      "title": "Before the storm",
+      "description": "A normal Saturday: no warnings, a festival story, everyday posts. No incident should appear.",
+      "pages": {
+        "rescue": "rescue-0.html",
+        "herald": "herald-0.html",
+        "board": "board-0.html"
+      }
+    },
+    {
+      "n": 1,
+      "clock": "11:10",
+      "title": "Orange storm surge warning",
+      "description": "Rescue Services issue an orange warning; the Herald reports it; people notice the wind and waves.",
+      "pages": {
+        "rescue": "rescue-1.html",
+        "herald": "herald-1.html",
+        "board": "board-1.html"
+      }
+    },
+    {
+      "n": 2,
+      "clock": "12:45",
+      "title": "Raised to red, first rumour",
+      "description": "The warning goes red. On social media someone asks whether Saltmarsh is being evacuated (unconfirmed).",
+      "pages": {
+        "rescue": "rescue-2.html",
+        "board": "board-2.html"
+      }
+    },
+    {
+      "n": 3,
+      "clock": "13:45",
+      "title": "Bridge closed, Saltmarsh evacuated",
+      "description": "Rescue Services close Harbour Bridge and order part of Saltmarsh to leave, confirming the rumour. A photo shows the bridge closed but intact.",
+      "pages": {
+        "rescue": "rescue-3.html",
+        "herald": "herald-3.html",
+        "board": "board-3.html"
+      }
+    },
+    {
+      "n": 4,
+      "clock": "14:28",
+      "title": "Rumour swarm",
+      "description": "Near-identical bot posts claim the bridge collapsed (212 reposts), a scam post says all of Halvik is being evacuated, and a resident says the water is going down. The Herald relays the collapse claim as unconfirmed. No official word yet.",
+      "pages": {
+        "herald": "herald-4.html",
+        "board": "board-4.html"
+      }
+    },
+    {
+      "n": 5,
+      "clock": "14:31",
+      "title": "Official debunk",
+      "description": "Rescue Services publish update 4 with a 'Not true' section; the Herald adds the official denial.",
+      "pages": {
+        "rescue": "rescue-update-4.html",
+        "herald": "herald-5.html"
+      }
+    },
+    {
+      "n": 6,
+      "clock": "15:05",
+      "title": "Evacuation extended",
+      "description": "Update 5 extends the evacuation to Old Harbour and debunks 'all of Halvik' and 'water going down'.",
+      "pages": {
+        "rescue": "rescue-update-5.html"
+      }
+    }
+  ]
+}
