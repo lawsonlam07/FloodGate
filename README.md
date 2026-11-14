@@ -66,3 +66,10 @@ store + alerts + Server-Sent Events          backend/store.py, backend/app.py â†
   `uv run poc/monitor_experiment.py`).
 - Without uv: `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt` (exported from uv.lock).
 - Everything in `scenario/` is fictional: invented towns, organisations, newspapers and accounts.
+
+Sources
+<img width="1698" height="867" alt="image" src="https://github.com/user-attachments/assets/395c2470-7245-44c9-b46c-36b2cbaf6831" />
+<img width="1490" height="849" alt="image" src="https://github.com/user-attachments/assets/ff2c7c05-a86c-461f-9457-277f55a49c14" />
+<img width="1186" height="716" alt="image" src="https://github.com/user-attachments/assets/3b2044eb-e03b-4651-987a-83a069f9a559" />
+
+
