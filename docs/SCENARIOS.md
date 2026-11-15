@@ -4,7 +4,7 @@ Each scenario is one fictional disaster somewhere in Europe, told as a storyline
 up to three fictional web pages (an official authority page, a local news article, a public social feed). FloodGate's
 monitors notice the change, Context.dev captures the pages, and the board verifies the claims, exactly as for real pages.
 
-Files: `scenario/<id>/scenario.json`. The backend renders the pages to `fake_site/<id>/<source>/index.html` (same visual
+Files: `scenario/<id>/scenario.json`. The backend renders the pages to `data/sites/<id>/<source>/index.html` (same visual
 style as the Halvik pages) and serves them at `/sites/<id>/<source>/` and through the tunnel. The hand-written Halvik
 storyline (`scenario/halvik/steps.json` + HTML files) stays as it is.
 

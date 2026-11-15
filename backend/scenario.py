@@ -2,7 +2,7 @@
 scenario/<id>/scenario.json files (docs/SCENARIOS.md).
 
 A scenario that hasn't started has no monitors and no incident (JSON scenarios also have no pages). Starting it means
-going to step 0: its pages are published into fake_site/, monitors are added for its sources and nudged, and the normal
+going to step 0: its pages are published into data/sites/, monitors are added for its sources and nudged, and the normal
 pipeline runs (Context.dev -> grouping -> verdicts), exactly as for a real site update. In production a monitor would
 find a change on its own within its polling interval; for the demo we nudge it to check immediately.
 """
@@ -21,7 +21,7 @@ from . import fake_render
 from .config import ADMIN_TOKEN, CREDIT_BUDGET_DAILY, INCIDENT_TEMPLATES, ROOT, SCENARIO_SPECS, SHOWCASE, SOURCES_BY_ID
 from .monitors import PageMonitor
 
-SITE_DIR = ROOT / "fake_site"
+SITE_DIR = ROOT / "data" / "sites"            # the published fictional sites (runtime output, not in git)
 HALVIK_DIR = ROOT / "scenario" / "halvik"
 STATE_FILE = ROOT / "data" / "scenario.json"
 CONTROL_FILE = ROOT / "data" / "control.json"           # {"paused": bool, "since": ts}: survives restarts
@@ -198,7 +198,6 @@ class ScenarioEngine:
     async def set_fictional(self, enabled: bool) -> dict:
         """Hide or show every fictional scenario. Hidden ones are frozen (no steps, so no page changes and no credits)
         and kept exactly as they are; showing them again carries on from there."""
-        from .store import now
         if enabled == self.control.get("fictional", True):
             return self.control_view()
         fictional = [inc for inc in self.store.incidents.values() if inc.kind != "official_warning" and inc.is_live()]
@@ -362,14 +361,14 @@ class ScenarioEngine:
         return self._previews[target]
 
     def photo(self, path: str) -> Path | None:
-        """A scenario's photo for a preview page ("<id>/images/<file>.jpg"); started ones copy theirs into fake_site/."""
+        """A scenario's photo for a preview page ("<id>/images/<file>.jpg"); started ones copy theirs into data/sites/."""
         m = re.fullmatch(r"([a-z0-9-]+)/images/([\w-]+\.(?:jpg|png|webp))", path)
         if m and m[1] in self.defs:
             f = ROOT / "scenario" / m[1] / "images" / m[2]
             return f if f.is_file() else None
         return None
 
-    # ---- an index of every scenario's fictional sites (fake_site/index.html, also served at /sites/) --------------------
+    # ---- an index of every scenario's fictional sites (data/sites/index.html, served at /sites/) --------------------
     def write_sites_index(self) -> None:
         import html as _html
         order = {"catastrophic": 0, "major": 1, "moderate": 2, "minor": 3}

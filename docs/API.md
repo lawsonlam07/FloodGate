@@ -1,4 +1,4 @@
-# FloodGate API contract (mock-up v0)
+# FloodGate API contract
 
 Backend: FastAPI on `http://127.0.0.1:8000`. The frontend is served by the same server (`/` → `frontend/index.html`,
 `/incident.html?id=<incident_id>`), so all calls are same-origin, relative paths (`/api/...`).
@@ -271,7 +271,7 @@ Chips L4 · L3 · L2 · L1 with counts; toggle each; default L4–L2 on (L1 hidd
   "autoplay": {"running": false, "interval_s": 60}
 }
 ```
-`POST /api/admin/scenario/step` body `{"to": 3}` or `{"next": true}` → publishes that step's page versions into `fake_site/`
+`POST /api/admin/scenario/step` body `{"to": 3}` or `{"next": true}` → publishes that step's page versions into `data/sites/`
 and nudges the affected monitors to check immediately; returns the scenario state.
 `POST /api/admin/scenario/reset` → puts every page back to step 0, deletes the Halvik incident (items, alerts, snapshots) so the
 story can be replayed from scratch; returns the scenario state.

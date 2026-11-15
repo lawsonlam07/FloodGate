@@ -8,12 +8,13 @@ cd "$(dirname "$0")"
 PORT="${PORT:-8765}"
 TUNNEL="${TUNNEL:-$(command -v cloudflared >/dev/null 2>&1 && echo cloudflared || echo localhost.run)}"
 
+mkdir -p data/sites
 # Static server that labels HTML as UTF-8 (plain `python -m http.server` sends no charset).
 python3 - "$PORT" >/dev/null 2>&1 <<'PY' &
 import functools, sys, http.server as hs
 H = hs.SimpleHTTPRequestHandler
 H.extensions_map = {**H.extensions_map, ".html": "text/html; charset=utf-8"}
-hs.ThreadingHTTPServer(("127.0.0.1", int(sys.argv[1])), functools.partial(H, directory="fake_site")).serve_forever()
+hs.ThreadingHTTPServer(("127.0.0.1", int(sys.argv[1])), functools.partial(H, directory="data/sites")).serve_forever()
 PY
 SERVER_PID=$!
 trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT

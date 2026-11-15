@@ -42,7 +42,7 @@ SETTLE = ("document.fonts.ready.then(() => Promise.all([...document.images].map(
 
 
 def render_pages(tmp: Path) -> list[dict]:
-    """Every scenario page at its last step, written under tmp/ exactly as fake_site/ would hold it."""
+    """Every scenario page at its last step, written under tmp/ exactly as data/sites/ would hold it."""
     pages = []
     for sid, d in load_defs().items():
         versions = d.versions_at(len(d.steps) - 1)

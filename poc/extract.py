@@ -299,7 +299,7 @@ def preflight(url: str) -> str | None:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--base-url", help="public URL where fake_site/ is served")
+    ap.add_argument("--base-url", help="public URL where data/sites/ is served")
     ap.add_argument("--only", action="append", choices=[s.id for s in HALVIK_SOURCES], help="limit to these Halvik sources")
     ap.add_argument("--url", help="scrape an arbitrary page instead of the Halvik sites")
     ap.add_argument("--kind", default="other", choices=["official", "news", "social", "other"], help="kind for --url")

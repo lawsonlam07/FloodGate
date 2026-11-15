@@ -4,10 +4,11 @@ Whether a source is official is decided HERE, by us, never by the LLM.
 
 Environment:
   CONTEXT_DEV_API_KEY   Context.dev key (evidence capture)
-  ANTHROPIC_API_KEY     Claude key (claim grouping)
-  SITE_PUBLIC_URL       public URL of fake_site/ (the tunnel), which Context.dev scrapes; if unset, the URL
+  GEMINI_API_KEY        Gemini key (claim grouping and fast extraction)
+  ANTHROPIC_API_KEY     optional Claude key, automatic fallback when a Gemini call fails
+  SITE_PUBLIC_URL       public URL of data/sites/ (the tunnel), which Context.dev scrapes; if unset, the URL
                         serve.sh saved in data/site_public_url is used (it follows tunnel rotations)
-  SITE_LOCAL_URL        where our own monitors fetch fake_site/ cheaply (default http://127.0.0.1:8765)
+  SITE_LOCAL_URL        where our own monitors fetch data/sites/ cheaply (default http://127.0.0.1:8765)
   CONTEXT_REPLAY_DIR    if set, serve saved Context.dev responses from this out/<run> dir instead of calling the API
   CREDIT_BUDGET         max Context.dev credits this server process may spend (default 1500)
   FMI_MONITOR           "0" disables the real official feed monitors (default on; they cost no credits)
@@ -108,7 +109,7 @@ class FeedMonitorConfig:
     interval_s: int = 300
 
 
-# ---- the fictional Halvik scenario (served from fake_site/) -------------------------------------------------
+# ---- the fictional Halvik scenario (served from data/sites/) ------------------------------------------------
 SOURCES = [
     Source("halvik-rescue", "Halvik Rescue Services", "official", "page", "rescue/", "halvik-storm-surge", "rescue"),
     Source("halvik-herald", "The Halvik Herald", "news", "page", "herald/storm-surge-live.html", "halvik-storm-surge", "herald"),

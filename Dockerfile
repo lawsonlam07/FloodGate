@@ -10,7 +10,6 @@ RUN uv sync --frozen --no-dev --no-install-project
 COPY backend ./backend
 COPY frontend ./frontend
 COPY scenario ./scenario
-COPY fake_site ./fake_site
 VOLUME /app/data
 EXPOSE 8000
 CMD ["sh", "-c", "exec uv run --no-sync uvicorn backend.app:app --host 0.0.0.0 --port ${PORT} --proxy-headers --forwarded-allow-ips '*' --timeout-graceful-shutdown 2"]

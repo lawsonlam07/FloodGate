@@ -21,9 +21,9 @@ echo ">>> building frontend assets (Tailwind CSS, Leaflet, fonts)"
 uv run frontend/build.py
 echo ">>> copying code to $HOST:$DIR"
 tar czf - --exclude=.venv --exclude=.git --exclude=data --exclude=out --exclude=.env --exclude='*.zip' \
-    --exclude=__pycache__ --exclude='fake_site/*' --exclude=serve.sh.new \
-    pyproject.toml uv.lock Dockerfile .dockerignore compose.yaml deploy backend frontend scenario fake_site README.md docs |
-  "${SSH[@]}" "$HOST" "mkdir -p $DIR && cd $DIR && rm -rf backend frontend scenario deploy docs && tar xzf - && mkdir -p fake_site && touch fake_site/.gitkeep"
+    --exclude=__pycache__ --exclude=serve.sh.new \
+    pyproject.toml uv.lock Dockerfile .dockerignore compose.yaml deploy backend frontend scenario README.md docs |
+  "${SSH[@]}" "$HOST" "mkdir -p $DIR && cd $DIR && rm -rf backend frontend scenario deploy docs && tar xzf -"
 
 if ! "${SSH[@]}" "$HOST" "test -f $DIR/.env"; then
   [ -n "$DOMAIN" ] || { echo "First deploy: pass the domain, e.g. ./deploy.sh $HOST srv123456.hstgr.cloud"; exit 1; }

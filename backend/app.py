@@ -35,7 +35,7 @@ from . import bulletin
 from . import history as tiger
 from . import llm as llms
 from .pipeline import Pipeline
-from .scenario import ScenarioEngine
+from .scenario import SITE_DIR, ScenarioEngine
 from .store import Store
 
 class _QuietShutdown(logging.Filter):
@@ -482,13 +482,13 @@ async def stream(request: Request):
 
 
 # ---- the fictional sites, served for humans at /sites (links never depend on the tunnel) ------------------------------
-(ROOT / "fake_site").mkdir(exist_ok=True)            # generated at runtime by the scenario engine
+SITE_DIR.mkdir(parents=True, exist_ok=True)          # generated at runtime by the scenario engine
 # Slim containers have no /etc/mime.types: make sure self-hosted fonts get their proper type.
 mimetypes.add_type("font/woff2", ".woff2")
 
 
 class SiteFiles(StaticFiles):
-    """fake_site/ as published by the scenario engine, plus every site of a scenario that isn't running (its whole
+    """data/sites/ as published by the scenario engine, plus every site of a scenario that isn't running (its whole
     storyline, see ScenarioEngine.preview_page), so any fictional site can be visited at any time."""
 
     async def get_response(self, path: str, scope) -> Response:
@@ -511,7 +511,7 @@ class SiteFiles(StaticFiles):
             return FileResponse(photo)
 
 
-app.mount("/sites", SiteFiles(directory=ROOT / "fake_site", html=True), name="sites")
+app.mount("/sites", SiteFiles(directory=SITE_DIR, html=True), name="sites")
 
 # ---- frontend (mounted last so /api wins) --------------------------------------------------------------------------
 FRONTEND = ROOT / "frontend"

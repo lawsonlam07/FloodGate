@@ -3,7 +3,7 @@ name = "floodgate"
 version = "0.1.0"
 description = "Live, verified situation board for emergencies (Junction 2026, Context.dev challenge)"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "anthropic>=2.8",
     "fastapi>=0.160",

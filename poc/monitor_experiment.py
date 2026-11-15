@@ -1,6 +1,6 @@
 """Experiment: can Context.dev Monitors + "run now" give us fast, AI-judged change detection?
 
-Creates a throwaway fictional test page (fake_site/_monitor_test/, served through ./serve.sh's tunnel), two monitors
+Creates a throwaway fictional test page (data/sites/_monitor_test/, served through ./serve.sh's tunnel), two monitors
 on it (exact and semantic) on a once-a-day schedule, then for each scenario edits the page, calls
 POST /v1/monitors/{id}/run and polls the run (no webhook needed) to measure:
   - wall time from "run now" to a completed run
@@ -27,7 +27,7 @@ sys.path.insert(0, str(ROOT))
 from backend.context_client import load_dotenv  # noqa: E402
 
 API = "https://api.context.dev/v1"
-PAGE_DIR = ROOT / "fake_site" / "_monitor_test"
+PAGE_DIR = ROOT / "data" / "sites" / "_monitor_test"
 
 TEMPLATE = """<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow">
 <title>Monitor test – Halvik Rescue Services</title></head><body>
