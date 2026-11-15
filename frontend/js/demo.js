@@ -1,38 +1,78 @@
-// Demo page: board (left) + compact read-only "behind the scenes" (right); tabs on mobile.
-import * as api from "./api.js";
-import { initTheme, setLive, onResume } from "./ui.js";
+// Demo landing page: the problem in one screen (a drifting wall of every fictional site) and the way to the board.
+// Screenshots and their list come from frontend/shoot_sites.py (img/sites/sites.json).
 
 const $ = (id) => document.getElementById(id);
-// In mock mode, pass the simulation switches through to both frames.
-const q = new URLSearchParams(location.search);
-const extra = api.MOCK ? ["showcase", "paused", "budget", "simdelay", "auth"].filter((k) => q.has(k)).map((k) => `&${k}=${encodeURIComponent(q.get(k))}`).join("") : "";
-$("f-board").src = api.link("index.html") + (extra ? (api.MOCK ? extra : "") : "");
-$("f-behind").src = api.link("admin.html?embed=1") + extra;
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
-// Mobile tabs (on ≥1024px both panes are visible side by side).
-document.querySelectorAll("[data-tab]").forEach((b) => {
-  b.onclick = () => {
-    const behind = b.dataset.tab === "behind";
-    document.querySelectorAll("[data-tab]").forEach((t) => t.setAttribute("aria-selected", String(t === b)));
-    $("pane-board").classList.toggle("hidden", behind);
-    $("pane-behind").classList.toggle("hidden", !behind);
-    $("pane-behind").classList.toggle("flex-1", true);
-  };
-});
+if (new URLSearchParams(location.search).get("mock") === "1") {      // keep mock mode on the way to the board
+  $("cta").href = $("brand").href = "index.html?mock=1";
+}
 
-// "How it works" modal; the grouping model name comes from the server.
-const open = () => $("how-modal").classList.remove("hidden");
-const close = () => $("how-modal").classList.add("hidden");
-$("how-btn").onclick = open;
-$("how-close").onclick = close;
-$("how-modal").addEventListener("click", (e) => { if (e.target.id === "how-modal") close(); });
-document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
-if (new URLSearchParams(location.search).get("how") === "1") open();   // screenshot aid
-api.getHealth().then((h) => {
-  if (h.grouping_model) $("how-model").textContent = h.llm_provider === "gemini" ? `Google Gemini, ${h.grouping_model}` : h.grouping_model;
-}).catch(() => {});
+const SPEEDS = [16, 21, 18, 23, 17, 20];     // px per second, per column: never in lockstep
+const wall = $("wall");
+let sites = [];
+let columns = 0;
 
-// LIVE dot for the demo frame itself (the iframes have their own connections).
-api.subscribe({}, setLive);
-onResume(() => { $("f-board").contentWindow?.location.reload(); $("f-behind").contentWindow?.location.reload(); });
-initTheme();
+// Social, official and news in turn, each kind starting at a different scenario, so neighbours never match.
+function interleave(list) {
+  const kinds = ["social", "official", "news"];
+  const lanes = kinds.map((k, i) => {
+    const arr = list.filter((s) => s.kind === k);
+    const at = Math.floor((i * arr.length) / kinds.length);
+    return arr.slice(at).concat(arr.slice(0, at));
+  });
+  lanes.push(list.filter((s) => !kinds.includes(s.kind)));
+  const out = [];
+  for (let i = 0; i < Math.max(...lanes.map((l) => l.length)); i++) for (const l of lanes) if (l[i]) out.push(l[i]);
+  return out;
+}
+
+function tile(s, copy) {
+  const label = `${s.name} (${s.kind}, fictional): ${s.scenario}, ${s.region}`;
+  return `<a class="tile" href="${esc(s.href)}" target="_blank" rel="noopener" title="${esc(label)}"${copy ? ' tabindex="-1" aria-hidden="true"' : ""}>`
+    + `<img src="${esc(s.img)}" width="${s.w}" height="${s.h}" alt="${copy ? "" : esc(label)}" decoding="async">`
+    + `<span class="cap"><span class="kind ${esc(s.kind)}">${esc(s.kind)}</span><span class="name">${esc(s.name)}</span><span class="lang">${esc(s.language)}</span></span></a>`;
+}
+
+// Deal tiles into the shortest column (heights balance, kinds mix), then repeat each column once for a seamless loop.
+function build() {
+  const n = Math.max(2, Math.min(6, Math.round(wall.clientWidth / 250)));
+  if (n !== columns) {
+    columns = n;
+    const cols = Array.from({ length: n }, () => ({ items: [], h: 0 }));
+    for (const s of interleave(sites)) {
+      const c = cols.reduce((a, b) => (b.h < a.h ? b : a));
+      c.items.push(s);
+      c.h += s.h / s.w + 0.12;                 // + caption, in column widths
+    }
+    wall.innerHTML = cols.map((c) => `<div class="col"><div class="track">${c.items.map((s) => tile(s, false)).join("")}`
+      + `${c.items.map((s) => tile(s, true)).join("")}</div></div>`).join("");
+  }
+  wall.querySelectorAll(".track").forEach((t, i) => {     // same speed whatever the column's height
+    const dur = t.scrollHeight / 2 / SPEEDS[i % SPEEDS.length];
+    t.style.animationDuration = `${dur.toFixed(1)}s`;
+    t.style.animationDelay = `${(-dur * ((i * 0.37) % 1)).toFixed(1)}s`;
+  });
+}
+
+// How many real official warnings (feeds, not scenarios) are on the board right now; else it says "5 real feeds".
+fetch("api/incidents")
+  .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+  .then((d) => {
+    const n = (d.incidents || []).filter((i) => i.kind === "official_warning" && i.status !== "ended").length;
+    if (n > 0) { $("n-real").textContent = n; $("real-label").innerHTML = "real warnings<br>live now"; }
+  })
+  .catch(() => {});
+
+fetch("img/sites/sites.json")
+  .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+  .then((list) => {
+    sites = list;
+    $("n-sites").textContent = list.length;
+    $("n-emergencies").textContent = new Set(list.map((s) => s.scenario)).size;
+    $("n-languages").textContent = new Set(list.map((s) => s.language)).size;
+    build();
+    let timer;
+    window.addEventListener("resize", () => { clearTimeout(timer); timer = setTimeout(build, 150); });
+  })
+  .catch(() => {});                              // no wall: the pitch and the link to the board still work

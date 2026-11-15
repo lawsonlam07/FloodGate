@@ -17,7 +17,9 @@ cp .env.example .env            # add CONTEXT_DEV_API_KEY and GEMINI_API_KEY (ot
 ./run.sh                        # terminal 2: backend + frontend on http://127.0.0.1:8000
 ```
 
-- **Board:** http://127.0.0.1:8000 · **Demo view** (board + behind the scenes): http://127.0.0.1:8000/demo.html
+- **Board:** http://127.0.0.1:8000 · **Demo landing page** (the problem in one screen, then a link to the board):
+  http://127.0.0.1:8000/demo. Its screenshots of the fictional sites come from `uv run frontend/shoot_sites.py`
+  (re-run it after changing a scenario's pages).
 - **Scenario control centre:** http://127.0.0.1:8000/admin.html: start, step, autoplay or reset the fictional
   disasters (13 across Europe, minor to catastrophic), switch on showcase mode, or pause all processing.
 - **Fictional sites:** http://127.0.0.1:8000/sites/, always available: a running scenario's pages show its current

@@ -1,5 +1,5 @@
 // Home page: alert banner, map of affected areas, disasters ranked by severity, system panel.
-if (window.self !== window.top) document.body.classList.add("framed");   // shown inside demo.html
+if (window.self !== window.top) document.body.classList.add("framed");   // shown inside an iframe
 import * as api from "./api.js";
 import { createLive, animDelay, setPausedChip } from "./live.js";
 import { basemap, initTheme, SIMPLE, simpleChip, simpleCounts, esc, ago, icon, sevChip, sevColor, countChips, statusChip, lsGet, lsSet, setLive, startAgoTicker, KIND_ICON, toast, isWarning, untilText, validText, isEnded, warningColor, activityRows, updatedChecked, onResume } from "./ui.js";
@@ -568,7 +568,7 @@ function live() {
 }
 
 document.querySelectorAll('a[href="admin.html"]').forEach((a) => { a.href = api.link("admin.html"); });
-document.getElementById("demo-link")?.setAttribute("href", api.link("demo.html"));
+document.getElementById("demo-link")?.setAttribute("href", api.link("demo"));
 if (location.hash === "#system" || new URLSearchParams(location.search).get("system") === "1") document.getElementById("system").open = true;
 initTheme();
 initMap();

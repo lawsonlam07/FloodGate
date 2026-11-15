@@ -55,7 +55,7 @@ echo ">>> waiting for https://$DOMAIN/api/health"
 for _ in $(seq 1 60); do
   if curl -fsS -m 5 "https://$DOMAIN/api/health" >/dev/null 2>&1; then
     curl -fsS "https://$DOMAIN/api/health"; echo
-    echo ">>> live: https://$DOMAIN   (demo: /demo.html, admin: /admin.html)"
+    echo ">>> live: https://$DOMAIN   (demo landing page: /demo, admin: /admin.html)"
     exit 0
   fi
   sleep 3

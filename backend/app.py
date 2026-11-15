@@ -141,7 +141,7 @@ class FreshPages:
 
     async def __call__(self, scope, receive, send):
         path = scope.get("path", "") if scope["type"] == "http" else ""
-        if not (path == "/" or path.endswith((".html", ".js", ".css"))) or path.startswith(("/api/", "/sites/")):
+        if not (path in ("/", "/demo") or path.endswith((".html", ".js", ".css"))) or path.startswith(("/api/", "/sites/")):
             return await self.app(scope, receive, send)
 
         async def send_fresh(message):
@@ -553,6 +553,21 @@ def board_page(request: Request):
     return _page_with_meta("index.html", SITE_TITLE, SITE_DESCRIPTION, f"{base}/", share_title=SITE_TAGLINE, jsonld=
                            {"@context": "https://schema.org", "@type": "WebSite", "name": "FloodGate", "url": f"{base}/",
                             "description": SITE_DESCRIPTION})
+
+
+# The demo landing page lives at /demo (the link in the submission); the old /demo.html address still leads there.
+@app.get("/demo", include_in_schema=False)
+def demo_page(request: Request):
+    base = _base_url(request)
+    return _page_with_meta("demo.html", "FloodGate demo", "In an emergency, information floods in. FloodGate lets through "
+                           "only what official sources confirm, live on real official warnings and on 39 demo sites "
+                           "from 13 fictional emergencies.", f"{base}/demo", share_title=SITE_TAGLINE)
+
+
+@app.get("/demo/", include_in_schema=False)
+@app.get("/demo.html", include_in_schema=False)
+def demo_redirect():
+    return RedirectResponse("/demo", status_code=308)
 
 
 @app.get("/incident.html", include_in_schema=False)

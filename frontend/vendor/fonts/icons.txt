@@ -73,6 +73,7 @@ radar
 radio
 refresh
 remove_circle
+resize
 restart_alt
 route
 schedule
@@ -86,7 +87,6 @@ storage
 storm
 swap_vert
 sync_problem
-tab
 thermostat
 thumb_down
 thumb_up
