@@ -559,7 +559,7 @@ def board_page(request: Request):
 @app.get("/demo", include_in_schema=False)
 def demo_page(request: Request):
     base = _base_url(request)
-    return _page_with_meta("demo.html", "FloodGate demo", "In an emergency, information floods in. FloodGate lets through "
+    return _page_with_meta("demo.html", "FloodGate Demo", "In an emergency, information floods in. FloodGate lets through "
                            "only what official sources confirm, live on real official warnings and on 39 demo sites "
                            "from 13 fictional emergencies.", f"{base}/demo", share_title=SITE_TAGLINE)
 
