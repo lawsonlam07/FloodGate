@@ -20,8 +20,10 @@ from contextlib import asynccontextmanager
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.datastructures import URL
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic import BaseModel, Field
 
 from .config import (ADMIN_TOKEN, CONTEXT_REPLAY_DIR, CREDIT_BUDGET, FEED_MONITORS, PUBLIC_BASE_URL, ROOT, SCENARIO_ERRORS,
@@ -483,7 +485,33 @@ async def stream(request: Request):
 (ROOT / "fake_site").mkdir(exist_ok=True)            # generated at runtime by the scenario engine
 # Slim containers have no /etc/mime.types: make sure self-hosted fonts get their proper type.
 mimetypes.add_type("font/woff2", ".woff2")
-app.mount("/sites", StaticFiles(directory=ROOT / "fake_site", html=True), name="sites")
+
+
+class SiteFiles(StaticFiles):
+    """fake_site/ as published by the scenario engine, plus every site of a scenario that isn't running (its whole
+    storyline, see ScenarioEngine.preview_page), so any fictional site can be visited at any time."""
+
+    async def get_response(self, path: str, scope) -> Response:
+        engine = state.get("scenario")
+        if engine is not None and scope["method"] in ("GET", "HEAD"):
+            for target in (path, f"{path}/index.html"):
+                page = engine.preview_page(target)
+                if page is None:
+                    continue
+                if target != path and not scope["path"].endswith("/"):      # relative links need the trailing slash
+                    url = URL(scope=scope)
+                    return RedirectResponse(url.replace(path=url.path + "/"))
+                return Response(page, media_type="text/html; charset=utf-8", headers={"Cache-Control": "no-cache"})
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            photo = engine.photo(path) if engine is not None and exc.status_code == 404 else None
+            if photo is None:
+                raise
+            return FileResponse(photo)
+
+
+app.mount("/sites", SiteFiles(directory=ROOT / "fake_site", html=True), name="sites")
 
 # ---- frontend (mounted last so /api wins) --------------------------------------------------------------------------
 FRONTEND = ROOT / "frontend"

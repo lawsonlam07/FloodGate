@@ -20,7 +20,9 @@ cp .env.example .env            # add CONTEXT_DEV_API_KEY and GEMINI_API_KEY (ot
 - **Board:** http://127.0.0.1:8000 · **Demo view** (board + behind the scenes): http://127.0.0.1:8000/demo.html
 - **Scenario control centre:** http://127.0.0.1:8000/admin.html: start, step, autoplay or reset the fictional
   disasters (13 across Europe, minor to catastrophic), switch on showcase mode, or pause all processing.
-- **Fictional sites:** http://127.0.0.1:8000/sites/ (pages exist while their scenario is started).
+- **Fictional sites:** http://127.0.0.1:8000/sites/, always available: a running scenario's pages show its current
+  step, the others show their whole storyline (monitors only exist for running scenarios, so these previews never
+  reach the pipeline).
 - Starting a scenario costs roughly 15 Context.dev credits, a full storyline about 40. Real official warnings are free.
 - To start from scratch, stop the server and delete `data/`.
 

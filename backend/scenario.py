@@ -12,8 +12,10 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import shutil
 import time
+from pathlib import Path
 
 from . import fake_render
 from .config import ADMIN_TOKEN, CREDIT_BUDGET_DAILY, INCIDENT_TEMPLATES, ROOT, SCENARIO_SPECS, SHOWCASE, SOURCES_BY_ID
@@ -74,6 +76,8 @@ class ScenarioEngine:
     def __init__(self, store, scheduler, pipeline):
         self.store, self.scheduler, self.pipeline = store, scheduler, pipeline
         self.defs = load_defs()
+        self._targets = {p["target"]: (sid, p["id"]) for sid, d in self.defs.items() for p in d.pages}
+        self._previews: dict[str, bytes] = {}       # /sites path -> rendered last-step page (see preview())
         self.state: dict[str, dict] = {sid: {"current_step": -1, "applied": {}, "interval_s": 60} for sid in self.defs}
         self.tasks: dict[str, asyncio.Task] = {}
         self.locks: dict[str, asyncio.Lock] = {sid: asyncio.Lock() for sid in self.defs}
@@ -343,6 +347,28 @@ class ScenarioEngine:
                                      "detail": f"{type(exc).__name__}: {exc}"[:200]})
             self.store.publish("control", self.control_view())
 
+    # ---- always-on sites: a scenario that isn't running still has its pages, showing the whole storyline -------------
+    def preview_page(self, target: str) -> bytes | None:
+        """The page /sites serves at `target` (e.g. "<id>/news/index.html") while its scenario is not started: its
+        version at the last step, so every fictional site can be visited at any time. None for a started scenario,
+        whose pages are exactly what it has published (all of them exist from step 0). Page monitors and Context.dev
+        monitors exist only for started scenarios, so the pipeline never reads a preview."""
+        hit = self._targets.get(target)
+        if hit is None or self.state[hit[0]]["current_step"] >= 0:
+            return None
+        if target not in self._previews:
+            d = self.defs[hit[0]]
+            self._previews[target] = d.content(hit[1], d.versions_at(len(d.steps) - 1)[hit[1]])
+        return self._previews[target]
+
+    def photo(self, path: str) -> Path | None:
+        """A scenario's photo for a preview page ("<id>/images/<file>.jpg"); started ones copy theirs into fake_site/."""
+        m = re.fullmatch(r"([a-z0-9-]+)/images/([\w-]+\.(?:jpg|png|webp))", path)
+        if m and m[1] in self.defs:
+            f = ROOT / "scenario" / m[1] / "images" / m[2]
+            return f if f.is_file() else None
+        return None
+
     # ---- an index of every scenario's fictional sites (fake_site/index.html, also served at /sites/) --------------------
     def write_sites_index(self) -> None:
         import html as _html
@@ -355,20 +381,22 @@ class ScenarioEngine:
                 target = pg["target"]               # e.g. "<id>/official/index.html" or "herald/storm-surge-live.html"
                 href = os.path.dirname(target) + "/" if target.endswith("index.html") else target
                 label = f"{_html.escape(pg['name'])} <small>({pg['kind']})</small>"
-                links.append(f'<a href="{href}">{label}</a>' if started else f'<span class="off">{label}</span>')
+                links.append(f'<a href="{href}">{label}</a>')
             m = d.meta
+            status = f"live: step {self.state[sid]['current_step'] + 1} of {len(d.steps)}" if started else "full story"
             rows.append(f'<tr class="{"on" if started else ""}"><td><b>{_html.escape(m.get("name", sid))}</b><br>'
                         f'<small>{_html.escape(m.get("region", ""))} · {m.get("language", "")} · {m.get("scale", "")}</small></td>'
-                        f'<td>{"step " + str(self.state[sid]["current_step"]) if started else "not started"}</td>'
+                        f'<td>{status}</td>'
                         f'<td>{"<br>".join(links)}</td></tr>')
         page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow"><title>Fictional exercise sites</title>
 <style>body{{font:15px/1.5 system-ui,sans-serif;margin:0;background:#fff;color:#1b1f24}}.wrap{{max-width:960px;margin:0 auto;padding:24px 16px}}
 .note{{background:#ffe14d;padding:12px 16px;border-radius:6px;font-weight:600}}table{{width:100%;border-collapse:collapse;margin-top:16px}}
-td{{border-top:1px solid #ddd;padding:10px 8px;vertical-align:top}}tr:not(.on){{color:#888}}.off{{color:#aaa}}a{{color:#0b57d0}}</style></head>
+td{{border-top:1px solid #ddd;padding:10px 8px;vertical-align:top}}tr.on td:nth-child(2){{color:#b3261e;font-weight:600}}a{{color:#0b57d0}}</style></head>
 <body><div class="wrap"><h1>Fictional exercise sites</h1>
 <p class="note">Everything here is fictional: invented towns, organisations, newspapers and accounts, used as test data for a
-hackathon demo. A scenario's pages exist only while it is started (from the FloodGate admin page).</p>
+hackathon demo. A scenario that is not running shows its whole storyline; while it runs (started from the FloodGate
+admin page), its pages show the current step and change as the story unfolds.</p>
 <table>{"".join(rows)}</table></div></body></html>"""
         tmp = SITE_DIR / ".index.html.tmp"
         tmp.write_text(page)
