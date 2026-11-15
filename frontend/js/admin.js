@@ -28,9 +28,6 @@ const TERMINAL = new Set(["done", "failed", "skipped"]);
 const STAGE_LABEL = { detected: "change detected", extracting: "Context.dev extracting", extracted: "claims extracted",
   grouping: "grouping claims", grouped: "grouped", done: "on the board", failed: "failed", skipped: "skipped" };
 
-$("board-link").href = api.link("index.html");
-$("sites-link").href = api.MOCK ? "../fake_site/" : "/sites/";
-
 // Bell only on admin (no pop-ups): finished updates and Context.dev verdicts of every scenario.
 const liveFx = createLive({
   toasts: false,
@@ -38,13 +35,12 @@ const liveFx = createLive({
 });
 
 // ---------------------------------------------------------------- pause processing (v0.8)
-const EMBED = new URLSearchParams(location.search).get("embed") === "1";
 const control = { paused: false, since: null, reason: null, showcase: null, auth_required: false, credit_budget_daily: null, credits_today: null, viewers: null };
-const readOnly = () => EMBED || (control.auth_required && !api.getToken());
+const readOnly = () => control.auth_required && !api.getToken();
 
 function applyAuth(msg = "") {
   document.body.classList.toggle("read-only", readOnly());
-  $("ro-banner").classList.toggle("hidden", !readOnly() || EMBED);
+  $("ro-banner").classList.toggle("hidden", !readOnly());
   $("ro-msg").textContent = msg;
   $("ss-auth").innerHTML = readOnly()
     ? `${icon("visibility", "text-[14px]")}read-only`
@@ -67,7 +63,7 @@ $("token-form").addEventListener("submit", async (e) => {
 // A token saved earlier may be outdated (e.g. changed on the server): check it once on load.
 async function recheckSavedToken() {
   const t = api.getToken();
-  if (!t || EMBED || !control.auth_required) return;
+  if (!t || !control.auth_required) return;
   try {
     if (!(await api.checkToken(t))) { api.setToken(""); applyAuth("Your saved token is no longer valid."); renderAll(); }
   } catch { /* offline: leave as is; actions will tell */ }
@@ -83,7 +79,6 @@ function applyControl(c) {
   $("paused-text").innerHTML = `<b>Paused${t ? ` since ${t}` : ""}${control.reason ? ` (${esc(control.reason)})` : ""}</b>: no Context.dev or LLM calls; page monitors stopped. Edits made now are picked up on resume.`;
   renderStatus();
   applyAuth($("ro-msg").textContent);
-  if (EMBED) renderEmbed();
   const btn = $("pause-btn");
   btn.setAttribute("aria-pressed", String(control.paused));
   btn.classList.toggle("btn-on", control.paused);
@@ -163,7 +158,6 @@ async function toggleFictional(enabled) {
 $("fictional-btn").onclick = () => toggleFictional(!control.fictional);
 $("fictional-on-btn").onclick = () => toggleFictional(true);
 $("resume-btn").onclick = () => togglePause(false);
-const pageUrl = (u) => (api.MOCK ? u.replace(/^\/sites\//, "../fake_site/") : u);   // mock dev server has no /sites/
 
 // ---------------------------------------------------------------- scenario helpers
 
@@ -448,7 +442,7 @@ function renderSelected() {
         <input id="sel-interval" type="number" min="10" max="900" step="5" value="${esc(sc.autoplay?.interval_s || 60)}" class="w-16 rounded border border-line bg-canvas px-2 py-1.5 text-sm text-ink mono focus:outline-none focus:border-authority" aria-label="Autoplay interval in seconds">s</label>
       <span class="paused-hint admin-action ${control.paused ? "" : "hidden"} text-xs text-triage flex items-center gap-1">${icon("schedule", "text-[14px]")}paused: will be processed on resume</span>
       <span class="flex-1"></span>
-      ${started ? `<a href="${api.link(`incident.html?id=${encodeURIComponent(sc.incident_id)}`)}" target="_blank" rel="noopener" class="btn">${icon("open_in_new", "text-[16px]")}Open on board</a>` : ""}
+      ${started ? `<a href="${`incident.html?id=${encodeURIComponent(sc.incident_id)}`}" target="_blank" rel="noopener" class="btn">${icon("open_in_new", "text-[16px]")}Open on board</a>` : ""}
     </div>
   </div>
 
@@ -525,7 +519,7 @@ function renderPreviews(sc) {
     </div>
     <div class="p-3 grid gap-3 sm:grid-cols-3">
       ${started ? sc.pages.map((p) => {
-        const url = pageUrl(p.url);
+        const url = p.url;
         return `
         <figure class="rounded-lg border border-line overflow-hidden bg-canvas">
           <figcaption class="px-2.5 py-1.5 flex items-center justify-between gap-2 border-b border-line">
@@ -547,7 +541,7 @@ function renderPreviews(sc) {
 
 const ALERT_CHIP = { potential: "chip-unverified", critical: "chip-contradicted", debunk: "chip-contradicted", info: "chip-corroborated" };
 function alertRow(a) {
-  const href = a.incident_id ? api.link(`incident.html?id=${encodeURIComponent(a.incident_id)}`) + (a.item_id ? `#${encodeURIComponent(a.item_id)}` : "") : null;
+  const href = a.incident_id ? `incident.html?id=${encodeURIComponent(a.incident_id)}` + (a.item_id ? `#${encodeURIComponent(a.item_id)}` : "") : null;
   return `
   <${href ? `a href="${href}" target="_blank" rel="noopener"` : "div"} class="block rounded border border-line bg-canvas/40 px-2.5 py-2 hover:border-line2">
     <div class="flex items-center justify-between gap-2"><span class="chip ${ALERT_CHIP[a.level] || "chip-tag"}">${esc(a.level)}</span>${ago(a.created_at, "mono text-xs text-faint")}</div>
@@ -573,7 +567,7 @@ function checkRow(c) {
 // Context.dev verdicts for the selected scenario come with its incident detail (if it has started).
 async function loadSelectedDetail() {
   const sc = selected();
-  if (!sc || sc.current_step < 0 || api.MOCK) return;
+  if (!sc || sc.current_step < 0) return;
   try {
     const d = await api.getIncident(sc.incident_id);
     for (const c of d.context_checks || []) if (!state.checks.some((x) => x.at === c.at && x.source_id === c.source_id)) state.checks.push(c);
@@ -624,60 +618,11 @@ function renderCredits() {
 }
 
 function renderAll() {
-  if (EMBED) { renderEmbed(); renderCredits(); return; }
   renderFilters();
   renderList();
   renderMap(false);
   renderSelected();
   renderCredits();
-}
-
-// ---------------------------------------------------------------- embed=1: compact "behind the scenes" (demo page)
-let embedQueued = false;
-function renderEmbed() {
-  if (!EMBED || embedQueued) return;
-  embedQueued = true;
-  requestAnimationFrame(() => {
-    embedQueued = false;
-    const running = state.scenarios.filter((sc) => statusOf(sc) === "running" || busy(sc));
-    const checks = state.checks.slice(0, 5);
-    $("embed").innerHTML = `
-    <div class="p-3 flex flex-col gap-3">
-      <div class="card p-3">
-        <div class="flex items-center justify-between gap-2">
-          <h2 class="font-bold flex items-center gap-2">${icon("route", "text-authority")}Behind the scenes</h2>
-          <span class="mono text-xs text-authority">${state.credits} credits</span>
-        </div>
-        <div class="mt-1.5 flex flex-col gap-0.5 mono text-[11.5px] text-muted">
-          ${control.showcase ? `<span class="flex items-center gap-1.5">${control.showcase.running ? `<span class="live-dot on"></span>` : icon("slideshow", "text-[14px]")}${esc(showcaseText())}</span>` : ""}
-          ${control.paused ? `<span class="text-triage flex items-center gap-1.5">${icon("pause_circle", "text-[14px]")}Paused${control.reason ? `: ${esc(control.reason)}` : ""}</span>` : ""}
-          ${budgetText() ? `<span>${esc(budgetText())}</span>` : ""}
-        </div>
-      </div>
-      <div class="card">
-        <div class="px-3 py-2 border-b border-line label">Running now · ${running.length}</div>
-        <div class="p-2 flex flex-col gap-3">
-          ${running.map((sc) => `
-          <div>
-            <div class="flex items-center justify-between gap-2 px-1 mb-1.5">
-              <span class="text-sm font-semibold truncate">${icon(HAZARD_ICON[sc.hazard] || "warning", "text-[16px]")} ${esc(sc.name)}</span>${statusChip(sc)}
-            </div>
-            ${sc.pages.some((pg) => state.pipeline[pg.source_id]?.stage)
-              ? `<div class="flex flex-col gap-1.5">${pipelineRows(sc)}</div>`
-              : `<div class="px-1 mono text-xs text-faint">waiting for the next step · ${esc(sc.steps[sc.current_step + 1]?.title || "")}</div>`}
-          </div>`).join("") || `<div class="p-2 text-sm text-muted">Nothing running at the moment.</div>`}
-        </div>
-      </div>
-      <div class="card">
-        <div class="px-3 py-2 border-b border-line label flex items-center gap-1.5">${icon("travel_explore", "text-authority text-[15px]")}Context.dev verdicts</div>
-        <div class="p-2 flex flex-col gap-1.5">${checks.map(checkRow).join("") || `<div class="p-1 text-sm text-muted">No Context.dev monitor runs yet.</div>`}</div>
-      </div>
-      <div class="card">
-        <div class="px-3 py-2 border-b border-line label">API activity</div>
-        <div class="p-2 flex flex-col gap-1 max-h-[22rem] overflow-y-auto">${activityRows(state.activity, 25)}</div>
-      </div>
-    </div>`;
-  });
 }
 
 // ---------------------------------------------------------------- usage per hour (v0.10, Tiger Data continuous aggregate)
@@ -737,14 +682,14 @@ async function load() {
   renderAll();
   renderMap(true);
   loadSelectedDetail();
-  if (!EMBED) loadUsage();
+  loadUsage();
 }
-if (!EMBED) setInterval(loadUsage, 60000);
+setInterval(loadUsage, 60000);
 
 function live() {
   api.subscribe({
     scenario(sc) { upsertScenario(sc); renderAll(); },
-    pipeline(ev) { onPipeline(ev); liveFx.onPipeline(ev); if (EMBED && (ev.stage === "detected" || TERMINAL.has(ev.stage) || ev.stage === "extracted")) renderEmbed(); },
+    pipeline(ev) { onPipeline(ev); liveFx.onPipeline(ev); },
     item: (it) => liveFx.onItem(it),
     control: applyControl,
     activity(row) {
@@ -752,7 +697,6 @@ function live() {
       state.activity = state.activity.slice(0, 200);
       if (row.credits) { state.credits += row.credits; renderCredits(); }
       $("activity").innerHTML = activityRows(state.activity, 40);
-      renderEmbed();
     },
     alert(a) {
       const i = state.alerts.findIndex((x) => x.id === a.id);
@@ -764,13 +708,11 @@ function live() {
       state.checks.unshift(c);
       state.checks = state.checks.slice(0, 100);
       if (c.incident_id === selected()?.incident_id) renderSelected();
-      renderEmbed();
     },
   }, setLive);
 }
 
-if (EMBED) document.body.classList.add("embed");
-else initMap();
+initMap();
 initTheme();
 applyAuth();
 startAgoTicker();

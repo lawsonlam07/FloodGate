@@ -31,7 +31,6 @@ const GLOW_CLASS = { false: "glow-false", verified: "glow-ok", held: "glow-held"
 const RIBBON_CLASS = { false: "ribbon-false", verified: "ribbon-ok", held: "ribbon-held" };
 
 const $ = (id) => document.getElementById(id);
-$("back").href = api.link("index.html");
 
 // ---------------------------------------------------------------- header
 
@@ -300,7 +299,6 @@ const LAYERS = [
 ];
 
 async function loadHistory(force = false) {
-  if (api.MOCK && hist.data) return;
   if (!force && Date.now() - hist.at < 10000) return;      // at most every 10 s while the board is busy
   hist.at = Date.now();
   try { hist.data = await api.getHistory(incidentId); } catch { hist.data = null; }
@@ -720,14 +718,6 @@ function keepPosition(fn) {
   }
 }
 
-// Mock mode only: approximate the backend's key_facts rules for a changed item.
-function mockKeyFacts(it) {
-  const kf = state.keyFacts || (state.keyFacts = {});
-  for (const k of ["confirmed", "not_true", "developing", "dont_act_yet"]) kf[k] = (kf[k] || []).filter((f) => f.item_id !== it.id);
-  if (it.status === "verified" && it.category !== "instruction") kf.confirmed.unshift({ item_id: it.id, title: it.title, category: it.category, severity: 4 });
-  if (it.status === "contradicted") kf.not_true.unshift({ item_id: it.id, title: it.title, debunked_by: "Halvik Rescue Services" });
-}
-
 // "↑ 3 new updates" pill when updates land above the reader.
 let pillCount = 0;
 function timelineAbove() { return $("timeline-wrap").getBoundingClientRect().top < 56; }
@@ -850,7 +840,6 @@ async function load() {
 // key_facts only come with the detail endpoint, so refresh it (debounced) when the stream says something changed.
 let refreshTimer = null;
 function scheduleRefresh() {
-  if (api.MOCK) return;
   clearTimeout(refreshTimer);
   refreshTimer = setTimeout(async () => {
     try {
@@ -879,7 +868,6 @@ function live() {
         notePill(1);
       }
       replaceItem(it, false);
-      if (ch && api.MOCK) mockKeyFacts(it);                // the real backend recomputes key_facts (picked up by the refresh)
       if (ch) renderKeyFacts();
       scheduleRefresh();
     },

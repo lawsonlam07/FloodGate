@@ -9,8 +9,8 @@
 <title>Control centre · FloodGate admin</title>
 <meta name="description" content="Demo tool: run the fictional disaster scenarios and watch the pipeline work in real time.">
 <script>
-// Dev aid: in ?mock=1 / ?debug=1 show script errors on the page (no console in headless screenshots).
-if (/[?&](mock|debug)=1/.test(location.search)) {
+// Dev aid: with ?debug=1 show script errors on the page (no console in headless screenshots).
+if (/[?&]debug=1/.test(location.search)) {
   const show = (msg) => { const d = document.createElement("pre"); d.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:99999;margin:0;padding:8px;background:#7f1d1d;color:#fff;font:12px monospace;white-space:pre-wrap"; d.textContent = "JS error: " + msg; (document.body || document.documentElement).appendChild(d); };
   window.addEventListener("error", (e) => show((e.message || "") + " @ " + (e.filename || "") + ":" + (e.lineno || "")));
   window.addEventListener("unhandledrejection", (e) => show(String(e.reason && e.reason.stack || e.reason)));
@@ -85,9 +85,6 @@ if (/[?&](mock|debug)=1/.test(location.search)) {
     <span id="ss-auth" class="flex items-center gap-1.5 ml-auto"></span>
   </div>
 </div>
-
-<!-- embed=1 (demo page): compact read-only "behind the scenes" -->
-<div id="embed" class="hidden"></div>
 
 <div id="paused-banner" class="hidden border-b border-triage bg-triage/20" role="status">
   <div class="max-w-[1500px] mx-auto px-4 lg:px-6 py-2.5 flex flex-wrap items-center gap-x-3 gap-y-1">

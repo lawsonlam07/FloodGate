@@ -5,7 +5,6 @@
 //  - the bell: every finished update and Context.dev verdict, newest first (sessionStorage), unread badge, quiet mode;
 //  - classification of item events against what the page already knew (newly verified / FALSE / held / ...);
 //  - "(n) " tab-title counter while the tab is hidden.
-import * as api from "./api.js";
 import { esc, icon, statusChip, ago, lsGet, lsSet } from "./ui.js";
 
 const TERMINAL = new Set(["done", "failed", "skipped"]);
@@ -97,7 +96,6 @@ const bell = {
     document.addEventListener("click", () => this.close());
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") this.close(); });
     this.mounted = true;
-    if (api.MOCK && !this.entries.length) this.seedMock();
     this.render();
     if (new URLSearchParams(location.search).get("bell") === "1") this.toggle();   // dev/screenshot aid
   },
@@ -147,16 +145,6 @@ const bell = {
     panel.querySelector("[data-quiet]").onchange = (e) => this.setQuiet(e.target.checked);
   },
 
-  seedMock() {
-    const t = (s) => new Date(Date.now() - s * 1000).toISOString().replace(/\.\d+Z$/, "Z");
-    const link = (id) => api.link(`incident.html?id=${encodeURIComponent(id)}`);
-    this.entries = [
-      { id: "m1", incident_id: "halvik-storm-surge", name: "Halvik storm surge", text: "Checked in 9.4 s · 1 newly verified · 1 FALSE", sub: "Halvik Rescue Services, The Halvik Herald", accent: "critical", at: t(95), href: link("halvik-storm-surge") },
-      { id: "m2", incident_id: "halvik-storm-surge", name: "Halvik storm surge", text: "Context.dev monitor: Saltmarsh evacuation ordered · high importance (24.9 s)", sub: "Halvik Rescue Services", accent: "authority", at: t(80), href: link("halvik-storm-surge") },
-      { id: "m3", incident_id: "varnes-river-flood", name: "Varnes river flooding", text: "Checked in 7.1 s · no change to verified facts", sub: "Varnes Board", accent: "line", at: t(400), href: link("varnes-river-flood") },
-    ];
-    this.readAt = t(200);                                    // two unread
-  },
 };
 
 // =====================================================================================================
@@ -167,7 +155,7 @@ export function createLive(opts = {}) {
     toasts: false,                                // pop-up cards (off: the board shows one brief "latest" line instead)
     bell: false,                                  // the bell with an update history (off: missed updates just go)
     onUpdate: null,                               // ({name, headline, more, accent, href, at}) for each meaningful update
-    graceMs: api.SIM_FAST ? 0 : 2000,             // keep collecting items this long after the last source is done
+    graceMs: 2000,             // keep collecting items this long after the last source is done
     autoDismissMs: 8000,
     ...opts,
   };
@@ -217,7 +205,7 @@ export function createLive(opts = {}) {
   // ------------------------------------------------------------ runs
   const isWarningId = (id) => o.getIncident(id)?.kind === "official_warning" || /^(fmi|gdacs|usgs|ukea|meteo)-/.test(id || "");
   const incidentName = (id) => o.getIncident(id)?.name || String(id || "").replace(/-/g, " ").replace(/^\w/, (c) => c.toUpperCase());
-  const incidentHref = (id, itemId) => api.link(`incident.html?id=${encodeURIComponent(id)}`) + (itemId ? `#${encodeURIComponent(itemId)}` : "");
+  const incidentHref = (id, itemId) => `incident.html?id=${encodeURIComponent(id)}` + (itemId ? `#${encodeURIComponent(itemId)}` : "");
   const canToast = (id) => o.toasts && !bell.quiet && !!o.inFocus(id);
   const note = (entry) => { if (o.bell) bell.add(entry); };     // the bell, when a page has one
   // One brief line per update: the most important change, in plain words. "No change" and failures are not news.

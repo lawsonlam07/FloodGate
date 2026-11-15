@@ -1,5 +1,4 @@
 // Home page: alert banner, map of affected areas, disasters ranked by severity, system panel.
-if (window.self !== window.top) document.body.classList.add("framed");   // shown inside an iframe
 import * as api from "./api.js";
 import { createLive, animDelay, setPausedChip } from "./live.js";
 import { basemap, initTheme, SIMPLE, simpleChip, simpleCounts, esc, ago, icon, sevChip, sevColor, countChips, statusChip, lsGet, lsSet, setLive, startAgoTicker, KIND_ICON, toast, isWarning, untilText, validText, isEnded, warningColor, activityRows, updatedChecked, onResume } from "./ui.js";
@@ -70,7 +69,7 @@ const officialShort = (inc) => { const n = officialOf(inc); return SHORT[n] || n
 const officialOf = (inc) => (inc.sources || []).filter((x) => x.kind === "official").map((x) => x.name).join(", ") || inc.source_label || "";
 
 function incidentCard(inc) {
-  const href = api.link(`incident.html?id=${encodeURIComponent(inc.id)}`);
+  const href = `incident.html?id=${encodeURIComponent(inc.id)}`;
   const highlights = (inc.highlights || []).slice(0, 3).map((h) => `
     <li class="flex items-start gap-2 text-[15px]">
       ${h.status === "contradicted" ? '<span class="mt-[9px] w-1.5 h-1.5 rounded-full shrink-0 bg-critical"></span>' : h.status === "verified" ? '<span class="mt-[9px] w-1.5 h-1.5 rounded-full shrink-0 bg-ok"></span>' : '<span class="mt-[9px] w-1.5 h-1.5 rounded-full shrink-0 bg-triage"></span>'}
@@ -109,7 +108,7 @@ const isFullCard = (inc) => !isWarning(inc) || inc.severity >= 3;
 const WARN_OPEN_KEY = "fg-warnings-open";
 
 function warningRow(inc) {
-  const href = api.link(`incident.html?id=${encodeURIComponent(inc.id)}`);
+  const href = `incident.html?id=${encodeURIComponent(inc.id)}`;
   return `
   <a href="${href}" class="flex items-center gap-2.5 px-3 py-2.5 border-t border-line first:border-t-0 hover:bg-elevated min-h-[44px]" data-incident="${esc(inc.id)}">
     <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${warningColor(inc)}"></span>
@@ -197,7 +196,7 @@ function initMap() {
   renderAreaPicker();                                     // restoreView may have moved the map before these handlers existed
 }
 
-const openIncident = (inc) => () => { location.href = api.link(`incident.html?id=${encodeURIComponent(inc.id)}`); };
+const openIncident = (inc) => () => { location.href = `incident.html?id=${encodeURIComponent(inc.id)}`; };
 
 // ---- verified boards: epicentre rings (geographic), or a small dot when they'd be tiny ----------
 // Rings are real-size L.circle layers, so they shrink when you zoom out. Once the outer ring would be smaller
@@ -452,7 +451,7 @@ function showNewestAlert(alerts) {
   const inc = state.incidents.find((i) => i.id === a.incident_id);
   const title = String(a.title || "").replace(/^(verified|verifying…?|false|info|not true):\s*/i, "");
   showLatest({ name: inc?.name || "Update", headline: `${word}: ${title}`, more: 0, accent, at: a.created_at,
-               href: a.incident_id ? api.link(`incident.html?id=${encodeURIComponent(a.incident_id)}`) : "#" });
+               href: a.incident_id ? `incident.html?id=${encodeURIComponent(a.incident_id)}` : "#" });
 }
 
 // ---------------------------------------------------------------- system panel
@@ -567,8 +566,6 @@ function live() {
   }, setLive);
 }
 
-document.querySelectorAll('a[href="admin.html"]').forEach((a) => { a.href = api.link("admin.html"); });
-document.getElementById("demo-link")?.setAttribute("href", api.link("demo"));
 if (location.hash === "#system" || new URLSearchParams(location.search).get("system") === "1") document.getElementById("system").open = true;
 initTheme();
 initMap();

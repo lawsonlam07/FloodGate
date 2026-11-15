@@ -4,10 +4,6 @@
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
-if (new URLSearchParams(location.search).get("mock") === "1") {      // keep mock mode on the way to the board
-  $("cta").href = $("brand").href = "index.html?mock=1";
-}
-
 const SPEEDS = [16, 21, 18, 23, 17, 20];     // px per second, per column: never in lockstep
 const wall = $("wall");
 let sites = [];

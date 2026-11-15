@@ -104,8 +104,8 @@ export function setLive(state) {
   const dot = document.getElementById("live-dot");
   const txt = document.getElementById("live-text");
   if (!dot || !txt) return;
-  dot.className = "live-dot" + (state === "live" ? " on" : state === "mock" ? " mock" : "");
-  txt.textContent = state === "live" ? "Live" : state === "mock" ? "Mock data" : "Reconnecting";
+  dot.className = "live-dot" + (state === "live" ? " on" : "");
+  txt.textContent = state === "live" ? "Live" : "Reconnecting";
 }
 
 export function toast(msg) {
