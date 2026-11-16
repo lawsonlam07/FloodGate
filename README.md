@@ -12,7 +12,7 @@ Your Real-Time Database".
 ## The problem
 
 During a flood, a fire or a chemical leak, people go online to find out what is happening and what they should do.
-Official pages are accurate but slow to update. Local news is quicker but goes stale. Social media is quickest, and
+Official pages are accurate but slow to update. Local news is quicker but goes stale. Social media is quickest, but
 it is also where the rumours, fake all-clears and donation scams spread, often in several languages at once. People
 end up piecing the truth together themselves, in a hurry.
 
